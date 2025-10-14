@@ -168,4 +168,4 @@ cython_debug/
 .DS_Store
 notebooks/.DS_Store
 src/ionique/cparsers.c
-src/ionique/cparsers.c
+src/ionique/_version.py

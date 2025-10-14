@@ -3,13 +3,19 @@ name: Deploy Sphinx Docs to GitHub Pages
 on:
   push:
     branches: [ feature/dina ]
+    tags: ['v*']
+
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -19,12 +25,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx sphinx_rtd_theme
+          pip install -e .
+          pip install sphinx sphinx_rtd_theme sphinx-multiversion
           pip install myst-parser
+          
 
       - name: Build docs
         working-directory: docs
-        run: make html
+        run: sphinx-multiversion . _build/html
 
       - name: Add .nojekyll
         run: touch docs/_build/html/.nojekyll

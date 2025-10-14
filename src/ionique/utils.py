@@ -304,10 +304,10 @@ class Trimmer:
                     rank=self.newrank,
                     parent=v
                 ))
-    @classmethod
-    def via_GUI():
-        pass
-
+    # @classmethod
+    # def via_GUI():
+    #     pass
+    #
 
 def extract_features(seg, bottom_rank, extractions: list[str], add_ons: dict = {}, lambdas={}):
     """
