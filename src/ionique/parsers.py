@@ -14,18 +14,18 @@ PyPore Package by Jacob Schreiber and Kevin Karplus (https://github.com/jmschrei
 # import sys
 # from itertools import tee, chain
 # import re
-
-try:
-    import cupy
-    import cupyx.scipy.signal as signal
-    if not cupy.cuda.is_available():
-        raise ImportError
-
-    np = cupy
-except ImportError:
-
-    import numpy as np
-    from scipy import signal
+#
+# try:
+#     import cupy
+#     import cupyx.scipy.signal as signal
+#     if not cupy.cuda.is_available():
+#         raise ImportError
+#
+#     np = cupy
+# except ImportError:
+#
+#     import numpy as np
+#     from scipy import signal
 
 from typing import TypeVar
 from itertools import tee

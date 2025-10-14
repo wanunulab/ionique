@@ -8,7 +8,7 @@ import datetime
 import numpy as np
 from ionique.core import MetaSegment, AnySegment, Segment
 from ionique.utils import Singleton
-from ionique.setup_log import json_logger
+# from ionique.setup_log import json_logger
 import uuid
 
 
@@ -34,7 +34,7 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
     """
     rank = "root"  # set the rank to "root"
 
-    @json_logger.log
+    # @json_logger.log
     def __init__(self) -> None:
         """
         Initialize the session manager.
@@ -71,12 +71,12 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
             "signature": affector_repr,
             "timestamp": datetime.datetime.now().isoformat()}
 
-        self.affector_table[new_uuid] = entry  # entry here is the the entry to log structure(
-        json_logger._log_to_json({
-            "action": "register_affector",
-            "uuid": new_uuid,
-            "entry": entry
-        })
+        self.affector_table[new_uuid] = entry  # entry here is the entry to log structure(
+        #json_logger._log_to_json({
+        #     "action": "register_affector",
+        #     "uuid": new_uuid,
+        #     "entry": entry
+        # })
         return new_uuid
 
 
@@ -131,7 +131,7 @@ class TraceFile(Segment):
 
     """
 
-    @json_logger.log
+    # @json_logger.log
     def __init__(self, current: np.ndarray, voltage=None, rank="file", parent=None,
                  unique_features: dict = {}, metadata: dict = {}):
         """

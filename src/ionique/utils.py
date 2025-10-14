@@ -226,7 +226,7 @@ class Filter:
     cutoff_frequency: float
     filter_type: Literal["lowpass", "highpass", "bandpass", "bandstop"]
     filter_method: Literal["butter", "bessel"] = field(default="butter")
-    order: int = field(default=2,min=1,max=16)
+    # order: int = field(default=2,min=1,max=16)
     bidirectional: bool = True
     sampling_frequency: float = None
 
@@ -304,10 +304,10 @@ class Trimmer:
                     rank=self.newrank,
                     parent=v
                 ))
-    @classmethod
-    def via_GUI():
-        pass
-
+    # @classmethod
+    # def via_GUI():
+    #     pass
+    #
 
 def extract_features(seg, bottom_rank, extractions: list[str], add_ons: dict = {}, lambdas={}):
     """

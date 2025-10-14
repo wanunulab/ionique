@@ -6,15 +6,29 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+
 project = 'ionique'
 copyright = '2025, Ali Fallahi, Dinara Boyko, Wanunu Lab'
 author = 'Ali Fallahi, Dinara Boyko'
-release = '0.1.0'
+import ionique
+
+release = ionique.__version__
+version = release
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'myst_parser']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'myst_parser', 'sphinx_multiversion']
+
+
+smv_tag_whitelist = r'^v\d+\.\d+(\.\d+)?$'
+smv_branch_whitelist = r'^(feature/dina)$'
+smv_remote_whitelist = r'^$'
+
+html_sidebars = {
+   '**': ['sidebar-nav-bs.html', 'versioning.html'],
+}
+
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
@@ -27,7 +41,6 @@ autosummary_generate = True
 autodoc_default_options = {
     "special-members": "__init__"
 }
-
 
 
 # -- Options for HTML output -------------------------------------------------
