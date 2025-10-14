@@ -21,6 +21,7 @@ def select_files_GUI():
 
     from tkinter import Tk, filedialog, messagebox
     import os
+    from ionique.io import supported_extensions
     # Normalize & dedupe extensions (lowercase, ensure leading dot)
     norm = []
     seen = set()
