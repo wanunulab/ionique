@@ -169,3 +169,9 @@ cython_debug/
 notebooks/.DS_Store
 src/ionique/cparsers.c
 src/ionique/_version.py
+docs/_build/
+docs/_autosummary/
+docs/_images/
+docs/_generated/
+
+
