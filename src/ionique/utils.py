@@ -226,7 +226,7 @@ class Filter:
     cutoff_frequency: float
     filter_type: Literal["lowpass", "highpass", "bandpass", "bandstop"]
     filter_method: Literal["butter", "bessel"] = field(default="butter")
-    order: int = field(default=2,min=1,max=16)
+    order: int = field(default=2,metadata={"min":1,"max":16})
     bidirectional: bool = True
     sampling_frequency: float = None
 
