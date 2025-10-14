@@ -1,0 +1,992 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ionique.parsers &mdash; ionique 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ionique.utils" href="utils.html" />
+    <link rel="prev" title="ionique.core" href="core.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ionique
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Nanopore Signal Analysis Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../signal_preprocess.html">Signal Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../signal_preprocess.html#filtering-with-filter-class">Filtering with <cite>Filter</cite> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../signal_preprocess.html#trimming-with-trimmer-class">Trimming with <cite>Trimmer</cite> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../signal_preprocess.html#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../signal_analysis.html">Signal Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_input.html">Data Input</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="io.html">ionique.io</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.accepted_keywords"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.accepted_keywords</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.current_multiplier"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.current_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.ext"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.ext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.read"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.voltage_multiplier"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.voltage_multiplier</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.EDHReader"><code class="docutils literal notranslate"><span class="pre">EDHReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.__init__"><code class="docutils literal notranslate"><span class="pre">EDHReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.accepted_keywords"><code class="docutils literal notranslate"><span class="pre">EDHReader.accepted_keywords</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.current_multiplier"><code class="docutils literal notranslate"><span class="pre">EDHReader.current_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.ext"><code class="docutils literal notranslate"><span class="pre">EDHReader.ext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.voltage_multiplier"><code class="docutils literal notranslate"><span class="pre">EDHReader.voltage_multiplier</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.OPTReader"><code class="docutils literal notranslate"><span class="pre">OPTReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.__init__"><code class="docutils literal notranslate"><span class="pre">OPTReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.accepted_keywords"><code class="docutils literal notranslate"><span class="pre">OPTReader.accepted_keywords</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.current_multiplier"><code class="docutils literal notranslate"><span class="pre">OPTReader.current_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.ext"><code class="docutils literal notranslate"><span class="pre">OPTReader.ext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.find_peaks_in_segment"><code class="docutils literal notranslate"><span class="pre">OPTReader.find_peaks_in_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.find_peaks_slide_window"><code class="docutils literal notranslate"><span class="pre">OPTReader.find_peaks_slide_window()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.process_custom_xml"><code class="docutils literal notranslate"><span class="pre">OPTReader.process_custom_xml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.load_files_GUI"><code class="docutils literal notranslate"><span class="pre">load_files_GUI()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.select_files_GUI"><code class="docutils literal notranslate"><span class="pre">select_files_GUI()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="core.html">ionique.core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.add_child"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.add_child()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.add_children"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.add_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.children"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.clear_children"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.clear_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.climb_to_rank"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.climb_to_rank()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.end"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.get_feature"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.get_feature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.get_top_parent"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.get_top_parent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.n"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.n</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.parent"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.parse"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.rank"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.relative_end"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.relative_end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.relative_slice"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.relative_slice</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.relative_start"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.relative_start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.slice"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.slice</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.start"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.AbstractSegmentTree.traverse_to_rank"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.traverse_to_rank()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#ionique.core.MetaSegment"><code class="docutils literal notranslate"><span class="pre">MetaSegment</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.__init__"><code class="docutils literal notranslate"><span class="pre">MetaSegment.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.current"><code class="docutils literal notranslate"><span class="pre">MetaSegment.current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.delete"><code class="docutils literal notranslate"><span class="pre">MetaSegment.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.duration"><code class="docutils literal notranslate"><span class="pre">MetaSegment.duration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.from_json"><code class="docutils literal notranslate"><span class="pre">MetaSegment.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.max"><code class="docutils literal notranslate"><span class="pre">MetaSegment.max</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.mean"><code class="docutils literal notranslate"><span class="pre">MetaSegment.mean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.min"><code class="docutils literal notranslate"><span class="pre">MetaSegment.min</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.std"><code class="docutils literal notranslate"><span class="pre">MetaSegment.std</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.time"><code class="docutils literal notranslate"><span class="pre">MetaSegment.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.to_dict"><code class="docutils literal notranslate"><span class="pre">MetaSegment.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.to_json"><code class="docutils literal notranslate"><span class="pre">MetaSegment.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.to_meta"><code class="docutils literal notranslate"><span class="pre">MetaSegment.to_meta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.MetaSegment.unique_features"><code class="docutils literal notranslate"><span class="pre">MetaSegment.unique_features</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#ionique.core.Segment"><code class="docutils literal notranslate"><span class="pre">Segment</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.__init__"><code class="docutils literal notranslate"><span class="pre">Segment.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.children"><code class="docutils literal notranslate"><span class="pre">Segment.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.delete"><code class="docutils literal notranslate"><span class="pre">Segment.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.end"><code class="docutils literal notranslate"><span class="pre">Segment.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.from_json"><code class="docutils literal notranslate"><span class="pre">Segment.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.max"><code class="docutils literal notranslate"><span class="pre">Segment.max</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.mean"><code class="docutils literal notranslate"><span class="pre">Segment.mean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.min"><code class="docutils literal notranslate"><span class="pre">Segment.min</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.n"><code class="docutils literal notranslate"><span class="pre">Segment.n</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.parent"><code class="docutils literal notranslate"><span class="pre">Segment.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.rank"><code class="docutils literal notranslate"><span class="pre">Segment.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.scale"><code class="docutils literal notranslate"><span class="pre">Segment.scale()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.start"><code class="docutils literal notranslate"><span class="pre">Segment.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.std"><code class="docutils literal notranslate"><span class="pre">Segment.std</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.to_dict"><code class="docutils literal notranslate"><span class="pre">Segment.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.to_json"><code class="docutils literal notranslate"><span class="pre">Segment.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="core.html#ionique.core.Segment.to_meta"><code class="docutils literal notranslate"><span class="pre">Segment.to_meta()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#ionique.core.ignored"><code class="docutils literal notranslate"><span class="pre">ignored()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ionique.parsers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.AutoSquareParser"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.AutoSquareParser.__init__"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.AutoSquareParser.parse"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.AutoSquareParser.required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser.required_parent_attributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.FilterDerivativeSegmenter"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.FilterDerivativeSegmenter.__init__"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.FilterDerivativeSegmenter.parse"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.FilterDerivativeSegmenter.set_params"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter.set_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.IVCurveAnalyzer"><code class="docutils literal notranslate"><span class="pre">IVCurveAnalyzer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.IVCurveAnalyzer.__init__"><code class="docutils literal notranslate"><span class="pre">IVCurveAnalyzer.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.IVCurveAnalyzer.analyze"><code class="docutils literal notranslate"><span class="pre">IVCurveAnalyzer.analyze()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.IVCurveParser"><code class="docutils literal notranslate"><span class="pre">IVCurveParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.IVCurveParser.__init__"><code class="docutils literal notranslate"><span class="pre">IVCurveParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.IVCurveParser.parse"><code class="docutils literal notranslate"><span class="pre">IVCurveParser.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.MemoryParse"><code class="docutils literal notranslate"><span class="pre">MemoryParse</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.MemoryParse.__init__"><code class="docutils literal notranslate"><span class="pre">MemoryParse.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.MemoryParse.parse"><code class="docutils literal notranslate"><span class="pre">MemoryParse.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.NoiseFilterParser"><code class="docutils literal notranslate"><span class="pre">NoiseFilterParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.NoiseFilterParser.__init__"><code class="docutils literal notranslate"><span class="pre">NoiseFilterParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.NoiseFilterParser.parse"><code class="docutils literal notranslate"><span class="pre">NoiseFilterParser.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.Parser"><code class="docutils literal notranslate"><span class="pre">Parser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.__init__"><code class="docutils literal notranslate"><span class="pre">Parser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.from_json"><code class="docutils literal notranslate"><span class="pre">Parser.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.get_init_params"><code class="docutils literal notranslate"><span class="pre">Parser.get_init_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.get_name"><code class="docutils literal notranslate"><span class="pre">Parser.get_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.get_process_inputs"><code class="docutils literal notranslate"><span class="pre">Parser.get_process_inputs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.get_process_outputs"><code class="docutils literal notranslate"><span class="pre">Parser.get_process_outputs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.get_required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">Parser.get_required_parent_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.parse"><code class="docutils literal notranslate"><span class="pre">Parser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">Parser.required_parent_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.set_params"><code class="docutils literal notranslate"><span class="pre">Parser.set_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.to_dict"><code class="docutils literal notranslate"><span class="pre">Parser.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.Parser.to_json"><code class="docutils literal notranslate"><span class="pre">Parser.to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.SpeedyStatSplit"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpeedyStatSplit.__init__"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpeedyStatSplit.best_single_split"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.best_single_split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpeedyStatSplit.parse"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpeedyStatSplit.parse_meta"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.parse_meta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpeedyStatSplit.set_params"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.set_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpeedyStatSplit.uiTemplate"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.uiTemplate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.SpikeParser"><code class="docutils literal notranslate"><span class="pre">SpikeParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpikeParser.__init__"><code class="docutils literal notranslate"><span class="pre">SpikeParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpikeParser.parse"><code class="docutils literal notranslate"><span class="pre">SpikeParser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.SpikeParser.required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">SpikeParser.required_parent_attributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.lambda_event_parser"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.lambda_event_parser.__init__"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.lambda_event_parser.parse"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.lambda_event_parser.set_params"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser.set_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.pairwise"><code class="docutils literal notranslate"><span class="pre">pairwise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.parsers.snakebase_parser"><code class="docutils literal notranslate"><span class="pre">snakebase_parser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.snakebase_parser.__init__"><code class="docutils literal notranslate"><span class="pre">snakebase_parser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.snakebase_parser.parse"><code class="docutils literal notranslate"><span class="pre">snakebase_parser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.parsers.snakebase_parser.set_params"><code class="docutils literal notranslate"><span class="pre">snakebase_parser.set_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">ionique.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.Filter"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.__init__"><code class="docutils literal notranslate"><span class="pre">Filter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.bidirectional"><code class="docutils literal notranslate"><span class="pre">Filter.bidirectional</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.cutoff_frequency"><code class="docutils literal notranslate"><span class="pre">Filter.cutoff_frequency</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.filter_method"><code class="docutils literal notranslate"><span class="pre">Filter.filter_method</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.filter_type"><code class="docutils literal notranslate"><span class="pre">Filter.filter_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.sampling_frequency"><code class="docutils literal notranslate"><span class="pre">Filter.sampling_frequency</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.Singleton"><code class="docutils literal notranslate"><span class="pre">Singleton</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Singleton.__init__"><code class="docutils literal notranslate"><span class="pre">Singleton.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.Trimmer"><code class="docutils literal notranslate"><span class="pre">Trimmer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.__init__"><code class="docutils literal notranslate"><span class="pre">Trimmer.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.newrank"><code class="docutils literal notranslate"><span class="pre">Trimmer.newrank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.rank"><code class="docutils literal notranslate"><span class="pre">Trimmer.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.samples_to_remove"><code class="docutils literal notranslate"><span class="pre">Trimmer.samples_to_remove</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.extract_features"><code class="docutils literal notranslate"><span class="pre">extract_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.si_eval"><code class="docutils literal notranslate"><span class="pre">si_eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.split_voltage_steps"><code class="docutils literal notranslate"><span class="pre">split_voltage_steps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="datatypes.html">ionique.datatypes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager"><code class="docutils literal notranslate"><span class="pre">SessionFileManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.__init__"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.add_child"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.add_child()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.add_children"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.add_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.rank"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.register_affector"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.register_affector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.unique_features"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.unique_features</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile"><code class="docutils literal notranslate"><span class="pre">TraceFile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.__init__"><code class="docutils literal notranslate"><span class="pre">TraceFile.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.children"><code class="docutils literal notranslate"><span class="pre">TraceFile.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.delete"><code class="docutils literal notranslate"><span class="pre">TraceFile.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.end"><code class="docutils literal notranslate"><span class="pre">TraceFile.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.parent"><code class="docutils literal notranslate"><span class="pre">TraceFile.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.plot"><code class="docutils literal notranslate"><span class="pre">TraceFile.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.rank"><code class="docutils literal notranslate"><span class="pre">TraceFile.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.start"><code class="docutils literal notranslate"><span class="pre">TraceFile.start</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cparsers.html">ionique.cparsers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit"><code class="docutils literal notranslate"><span class="pre">FastStatSplit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.__init__"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.best_single_split"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.best_single_split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.min_gain"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.min_gain</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.parse"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.parse_meta"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.parse_meta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.score_samples"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.score_samples()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cparsers.html#ionique.cparsers.pairwise"><code class="docutils literal notranslate"><span class="pre">pairwise()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install_beginner.html">Installation for beginners</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#welcome-to-ionique">Welcome to Ionique!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-1-install-python">Step 1: Install Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-2-github">Step 2: GitHub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-3-moving-between-folders-in-the-terminal">Step 3: Moving Between Folders in the Terminal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-4-virtual-environment">Step 4: Virtual Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-5-run-the-notebooks">Step 5: Run the Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-6-finish-workflow">Step 6: Finish Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ionique_starter.html">Install Ionique</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#download-the-ionique-repository">1. Download the Ionique Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#open-the-ionique-folder-in-vs-code">2. Open the Ionique Folder in VS Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#set-up-a-virtual-environment">3. Set Up a Virtual Environment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ionique_starter.html#step-1-open-terminal-in-vs-code">Step 1: Open Terminal in VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionique_starter.html#step-2-confirm-you-re-in-the-correct-directory">Step 2: Confirm You’re in the Correct Directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionique_starter.html#step-3-create-and-activate-the-environment">Step 3: Create and Activate the Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#install-the-ionique-package">4. Install the Ionique Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#optional-install-jupyterlab">5. (Optional) Install JupyterLab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#deactivate-the-environment">6. Deactivate the Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../python_vscode_start.html">Guide for VSCode and Python Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python_vscode_start.html#installing-vs-code">Installing VS Code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-vs-code">1. Install VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-required-extensions">2. Install Required Extensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-compilers-build-tools">3. Install Compilers (Build Tools)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-python">4. Install Python.</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python_vscode_start.html#skip-this-step-if-you-already-have-python"><em>Skip this step if you already have Python!</em></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#download-and-install-vs-code">1. Download and Install VS_Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#open-a-terminal">2. Open a Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#id1">3. Install Python</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python_vscode_start.html#id2"><em>Skip this step if you already have Python!</em></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#id3">1. Install VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#id4">2. Install Python</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python_vscode_start.html#id5"><em>Skip this step if you already have Python!</em></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ionique</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
+      <li class="breadcrumb-item active">ionique.parsers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/parsers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ionique-parsers">
+<h1>ionique.parsers<a class="headerlink" href="#ionique-parsers" title="Link to this heading"></a></h1>
+<p id="module-ionique.parsers">Parser module for event and state segmentation in current recordings.
+This module provides a framework for parsing current trace data. It includes an abstract base <cite>Parser</cite> class
+and multiple concrete parser implementations for detecting spikes, noise, square pulses, and other event
+structures in ionic current signals.</p>
+<p>Some of the parsers and the parser base class were adapted from the
+PyPore Package by Jacob Schreiber and Kevin Karplus (<a class="reference external" href="https://github.com/jmschrei/PyPore">https://github.com/jmschrei/PyPore</a>)</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.AutoSquareParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">AutoSquareParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold_baseline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_conductance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conductance_tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.AutoSquareParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>Class for building a straightforward pipeline of data analysis
+to make it reusable with customized parameters</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.AutoSquareParser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold_baseline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_conductance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conductance_tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.AutoSquareParser.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a Parser instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.AutoSquareParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eff_sampling_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voltage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.AutoSquareParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Takes in a current segment, and returns a list of segment objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments containing the data, such as current</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of tuples representing the start and end indices of the segment
+and an empty dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.parsers.AutoSquareParser.required_parent_attributes">
+<span class="sig-name descname"><span class="pre">required_parent_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['current',</span> <span class="pre">'eff_sampling_freq',</span> <span class="pre">'voltage']</span></em><a class="headerlink" href="#ionique.parsers.AutoSquareParser.required_parent_attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.FilterDerivativeSegmenter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">FilterDerivativeSegmenter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.FilterDerivativeSegmenter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>This parser will segment an event using a filter-derivative method. It will
+first apply a bessel filter at a certain cutoff to the current, then it will
+take the derivative of that, and segment when the derivative passes a
+threshold.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.FilterDerivativeSegmenter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.FilterDerivativeSegmenter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a Parser instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.FilterDerivativeSegmenter.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.FilterDerivativeSegmenter.parse" title="Link to this definition"></a></dt>
+<dd><p>Apply the filter-derivative method to filter the ionic current.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.FilterDerivativeSegmenter.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.FilterDerivativeSegmenter.set_params" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.IVCurveAnalyzer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">IVCurveAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_segment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.IVCurveAnalyzer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>THIS CLASS IS NOT IMPLEMENTED YET. DO NOT USE.
+Check for at Least Two Voltage Steps: confirm that the segment has at least two voltage steps.</p>
+<p>Divide into Voltage Segments: separate data into  voltage segments.</p>
+<p>Call <cite>IVAnalyzer</cite> on Parent Segment: compute the mean and std of the current in each
+voltage segment.</p>
+<p>Return an Array of (voltage: (imean, istd)) pair:</p>
+<p>Also mean and std should be calulated in two ways</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.IVCurveAnalyzer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_segment</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'simple'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.IVCurveAnalyzer.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a Parser instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.IVCurveAnalyzer.analyze">
+<span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.IVCurveAnalyzer.analyze" title="Link to this definition"></a></dt>
+<dd><p>Analyze each voltage step in a parent segment</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.IVCurveParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">IVCurveParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voltage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.IVCurveParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>THIS CLASS IS NOT IMPLEMENTED YET! DO NOT USE.
+The class handles:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Identifies a file where an IV curve is recorded based on the pattern.</p></li>
+</ol>
+</div></blockquote>
+<p>Here, the goal is to feed the voltage information to a module and have it search and do pattern matching to find one of
+these possibilities. .This can be a parser that accepts voltage array or compressed voltage as one of the inputs.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.IVCurveParser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voltage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.IVCurveParser.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.IVCurveParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.IVCurveParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Searches for a pattern in the voltage data to identify IV.
+If none exists, the given datafile does not contain IV curves.
+If one or multiple IV curves are found, it returns start and
+end regions of each of them.
+Returns: list of indices: start and end for each deteced IV curve</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.MemoryParse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">MemoryParse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ends</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.MemoryParse" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A parser based on being fed previous split points, and splitting a raw file based
+those splits. Used predominately when loading previous split points from the
+database cache, to reconstruct a parsed file from “memory.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.MemoryParse.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">starts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ends</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.MemoryParse.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>starts</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – A list of start indices for each segment.</p></li>
+<li><p><strong>ends</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – A list of end indices corresponding to each start index.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.MemoryParse.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.MemoryParse.parse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.NoiseFilterParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">NoiseFilterParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.NoiseFilterParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>This unit is a parser subclass. when invoked on a segment (whole file or subsegment),
+it identifies the areas where bad things happened, and areas where the data is clean.
+Examples of bad things include high noise (60Hz noise from opening the cage), membrane
+rupture, and membrane formation attempts. it produces children from the good
+regions of the data and ignore the bad regions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.NoiseFilterParser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.NoiseFilterParser.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a Parser instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.NoiseFilterParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.NoiseFilterParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Takes in a current segment, and returns a list of segment objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments containing the data, such as current</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of tuples representing the start and end indices of the segment
+and an empty dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.Parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">Parser</span></span><a class="headerlink" href="#ionique.parsers.Parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>This class defines the interface and shared utility methods for parser implementations.
+Parsers are used to segment  ionic current data
+into structured regions of interest (events).</p>
+<p>Subclasses should implement the <cite>parse</cite> method and define any additional logic
+required to detect features in the data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.__init__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a Parser instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.from_json" title="Link to this definition"></a></dt>
+<dd><p>Critical: Not implemented yet, figure out how to make this work in pythion</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.get_init_params">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_init_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.get_init_params" title="Link to this definition"></a></dt>
+<dd><p>Get the initialization parameters of the parser class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary of initialization parameters, default None.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.get_name">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.get_name" title="Link to this definition"></a></dt>
+<dd><p>Get the name of the parser class
+:return: The name of the class.
+:rtype: str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.get_process_inputs">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_process_inputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.get_process_inputs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.get_process_outputs">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_process_outputs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.get_process_outputs" title="Link to this definition"></a></dt>
+<dd><p>Get the outputs generated by processing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of outputs generated by parse method</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.get_required_parent_attributes">
+<span class="sig-name descname"><span class="pre">get_required_parent_attributes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.get_required_parent_attributes" title="Link to this definition"></a></dt>
+<dd><p>Get the list of required attributes from the parent segment</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of required parent attributes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.parse" title="Link to this definition"></a></dt>
+<dd><p>Takes in a current segment, and returns a list of segment objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments containing the data, such as current</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of tuples representing the start and end indices of the segment
+and an empty dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.required_parent_attributes">
+<span class="sig-name descname"><span class="pre">required_parent_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['current']</span></em><a class="headerlink" href="#ionique.parsers.Parser.required_parent_attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.set_params" title="Link to this definition"></a></dt>
+<dd><p>Updates each paramater presented in the GUI to the value input in the lineEdit
+corresponding to that value.
+:param param_dict: A dictionary
+:type param_dict: dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Convert the parser’s attributes to a dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary representation of the parser’s attributes.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.Parser.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.Parser.to_json" title="Link to this definition"></a></dt>
+<dd><p>Convert the parser’s attributes to a JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em><em>, </em><em>default bool</em>) – If filename, it writes the JSON string to the specified file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary representation of the parser’s attributes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.SpeedyStatSplit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">SpeedyStatSplit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_gain_per_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">false_positive_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_segments_per_second</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpeedyStatSplit" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>A parser wrapper for the Cython-accelerated <cite>FastStatSplit</cite> algorithm.</p>
+<p>See cparsers.pyx FastStatSplit for full documentation. This is just a
+wrapper for the cyton implementation to add a GUI.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.SpeedyStatSplit.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_gain_per_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">false_positive_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_segments_per_second</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpeedyStatSplit.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the SpeedyStatSplit instance</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampling_freq</strong> (<em>int</em>) – The sampling frequency of the data</p></li>
+<li><p><strong>min_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum width of a segment, default=100</p></li>
+<li><p><strong>max_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum width of a segment, default=1000000.</p></li>
+<li><p><strong>window_width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of the window, defaults to 10000.</p></li>
+<li><p><strong>min_gain_per_sample</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Minimum gain per sample, default=None</p></li>
+<li><p><strong>false_positive_rate</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Expected false positive rate , default=None</p></li>
+<li><p><strong>prior_segments_per_second</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Prior number of segments per second, default=None.</p></li>
+<li><p><strong>cutoff_freq</strong> (<em>float</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Cutoff frequency for filtering, default=None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.SpeedyStatSplit.best_single_split">
+<span class="sig-name descname"><span class="pre">best_single_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpeedyStatSplit.best_single_split" title="Link to this definition"></a></dt>
+<dd><p>Determine the best single split point in the current data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>current</strong> (<em>numpy.ndarray</em>) – The current data to be analyzed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The best split point</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.SpeedyStatSplit.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpeedyStatSplit.parse" title="Link to this definition"></a></dt>
+<dd><p>Parse the current data to detect segments using the FastStatSplit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>current</strong> (<em>numpy.ndarray</em>) – The current data to be parsed</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of detected segments</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.SpeedyStatSplit.parse_meta">
+<span class="sig-name descname"><span class="pre">parse_meta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpeedyStatSplit.parse_meta" title="Link to this definition"></a></dt>
+<dd><p>Parse the current data and extract meta information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>current</strong> (<em>numpy.ndarray</em>) – The current data to be parsed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.SpeedyStatSplit.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpeedyStatSplit.set_params" title="Link to this definition"></a></dt>
+<dd><p>Set the parameters</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.parsers.SpeedyStatSplit.uiTemplate">
+<span class="sig-name descname"><span class="pre">uiTemplate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[('sampling_freq',</span> <span class="pre">'spin',</span> <span class="pre">{'bounds':</span> <span class="pre">[0,</span> <span class="pre">None],</span> <span class="pre">'dec':</span> <span class="pre">True,</span> <span class="pre">'siPrefix':</span> <span class="pre">True,</span> <span class="pre">'step':</span> <span class="pre">1,</span> <span class="pre">'suffix':</span> <span class="pre">'Hz',</span> <span class="pre">'value':</span> <span class="pre">200000}),</span> <span class="pre">('min_width',</span> <span class="pre">'spin',</span> <span class="pre">{'dec':</span> <span class="pre">True,</span> <span class="pre">'int':</span> <span class="pre">True,</span> <span class="pre">'min':</span> <span class="pre">2,</span> <span class="pre">'step':</span> <span class="pre">1,</span> <span class="pre">'value':</span> <span class="pre">100}),</span> <span class="pre">('max_width',</span> <span class="pre">'spin',</span> <span class="pre">{'dec':</span> <span class="pre">True,</span> <span class="pre">'int':</span> <span class="pre">True,</span> <span class="pre">'step':</span> <span class="pre">1,</span> <span class="pre">'value':</span> <span class="pre">1000000}),</span> <span class="pre">('window_width',</span> <span class="pre">'spin',</span> <span class="pre">{'dec':</span> <span class="pre">True,</span> <span class="pre">'int':</span> <span class="pre">True,</span> <span class="pre">'step':</span> <span class="pre">1,</span> <span class="pre">'value':</span> <span class="pre">10000}),</span> <span class="pre">('cutoff_freq',</span> <span class="pre">'spin',</span> <span class="pre">{'hidden':</span> <span class="pre">True})]</span></em><a class="headerlink" href="#ionique.parsers.SpeedyStatSplit.uiTemplate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.SpikeParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">SpikeParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prominence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prominence_snr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rel_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plateu_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fractional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpikeParser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>A parser for detecting spike-like events in ionic current data.</p>
+<p>This parser wraps <cite>scipy.signal.find_peaks</cite>, supporting thresholds
+for features like peak height, prominence, and width. It computes event characteristics such
+as dwell time, relative prominence, and peak positions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.SpikeParser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prominence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prominence_snr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rel_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plateu_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fractional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ionique.parsers.SpikeParser.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the SpikeParser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>height</strong> (<em>float</em><em> or </em><em>tuple</em><em> or </em><em>None</em>) – Minimum spike height.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em> or </em><em>tuple</em><em> or </em><em>None</em>) – Minimum vertical threshold.</p></li>
+<li><p><strong>distance</strong> (<em>float</em><em> or </em><em>tuple</em><em> or </em><em>None</em>) – Minimum horizontal distance between peaks.</p></li>
+<li><p><strong>prominence</strong> (<em>float</em><em> or </em><em>tuple</em><em> or </em><em>None</em>) – Minimum peak prominence.</p></li>
+<li><p><strong>prominence_snr</strong> (<em>tuple</em><em> or </em><em>None</em>) – Alternative to prominence, specified as a tuple of signal-to-noise (SNR) ratios.</p></li>
+<li><p><strong>width</strong> (<em>float</em><em> or </em><em>tuple</em><em> or </em><em>None</em>) – Full width at half maximum of the peak.</p></li>
+<li><p><strong>wlen</strong> (<em>float</em><em> or </em><em>None</em>) – Width of the window used to calculate prominence.</p></li>
+<li><p><strong>rel_height</strong> (<em>float</em>) – Relative height used in width calculation (range 0 to 1).</p></li>
+<li><p><strong>plateu_size</strong> (<em>float</em><em> or </em><em>None</em>) – Minimum length of a flat-topped peak.</p></li>
+<li><p><strong>fractional</strong> (<em>bool</em>) – Whether to interpret height, prominence, etc., as a fraction of the signal mean.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.SpikeParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.SpikeParser.parse" title="Link to this definition"></a></dt>
+<dd><p>Takes in a current segment, and returns a list of segment objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments containing the data, such as current</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of tuples representing the start and end indices of the segment
+and an empty dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.parsers.SpikeParser.required_parent_attributes">
+<span class="sig-name descname"><span class="pre">required_parent_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['current',</span> <span class="pre">'sampling_freq',</span> <span class="pre">'mean',</span> <span class="pre">'start',</span> <span class="pre">'std']</span></em><a class="headerlink" href="#ionique.parsers.SpikeParser.required_parent_attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.lambda_event_parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">lambda_event_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.lambda_event_parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>A simple rule-based parser which defines events as a sequential series
+of points which are below a certain threshold, then filtered based on other
+critereon such as total time or minimum current. Rules can be passed in at
+initiation, or set later, but must be a lambda function takes in a PreEvent
+object and performs some boolean operation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.lambda_event_parser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.lambda_event_parser.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>threshold</strong> (<em>float</em>) – The threshold for detecting events (e.g., current &lt; threshold).</p></li>
+<li><p><strong>rules</strong> (<em>list</em><em>[</em><em>callable</em><em>] or </em><em>None</em>) – A list of lambda functions that accept an event and return a bool.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.lambda_event_parser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.lambda_event_parser.parse" title="Link to this definition"></a></dt>
+<dd><p>Perform a large capture of events by creating a boolean mask for when
+the current is below a threshold, then detecting the edges in those masks,
+and using the edges to partitition the sample. The events are
+then filtered before being returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.lambda_event_parser.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.lambda_event_parser.set_params" title="Link to this definition"></a></dt>
+<dd><p>Read in the data from the GUI and use it to customize
+the rules or threshold of the parser.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ionique.parsers.pairwise">
+<span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">pairwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.pairwise" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>s -&gt; (s0,s1), (s1,s2), (s2, s3), …</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>iterable</strong></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.parsers.snakebase_parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.parsers.</span></span><span class="sig-name descname"><span class="pre">snakebase_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.snakebase_parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a></p>
+<p>A simple parser based on dividing when the peak-to-peak
+amplitude of a wave exceeds a certain threshold.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.snakebase_parser.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.snakebase_parser.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize a Parser instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.snakebase_parser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.snakebase_parser.parse" title="Link to this definition"></a></dt>
+<dd><p>Takes in a current segment, and returns a list of segment objects</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments containing the data, such as current</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of tuples representing the start and end indices of the segment
+and an empty dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.parsers.snakebase_parser.set_params">
+<span class="sig-name descname"><span class="pre">set_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.parsers.snakebase_parser.set_params" title="Link to this definition"></a></dt>
+<dd><p>Updates each paramater presented in the GUI to the value input in the lineEdit
+corresponding to that value.
+:param param_dict: A dictionary
+:type param_dict: dict</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="core.html" class="btn btn-neutral float-left" title="ionique.core" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="ionique.utils" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ali Fallahi, Dinara Boyko, Wanunu Lab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="sphinxsidebarwrapper">
+  <h3>Versions</h3>
+  <ul class="simple">
+    
+      <li><a href="../../v0.3.0/api/parsers.html">v0.3.0</a></li>
+    
+      <li><a href="../../v0.3.1/api/parsers.html">v0.3.1</a></li>
+    
+      <li><a href="../../feature/dina/api/parsers.html">feature/dina</a></li>
+    
+      <li><a href="parsers.html">main</a></li>
+    
+  </ul>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
