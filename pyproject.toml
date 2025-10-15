@@ -28,3 +28,5 @@ panel = ["panel"]
 
 [tool.setuptools_scm]
 write_to = "src/ionique/_version.py"
+# fall back version is for downloading git repo
+fallback_version = "0.3.0"
