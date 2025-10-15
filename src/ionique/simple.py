@@ -3,8 +3,221 @@
 Module ionique.simple
 GUI and Jupyter convinience functions to streamline work for basic users
 """
+pn_init=False
+pn=None
+def _init_panel():
+    global pn
+    global pn_init
+    if pn is None or not pn_init:
+        import panel 
+        pn=panel 
+        pn.extension("plotly")
+        pn_init=True
+    return
 
+def panel_load_opt_files(path="~",pattern="*.opt",title= "OPT Files and Parameters"):
+    return _panel_load_files(on_run=_panel_load_opt_callback,path=path,pattern=pattern,title=title)
 
+def panel_load_edh_files(path="~",pattern="*.edh",title= "EDH Files and Parameters"):
+    print("not implemented yet")
+    pass 
+
+def _panel_load_files(
+    on_run,
+    path="~",
+    pattern="",
+    title="File & Parameters",
+):
+    """
+    Build a single Panel unit (FileSelector + parameter form) and wire a run callback.
+
+    Parameters
+    ----------
+    on_run : callable
+        Function called when the run button is clicked.
+        Signature:
+            on_run(
+                file: str | None,
+                voltage_compress: bool,
+                filter_at_all:bool,
+                downsample: int,
+                cutoff_frequency: int,
+                sampling_frequency: int,
+                filter_type: str,
+                filter_method: str,
+                order: int,
+                bidirectional: bool,
+                samples_remove: int,
+            ) -> Optional[panel.Viewable | str | dict]
+        The return value (if any) is rendered in the output area.
+    """
+    _init_panel()
+    import ionique.io as iqio
+    from types import SimpleNamespace
+    if pattern == "":
+        raise ValueError("File pattern is undefined.")
+    else:
+        extension=pattern.split(".")[-1]
+        if not extension:
+            raise ValueError(f"File extension not specified in pattern: {pattern}")
+        if "."+extension.lower().strip() not in iqio.supported_extensions:
+            raise ValueError(f"Unsupported file extension. ionique currently supports {iqio.supported_extensions}")
+        
+    if not callable(on_run):
+        raise TypeError("on_run must be a callable")
+
+    # --- Widgets ---
+    file_browser = pn.widgets.FileSelector(directory=path, file_pattern=pattern)
+
+    voltage_compress_checkbox = pn.widgets.Checkbox(name="Voltage Compress", value=True)
+    filter_at_all_checkbox=pn.widgets.Checkbox(name="Filter the signal?", value=True)
+    cutoff_frequency = pn.widgets.FloatInput(name="Cutoff Frequency (Hz)", value=25_000,step=1000)
+    sampling_frequency = pn.widgets.IntInput(name="Sampling Frequency (Hz)", value=250_000)
+    filter_type = pn.widgets.Select(name="Filter type", options=["lowpass", "highpass", "bandpass", "bandstop"])
+    filter_method = pn.widgets.Select(name="Filter method", options=["bessel", "butter"])
+    order = pn.widgets.IntInput(name="Order", value=2, step=1, start=1,end=16)
+    direction = pn.widgets.Checkbox(name="Bidirectional", value=True)
+    
+    downsample_input = pn.widgets.IntInput(name="Downsample (post-filter)", value=5, step=1, start=1)
+    samples_remove = pn.widgets.IntInput(name="Samples to Remove (post-downsample)", value=2000)
+    run_button = pn.widgets.Button(name="Run", button_type="primary")
+    # Output/status area
+    status = pn.pane.Alert("Ready.", alert_type="light", sizing_mode="stretch_width")
+    output_area = pn.Column()
+
+    form_2 = pn.Column(
+        pn.pane.Markdown("### Parameters for Preprocessing Data"),
+        voltage_compress_checkbox,
+        filter_at_all_checkbox,
+        cutoff_frequency,
+        sampling_frequency,
+        filter_type,
+        filter_method,
+        order,
+        direction,
+        downsample_input,
+        samples_remove,
+    
+        run_button,
+        status,
+        sizing_mode="stretch_width",
+    )
+
+    unit = pn.Card(
+        pn.Row(
+            pn.Column(pn.pane.Markdown("### Select files"), file_browser, sizing_mode="stretch_both"),
+            pn.Spacer(width=20),
+            pn.Column(form_2, output_area, sizing_mode="stretch_both"),
+        ),
+        title=title,
+        collapsible=False,
+        sizing_mode="stretch_width",
+    )
+
+    # --- Click callback wiring ---
+    def _on_click(event):
+        # Grab current values
+        selected_files = list(file_browser.value or [])
+        # file = str(Path(selected_files[0]).expanduser()) if selected_files else None
+
+        params = dict(
+            files=selected_files,
+            voltage_compress=bool(voltage_compress_checkbox.value),
+            filter_at_all=bool(filter_at_all_checkbox.value),
+            downsample=int(downsample_input.value),
+            cutoff_frequency=float(cutoff_frequency.value),
+            sampling_frequency=int(sampling_frequency.value),
+            filter_type=str(filter_type.value),
+            filter_method=str(filter_method.value),
+            order=int(order.value),
+            bidirectional=bool(direction.value),
+            samples_remove=int(samples_remove.value),
+        )
+
+        # Basic validation example
+        if selected_files is []:
+            status.object = "Please select a valid data file."
+            status.alert_type = "warning"
+            return
+
+        # Run user callback
+        run_button.disabled = True
+        status.object = "Running..."
+        status.alert_type = "info"
+        try:
+            result = on_run(**params)
+        except Exception as e:
+            status.object = f"""Error: {e}""" 
+            status.alert_type = "danger"
+            output_area.objects = []
+        else:
+            status.object = "Done."
+            status.alert_type = "success"
+            # Render result if provided
+            if result is None:
+                output_area.objects = []
+            elif isinstance(result, pn.viewable.Viewable):
+                output_area.objects = [result]
+            else:
+                # Fallback: show text/JSON-ish results
+                output_area.objects = [pn.pane.Str(result, sizing_mode="stretch_width")]
+        finally:
+            run_button.disabled = False
+
+    run_button.on_click(_on_click)
+
+    widgets = SimpleNamespace(
+        file_browser=file_browser,
+        voltage_compress_checkbox=voltage_compress_checkbox,
+        downsample_input=downsample_input,
+        cutoff_frequency=cutoff_frequency,
+        sampling_frequency=sampling_frequency,
+        filter_type=filter_type,
+        filter_method=filter_method,
+        order=order,
+        direction=direction,
+        samples_remove=samples_remove,
+        run_button=run_button,
+        status=status,
+        output_area=output_area,
+        form=form_2,
+        unit=unit,
+    )
+    return unit
+
+def _panel_load_opt_callback(**params):
+    from ionique.utils import Filter,Trimmer
+    if not params["files"]:
+        raise ValueError ("No files selected")
+    if params["filter_at_all"]:
+        filt=Filter(
+            cutoff_frequency=params["cutoff_frequency"],
+            filter_type=params["filter_type"],
+            filter_method=params["filter_method"],
+            order=params["order"],
+            bidirectional=params["bidirectional"],
+            sampling_frequency=params["sampling_frequency"])
+    else:
+        filt=None
+    from ionique.io import OPTReader
+    from ionique.datatypes import SessionFileManager,TraceFile
+    sfm=SessionFileManager()
+    trimmer=Trimmer(samples_to_remove=params["samples_remove"],rank="vstep",newrank="vstepgap")
+    for fname in params["files"]:
+        metadata,current,voltage=OPTReader(
+            fname,
+            voltage_compress=params["voltage_compress"],
+            downsample=params["downsample"],
+            )
+        trace_file = TraceFile(
+            current=current,
+            voltage=voltage,
+            parent=sfm,
+            metadata=metadata,
+            unique_features={
+                "sampling_freq": metadata["eff_sampling_freq"],
+                "eff_sampling_freq": metadata["eff_sampling_freq"]})
+        trimmer(trace_file)
 
 def select_files_GUI():
     """
