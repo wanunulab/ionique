@@ -24,7 +24,7 @@ dependencies = [
 
 
 [project.optional-dependencies]
-panel = ["panel","bokeh-jupyter","ipympl","plotly"]
+panel = ["panel","bokeh-jupyter","ipympl","plotly","openpyxl"]
 
 [tool.setuptools_scm]
 write_to = "src/ionique/_version.py"

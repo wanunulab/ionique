@@ -3,6 +3,8 @@
 Module ionique.simple
 GUI and Jupyter convinience functions to streamline work for basic users
 """
+import os
+from pathlib import Path
 pn_init=False
 pn=None
 def _init_panel():
@@ -15,12 +17,202 @@ def _init_panel():
         pn_init=True
     return
 
-def panel_load_opt_files(path="~",pattern="*.opt",title= "OPT Files and Parameters"):
+def panel_load_opt_files(path="~",pattern="*[0-9].opt",title= "OPT Files and Parameters"):
     return _panel_load_files(on_run=_panel_load_opt_callback,path=path,pattern=pattern,title=title)
 
 def panel_load_edh_files(path="~",pattern="*.edh",title= "EDH Files and Parameters"):
     print("not implemented yet")
     pass 
+def get_standard_features():
+    """
+    Extract standard features from the current session's open files. Also stores the dataframe in session.latest_dataframe.
+
+    :return: df
+    :rtype: pandas.DataFrame
+    """
+    from ionique.datatypes import SessionFileManager
+    from ionique.utils import extract_features
+    import numpy as np
+    session=SessionFileManager()
+    if "subevent" in session.summary().keys():
+        df=extract_features(session, bottom_rank="event",
+            extractions=['mean', 'std','frac', 'duration', 'current', 'wrap', 'start'],
+            # add_ons={#"sample_type": trace_file.unique_features['sample_type'],
+            #     ,
+            #     # "concentration": trace_file.unique_features["concentration"]},
+            # },
+            lambdas={ "filename": lambda event: event.get_feature('metadata')["HeaderFile"],
+                     "baseline": lambda event: np.abs(event.unique_features["baseline"])*(-1 if event.get_feature("voltage")<0.00001 else 1),
+                "Voltage": lambda event: int(1000 * round(float(event.get_feature("voltage")), 3)),
+                "baseline_conductance":lambda event:np.abs(event.unique_features["baseline"]/event.get_feature("voltage")),
+                "start_time": lambda event: event.time[0],
+                "parent_start_time":lambda event: event.parent.time[0],
+                "subevent_starts": lambda event: np.array([subevent.start-event.start for subevent in event.children]),
+                "subevent_ends": lambda event: np.array([subevent.end-event.start for subevent in event.children]),
+                "subevent_mean": lambda event: np.array([subevent.mean for subevent in event.children]),
+                "subevent_std": lambda event: np.array([subevent.std for subevent in event.children]),
+                "subevent_duration": lambda event: np.array([subevent.duration for subevent in event.children]),
+                "subevent_count":lambda event:len(event.children)
+            })
+    else:
+        df=extract_features(session, bottom_rank="event",
+            extractions=['mean', 'std','frac', 'duration', 'current', 'wrap', 'start'],
+            # add_ons={#"sample_type": trace_file.unique_features['sample_type'],
+            #     "filename": trace_file.metadata["HeaderFile"],
+            #     # "concentration": trace_file.unique_features["concentration"]},
+            # },
+            lambdas={ "filename": lambda event: event.get_feature('metadata')["HeaderFile"],
+                     "baseline": lambda event: np.abs(event.unique_features["baseline"])*(-1 if event.get_feature("voltage")<0.00001 else 1),
+                "Voltage": lambda event: int(1000 * round(float(event.get_feature("voltage")), 3)),
+                "baseline_conductance":lambda event:np.abs(event.unique_features["baseline"]/event.get_feature("voltage")),
+                "start_time": lambda event: event.time[0],
+                "parent_start_time":lambda event: event.parent.time[0],
+            })
+    session.latest_dataframe=df
+    return df
+
+import pandas as pd
+def detect_array_columns(df: pd.DataFrame):
+    """Return list of columns that contain at least one numpy.ndarray value."""
+    cols = []
+    for col in df.columns:
+        s = df[col]
+        if s.dropna().map(lambda x: isinstance(x, np.ndarray)).any():
+            cols.append(col)
+    return cols
+
+
+
+def panel_save_dataframe(
+    df: pd.DataFrame=None,
+    start_dir: str = ".",
+    default_name: str = f"dataset.pkl" # e.g. "2025-10-15_09-42"
+,
+):
+    """
+    A Panel UI that:
+      • Lets you browse the filesystem with FileSelector
+      • Uses the currently viewed path (or a selected folder) as the save directory
+      • Saves .pkl / .csv / .xlsx accordingly
+      • Drops array columns for CSV
+      • Accepts the common typo .xslx -> .xlsx
+    """
+    
+    name,ext = os.path.splitext(default_name)
+    from datetime import datetime
+    default_name=f'{name}_{datetime.now().astimezone().strftime("%Y-%m-%d_%H-%M")}.{ext}'
+
+    from ionique.datatypes import SessionFileManager
+    session=SessionFileManager()
+    # --- Directory explorer ---
+    if df is None:
+        if hasattr(session,"latest_dataframe"):
+            df=session.latest_dataframe
+        else:
+            raise ValueError("No dataframe containing features was provided or found.")
+    _init_panel()
+    explorer = pn.widgets.FileSelector(
+        directory=str(Path(start_dir).expanduser()),
+        only_files=False,          # allow selecting folders too
+        file_pattern="*",
+        size=12,
+        name="Browse to a folder (you can also select one)"
+    )
+
+    # --- Inputs ---
+    name_input = pn.widgets.TextInput(name="Filename", value=default_name)
+    overwrite = pn.widgets.Checkbox(name="Overwrite if file exists", value=False)
+    save_btn = pn.widgets.Button(name="Save", button_type="primary")
+    status = pn.pane.Markdown("")
+    chosen_dir_md = pn.pane.Markdown("", sizing_mode="stretch_width")
+
+    # Track the "chosen directory"
+    #  - If user selects a folder, use it.
+    #  - If user selects files, use their parent.
+    #  - If nothing selected, use the explorer's current path.
+    def _compute_directory():
+        sels = explorer.value or []  # list of selected paths (strings)
+        if len(sels) == 1 and Path(sels[0]).is_dir():
+            return Path(sels[0]).expanduser().resolve()
+        elif len(sels) >= 1:
+            # if files/folders mixed or multiple files => use parent of first
+            return Path(sels[0]).expanduser().resolve().parent
+        else:
+            # nothing selected: use the currently viewed path
+            return Path(explorer.directory).expanduser().resolve()
+
+    def _update_chosen_dir_md(event=None):
+        d = _compute_directory()
+        chosen_dir_md.object = f"**Save directory:** `{d}`"
+
+    # Update label whenever selection or path changes
+    explorer.param.watch(lambda *_: _update_chosen_dir_md(), "value")
+    explorer.param.watch(lambda *_: _update_chosen_dir_md(), "directory")
+    _update_chosen_dir_md()
+
+    def _save(_):
+        status.object = "Saving..."
+        try:
+            directory = _compute_directory()
+            filename = name_input.value.strip()
+
+            if not filename:
+                status.object = "❌ Please provide a filename (e.g., `data.xlsx`)."
+                return
+
+            # Normalize extension (fix common typo)
+            suffix = Path(filename).suffix.lower()
+            if suffix == ".xslx":
+                filename = Path(filename).with_suffix(".xlsx").name
+                suffix = ".xlsx"
+
+            if suffix not in {".pkl", ".csv", ".xlsx"}:
+                status.object = "❌ Filename must end with .pkl, .csv, or .xlsx."
+                return
+
+            directory.mkdir(parents=True, exist_ok=True)
+            path = directory / filename
+
+            if path.exists() and not overwrite.value:
+                status.object = f"⚠️ File exists: `{path}`. Enable 'Overwrite' to replace it."
+                return
+
+            # Perform the save
+            if suffix == ".pkl":
+                df.to_pickle(path)
+                status.object = f"✅ Saved pickle to `{path}`."
+            elif suffix == ".csv":
+                array_cols = detect_array_columns(df)
+                out = df.drop(columns=array_cols) if array_cols else df
+                out.to_csv(path, index=False)
+                dropped = f" Dropped array columns: {array_cols}." if array_cols else " No array columns detected."
+                status.object = f"✅ Saved CSV to `{path}`.{dropped}"
+            else:  # .xlsx
+                df.to_excel(path, index=False)  # requires openpyxl
+                status.object = f"✅ Saved Excel to `{path}`."
+
+        except Exception as e:
+            status.object = f"❌ Error: `{type(e).__name__}: {e}`"
+
+    save_btn.on_click(_save)
+
+    # Optional: quick preview of which columns would be dropped for CSV
+    def _array_cols_preview():
+        cols = detect_array_columns(df)
+        return "Array columns (will be dropped for CSV): " + (", ".join(map(str, cols)) if cols else "(none)")
+    array_cols_md = pn.pane.Markdown(_array_cols_preview())
+
+    return pn.Card(
+        pn.Column(
+            explorer,
+            chosen_dir_md,
+            pn.Row(name_input, overwrite, save_btn),
+            array_cols_md,
+            status,
+        ),
+        title="Save DataFrame",
+        collapsible=False,
+    )
 
 def _panel_load_files(
     on_run,
@@ -151,7 +343,7 @@ def _panel_load_files(
             status.alert_type = "danger"
             output_area.objects = []
         else:
-            status.object = "Done."
+            status.object = f"""Done. Loaded {len(params['files'])} file(s).\n {' \n'.join(params["files"])}"""
             status.alert_type = "success"
             # Render result if provided
             if result is None:
