@@ -23,6 +23,151 @@ def panel_load_opt_files(path="~",pattern="*[0-9].opt",title= "OPT Files and Par
 def panel_load_edh_files(path="~",pattern="*.edh",title= "EDH Files and Parameters"):
     print("not implemented yet")
     pass 
+def panel_parser_AutoSquare():
+    """
+    Build a Panel UI to configure and run AutoSquareParser on `session`.
+    Hard-coded:
+      - rules=[lambda event: event.duration > 4]
+      - newrank="event", at_child_rank="vstepgap"
+    """
+    
+    from ionique.datatypes import SessionFileManager
+    
+    from ionique.parsers import AutoSquareParser
+    session=SessionFileManager()
+    _init_panel()
+    # Widgets for numeric params
+    threshold_baseline = pn.widgets.FloatInput(name="Threshold Baseline (fractional)", value=0.7, step=0.01)
+    expected_conductance = pn.widgets.FloatInput(name="Expected Conductance (nS)", value=2.0, step=0.1)
+    conductance_tolerance = pn.widgets.FloatInput(name="Conductance Tolerance (factor)", value=1.15, step=0.01)
+    wrap_padding = pn.widgets.IntInput(name="Samples to pad", value=50, step=1)
+
+    # Preview + status
+    parser_preview = pn.pane.Str("", sizing_mode="stretch_width")
+    status = pn.pane.Markdown("", sizing_mode="stretch_width")
+
+    def _build_parser():
+        return AutoSquareParser(
+            threshold_baseline=threshold_baseline.value,
+            expected_conductance=expected_conductance.value,
+            conductance_tolerance=conductance_tolerance.value,
+            wrap_padding=wrap_padding.value,
+            rules=[lambda event: event.duration > 4],  # hard-coded “funky” param
+        )
+
+    def _update_preview(event=None):
+        try:
+            parser_preview.object = repr(_build_parser())
+        except Exception as e:
+            parser_preview.object = f"Error building parser: {e}"
+
+    for w in (threshold_baseline, expected_conductance, conductance_tolerance, wrap_padding):
+        w.param.watch(_update_preview, "value")
+
+    _update_preview()
+
+    run_btn = pn.widgets.Button(name="Run parse (newrank='event' at 'vstepgap')", button_type="primary")
+    def _run(event):
+        try:
+            status.object = "Running..."
+            parser = _build_parser()
+            session.parse(parser, newrank="event", at_child_rank="vstepgap")
+            status.object = "✅ Parse complete: newrank **event** at **vstepgap**"
+        except Exception as e:
+            status.object = f"❌ Parse failed: `{e}`"
+
+    run_btn.on_click(_run)
+
+    return pn.Card(
+        pn.Row(threshold_baseline, expected_conductance, conductance_tolerance, wrap_padding),
+        pn.Column("**Parser preview**", parser_preview),
+        run_btn,
+        status,
+        title="AutoSquareParser",
+        collapsible=True,
+        sizing_mode="stretch_width",
+    )
+
+
+def panel_parser_SpeedyStatSplit():
+    """
+    Build a Panel UI to configure and run SpeedyStatSplit on `session`.
+    Hard-coded:
+      - sampling_freq = session.children[0].metadata["eff_sampling_freq"]
+      - newrank="subevent", at_child_rank="event"
+    """
+    from ionique.datatypes import SessionFileManager
+    from ionique.parsers import SpeedyStatSplit
+    session=SessionFileManager()
+    
+    # Numeric widgets
+    cutoff_frequency = pn.widgets.FloatInput(name="Cutoff Frequency (must match loading filter)", value=25000, step=1.0)
+    window_width = pn.widgets.IntInput(name="Window Width (samples)", value=500, step=5)
+    min_width = pn.widgets.IntInput(name="Minimum Width (samples)", value=5, step=1)
+    false_positive_rate = pn.widgets.IntInput(name="False Positive Rate (segments per second)", value=5000, step=100)
+    # prior_segments_per_second = pn.widgets.IntInput(name="Prior (segments per second)", value=8000, step=500)
+
+    # Hard-coded sampling frequency (not editable), but shown to user
+    try:
+        sampling_freq_val = session.children[0].metadata["eff_sampling_freq"]
+    except Exception:
+        sampling_freq_val = None  # will surface in preview and run if missing
+
+    sampling_info = pn.pane.Markdown(
+        f"**sampling_freq** (derived from files): `{sampling_freq_val}`",
+        sizing_mode="stretch_width"
+    )
+
+    parser_preview = pn.pane.Str("", sizing_mode="stretch_width")
+    status = pn.pane.Markdown("", sizing_mode="stretch_width")
+
+    def _build_parser():
+        if sampling_freq_val is None:
+            raise RuntimeError("Could not resolve session.children[0].metadata['eff_sampling_freq']")
+        return SpeedyStatSplit(
+            cutoff_freq=cutoff_frequency.value,
+            window_width=window_width.value,
+            min_width=min_width.value,
+            sampling_freq=sampling_freq_val,  # hard-coded “funky” param
+            false_positive_rate=false_positive_rate.value,
+            # prior_segments_per_second=prior_segments_per_second.value,
+        )
+
+    def _update_preview(event=None):
+        try:
+            parser_preview.object = repr(_build_parser())
+        except Exception as e:
+            parser_preview.object = f"Error building parser: {e}"
+
+    for w in (cutoff_frequency, window_width, min_width, false_positive_rate):#, prior_segments_per_second):
+        w.param.watch(_update_preview, "value")
+
+    _update_preview()
+
+    run_btn = pn.widgets.Button(name="Run parse (newrank='subevent' at 'event')", button_type="primary")
+    def _run(event):
+        try:
+            status.object = "Running..."
+            parser = _build_parser()
+            session.parse(parser=parser, newrank="subevent", at_child_rank="event")
+            status.object = "✅ Parse complete: newrank **subevent** at **event**"
+        except Exception as e:
+            status.object = f"❌ Parse failed: `{e}`"
+
+    run_btn.on_click(_run)
+
+    return pn.Card(
+        pn.Row(cutoff_frequency, window_width),
+        pn.Row(min_width,false_positive_rate),#, prior_segments_per_second),
+        sampling_info,
+        pn.Column("**Parser preview**", parser_preview),
+        run_btn,
+        status,
+        title="SpeedyStatSplit",
+        collapsible=True,
+        sizing_mode="stretch_width",
+    )
+    
 def get_standard_features():
     """
     Extract standard features from the current session's open files. Also stores the dataframe in session.latest_dataframe.
@@ -74,6 +219,7 @@ def get_standard_features():
 import pandas as pd
 def detect_array_columns(df: pd.DataFrame):
     """Return list of columns that contain at least one numpy.ndarray value."""
+    import numpy as np
     cols = []
     for col in df.columns:
         s = df[col]
@@ -100,7 +246,7 @@ def panel_save_dataframe(
     
     name,ext = os.path.splitext(default_name)
     from datetime import datetime
-    default_name=f'{name}_{datetime.now().astimezone().strftime("%Y-%m-%d_%H-%M")}.{ext}'
+    default_name=f'{name}_{datetime.now().astimezone().strftime("%Y-%m-%d_%H-%M")}{ext}'
 
     from ionique.datatypes import SessionFileManager
     session=SessionFileManager()
