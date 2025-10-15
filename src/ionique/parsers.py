@@ -933,7 +933,7 @@ class AutoSquareParser(Parser):
             wstart = int(wstart) 
             wend = int(wend)
 
-            events[i].unique_features["wrap"] = current_positive[wstart:wend]
+            events[i].unique_features["wrap"] = current[wstart:wend]
             
             new_start = events[i].start + idxs[0]
             new_end = events[i].start + idxs[-1] + 1

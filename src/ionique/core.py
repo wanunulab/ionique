@@ -241,7 +241,25 @@ class AbstractSegmentTree(object):
             else:
                 return list(chain(*[child.traverse_to_rank(rank) for child in self.children]))
 
+    def summary(self):
+        """
+        Provide a summary of existing ranks and number of elements at each rank
+        :return: dict of (rank: count) in root→children order
+        """
+        ranks_in_order = []
+        seen = set()
 
+        def collect(seg):
+            if seg.rank not in seen:
+                seen.add(seg.rank)
+                ranks_in_order.append(seg.rank)
+            
+            for child in seg.children:
+                collect(child)
+
+        collect(self)
+        return {rank: len(self.traverse_to_rank(rank)) for rank in ranks_in_order}
+    
 # class ParsableMixin:
 #     def parse(self,parser,newrank:str,**kwargs)->bool:
 #         required_parent_attributes=parser.get_required_parent_attributes()

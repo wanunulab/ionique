@@ -18,13 +18,13 @@ dependencies = [
   "scipy>=1.14.1",
   "platformdirs~=4.2.2",
   "pyabf>=2.3.8",
-  "pandas>=2.0"
+  "pandas>=2.0",
 
 ]
 
 
 [project.optional-dependencies]
-panel = ["panel"]
+panel = ["panel","bokeh-jupyter","ipympl","plotly","openpyxl"]
 
 [tool.setuptools_scm]
 write_to = "src/ionique/_version.py"
