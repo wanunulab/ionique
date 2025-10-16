@@ -546,6 +546,7 @@ def _panel_load_opt_callback(**params):
             fname,
             voltage_compress=params["voltage_compress"],
             downsample=params["downsample"],
+            prefilter=filt,
             )
         trace_file = TraceFile(
             current=current,
