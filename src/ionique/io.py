@@ -357,8 +357,8 @@ class OPTReader(AbstractFileReader):
         if self.downsample > 1:
             current = current[::self.downsample]
             voltage = voltage[::self.downsample]
-            metadata["downsample"] = self.downsample
-            metadata["eff_sampling_freq"] = metadata["Sampling frequency (SR)"] / self.downsample
+        metadata["downsample"] = self.downsample
+        metadata["eff_sampling_freq"] = metadata["Sampling frequency (SR)"] / self.downsample
 
         if self.voltage_compress and voltage is not None:
             voltage_splits = split_voltage_steps(voltage, as_tuples=True, n_remove=self.n_remove)
@@ -393,7 +393,8 @@ class OPTReader(AbstractFileReader):
             if msec is not None and voltage is not None:
                 try:
                     time = float(msec) / 1000  # Convert milliseconds to seconds
-                    volt_value = float(voltage.get("volt"))
+                    volt_value = float(voltage.get("volt")) / 1000.0
+                    # volt_value = float(voltage.get("volt"))
                     time_points.append(time)
                     voltage_data.append((time, volt_value))
                 except ValueError as e:
@@ -404,7 +405,8 @@ class OPTReader(AbstractFileReader):
 
         total_samples = int(round(time_points[-1] * sampling_frequency))
         voltage_waveform = np.ones(len(current), dtype=np.float32)
-        initial_voltage = float(root.find(".//inital_UI_voltage").get("volt"))
+        initial_voltage = float(root.find(".//inital_UI_voltage").get("volt")) / 1000.0
+        # initial_voltage = float(root.find(".//inital_UI_voltage").get("volt"))
         voltage_waveform *= initial_voltage
 
         # Find peaks for each segment
@@ -694,8 +696,6 @@ class OPTReader(AbstractFileReader):
         return peaks, properties
 
 
-    
-
 if __name__ == "__main__":
     # print(EDHReader.ext)
     #e = EDHReader()
@@ -708,10 +708,10 @@ if __name__ == "__main__":
     # e.read("C:/Users/alito/EDR/Q402m1_SBead/Q402m1_SBead.edh")
 
 
-    opt_file_1 = "/Users/dinaraboyko/grad_school/cloned_repo/data/TOKW/B090624SR_100kHz__000.opt"
+    opt_file_1 = "/Users/dinaraboyko/grad_school/cloned_repo/data/Parker/101425/B101425SR_250kHz__000.opt"
 
-    opt_file_2 = "/Users/dinaraboyko/grad_school/cloned_repo/data/xialin/file 1/B110724SR_250kHz__006.opt"
-    opt_file_3 = "/Users/dinaraboyko/grad_school/cloned_repo/data/011225/B011225_000--214219.opt"
+    opt_file_2 = "/Users/dinaraboyko/grad_school/cloned_repo/data/xialin/file 2/B110724SR_250kHz__008.opt"
+    opt_file_3 = "/Users/dinaraboyko/grad_school/cloned_repo/data/011225/B011225_933--220403.opt"
 
     file = "/Users/dinaraboyko/grad_school/cloned_repo/data/openflowcel_dphpcPBD_PEO_dec_pretreatAR20_2MGdm_1MKCl_10_CH001/openflowcel_dphpcPBD_PEO_dec_pretreatAR20_2MGdm_1MKCl.edh"
 
@@ -719,15 +719,15 @@ if __name__ == "__main__":
     #print(metadata)
 
     metadata, current, voltage = OPTReader(opt_file_1, voltage_compress=True, downsample=1)
+    print("Data for XML")
     print(metadata)
 
     # metadata, current, voltage = reader
     # print("Metadata:", metadata)
     # print("Curren:", len(current))
-    # print("Voltage:", voltage)
+    print("Voltage:", voltage)
 
-
-
-
-
-
+    metadata2, current2, voltage2 = OPTReader(opt_file_3, voltage_compress=True, downsample=1)
+    print("\n\n\nData for _volt.opt")
+    print(metadata2)
+    print("Voltage:", voltage2)
