@@ -7,6 +7,7 @@ from typing import List, Optional,Literal
 from ionique.core import AnySegment
 from ionique.datatypes import SessionFileManager
 import matplotlib.pyplot as plt
+
 def qp_trace(seg:AnySegment|None = None, ranks=["vstepgap","event"],downsamples={"vstepgap":50,"event":1},fig_size=(6,5),ranks_kwargs={},fig_kwargs={},plot_voltage:Literal["same","split",None]=None):
   """ 
   quickly plot a trace, or segment.
@@ -77,7 +78,7 @@ from bokeh.models import (
     LegendItem,
     Range1d,
 )
-from bokeh.palettes import Category10
+from bokeh.palettes import Category10, Category20
 
 pn.extension()
 
@@ -174,6 +175,13 @@ def compute_sampling_frequency(row: pd.Series) -> Optional[float]:
 # Main builder
 # -----------------------------
 
+from bokeh.palettes import Category10, Category20
+from bokeh.plotting import figure
+from bokeh.models import (
+    HoverTool, TapTool, Range1d, ColumnDataSource,
+    CDSView, BooleanFilter
+)
+
 def dashboard_event_inspection(df: pd.DataFrame):
     """
     Interactive Jupyter dashboard (Panel + Bokeh) for exploring ionic current events in `df`.
@@ -194,17 +202,35 @@ def dashboard_event_inspection(df: pd.DataFrame):
       6) If 'Show sub-segments' is ON, plots cyclically colored segments from 'subevent_start'/'subevent_end';
          otherwise plots wrap (black) and current (blue).
     """
+    def _pick_palette(n):
+        # Use Category10/20; repeat if needed
+        if n <= 10:
+            return Category10[10][:n]
+        elif n <= 20 and hasattr(Category10, "20"):  # some Bokeh installs have Category20
+            return Category20[20][:n]  # fallback if available
+        else:
+            base = Category10[10]
+            reps = (n // 10) + 1
+            return (base * reps)[:n]
+
     if not isinstance(df, pd.DataFrame) or df.empty:
         return pn.pane.Markdown("❌ DataFrame is empty or invalid.")
 
     # Column classifications
     numeric_cols = _numeric_non_array_columns(df)
     group_cols = ["(None)"] + _categorical_candidates(df)
+    if "Voltage" in df.columns and "Voltage" not in group_cols:
+        group_cols.append("Voltage")
 
     # Widgets
     x_select = pn.widgets.Select(name="X axis", options=numeric_cols, value=numeric_cols[0] if numeric_cols else None)
     y_select = pn.widgets.Select(name="Y axis", options=numeric_cols, value=numeric_cols[1] if len(numeric_cols) > 1 else (numeric_cols[0] if numeric_cols else None))
     group_select = pn.widgets.Select(name="Color by (group)", options=group_cols, value="(None)")
+    if "Voltage" in df.columns:
+        _voltages = [str(v) for v in sorted(df["Voltage"].dropna().unique().tolist(), key=float)]
+    else:
+        _voltages = []
+    voltage_filter = pn.widgets.Select(name="Show voltage", options=["(All)"] + _voltages, value="(All)")
 
     x_log = pn.widgets.Checkbox(name="Log X", value=False)
     y_log = pn.widgets.Checkbox(name="Log Y", value=False)
@@ -217,43 +243,97 @@ def dashboard_event_inspection(df: pd.DataFrame):
     status = pn.pane.Markdown("")
 
     # Prepare scatter data source
-    scatter_source = ColumnDataSource(data=dict(index=np.arange(len(df)), x=np.zeros(len(df)), y=np.zeros(len(df)), color=["#1f77b4"]*len(df), size=[6]*len(df), alpha=[0.8]*len(df)))
-
+    # scatter_source = ColumnDataSource(data=dict(index=np.arange(len(df)), x=np.zeros(len(df)), y=np.zeros(len(df)), color=["#1f77b4"]*len(df), size=[6]*len(df), alpha=[0.8]*len(df)))
+    scatter_source = ColumnDataSource(data=dict(
+        index=np.arange(len(df)),
+        x=np.zeros(len(df)),
+        y=np.zeros(len(df)),
+        color=["#1f77b4"] * len(df),
+        size=[6] * len(df),
+        alpha=[0.8] * len(df),
+        legend=[""] * len(df),
+        group_val=[""] * len(df),
+        voltage_str=(df["Voltage"].astype(str).fillna("NA").values
+        if "Voltage" in df.columns else ["NA"] * len(df)),
+    ))
     def _build_scatter_source():
         if x_select.value is None or y_select.value is None:
             return
         x = df[x_select.value].values
         y = df[y_select.value].values
-        # Group colors
+
+        legend = [""] * len(df)
+        colors = ["#1f77b4"] * len(df)
+
         if group_select.value and group_select.value != "(None)":
-            groups = df[group_select.value].astype(str).fillna("NA").values
-            uniq = pd.unique(groups)
-            palette = (Category10[10] if len(uniq) <= 10 else (Category10[10] * ((len(uniq)//10)+1)))
-            color_map = {g: palette[i] for i, g in enumerate(uniq)}
+            groups_raw = df[group_select.value]
+            groups = groups_raw.astype(str).fillna("NA").values
+            uniq = list(pd.unique(groups))
+            palette = _pick_palette(len(uniq))
+            color_map = {g: palette[i % len(palette)] for i, g in enumerate(uniq)}
             colors = [color_map[g] for g in groups]
+            legend = groups
+
+        scatter_source.data.update(
+            index=np.arange(len(df)),
+            x=x,
+            y=y,
+            color=colors,
+            size=[7] * len(df),
+            alpha=[0.8] * len(df),
+            legend=legend,
+            group_val=legend,
+            voltage_str=(df["Voltage"].astype(str).fillna("NA").values
+                         if "Voltage" in df.columns else scatter_source.data["voltage_str"])
+        )
+
+    bool_filter = BooleanFilter(booleans=[True] * len(df))
+    view = CDSView(filter=bool_filter)
+
+
+    def _update_voltage_view():
+        if not _voltages or voltage_filter.value == "(All)":
+            mask = [True] * len(df)
         else:
-            colors = ["#1f77b4"] * len(df)
-        scatter_source.data.update(index=np.arange(len(df)), x=x, y=y, color=colors, size=[7]*len(df), alpha=[0.8]*len(df))
+            allowed = {voltage_filter.value}
+            vstr = scatter_source.data.get("voltage_str", ["NA"] * len(df))
+            mask = [vs in allowed for vs in vstr]
+        bool_filter.booleans = mask
+
+
+    _update_voltage_view()
 
     _build_scatter_source()
-
-    # Scatter figure factory to support log toggles
     scatter_pane = pn.pane.Bokeh(sizing_mode="stretch_both")
+
 
     def _make_scatter_figure():
         x_axis_type = "log" if x_log.value else "linear"
         y_axis_type = "log" if y_log.value else "linear"
-        p = figure(height=350, sizing_mode="stretch_width", tools="pan,wheel_zoom,box_zoom,reset,tap,hover,save", x_axis_type=x_axis_type, y_axis_type=y_axis_type)
-        r = p.circle(source=scatter_source, x="x", y="y", size="size", color="color", alpha="alpha", line_color=None)
+        p = figure(height=350, sizing_mode="stretch_width",
+                   tools="pan,wheel_zoom,box_zoom,reset,tap,hover,save",
+                   x_axis_type=x_axis_type, y_axis_type=y_axis_type)
+        r = p.circle(source=scatter_source, x="x", y="y",
+                     size="size", color="color", alpha="alpha", line_color=None,
+                     legend_field="legend")  # NEW
+
         p.add_tools(TapTool())
         hover = p.select_one(HoverTool)
         hover.tooltips = [
             ("row", "@index"),
             (x_select.name, "@x"),
             (y_select.name, "@y"),
+            ("group", "@group_val")
         ]
         p.title.text = "Event Scatter"
+
+        # Only show legend if grouping is active
+        p.legend.visible = (group_select.value and group_select.value != "(None)")
+        p.legend.location = "top_right"
+        p.legend.click_policy = "hide"
+
         scatter_pane.object = p
+
         return p
 
     p_scatter = _make_scatter_figure()
@@ -262,8 +342,8 @@ def dashboard_event_inspection(df: pd.DataFrame):
     event_fig = figure(height=300, sizing_mode="stretch_width", tools="pan,wheel_zoom,box_zoom,reset,save",output_backend='webgl')
     event_fig.title.text = "Blockade Event View"
     # glyph refs to update
-    wrap_renderer = event_fig.line([], [], line_color="#000000", line_width=2, alpha=0.9)
-    current_renderer = event_fig.line([], [], line_color="#1f77b4", line_width=2, alpha=0.9)
+    wrap_renderer = event_fig.line([], [], line_color="#000000", line_width=1, alpha=0.9)
+    current_renderer = event_fig.line([], [], line_color="#1f77b4", line_width=1, alpha=0.9)
     # Segments datasource (fast): one MultiLine glyph for all segments
     segments_source = ColumnDataSource(data=dict(xs=[], ys=[], color=[]))
     segments_renderer = event_fig.multi_line(xs='xs', ys='ys', line_color='color', line_width=3, alpha=0.95, source=segments_source)
@@ -395,15 +475,11 @@ def dashboard_event_inspection(df: pd.DataFrame):
 
     select_idx.param.watch(_on_spinner_change, "value")
 
-    def _on_clear_click(event):
-        scatter_source.selected.indices = []
+    clear_btn.on_click(lambda _ : setattr(scatter_source.selected, "indices", []))
 
-    clear_btn.on_click(_on_clear_click)
-
-    # React to control changes
     def _on_axis_change(event=None):
         _build_scatter_source()
-        _make_scatter_figure()
+        p = _make_scatter_figure()
         _highlight_selection()
 
     for w in (x_select, y_select, group_select, x_log, y_log):
@@ -435,11 +511,6 @@ def dashboard_event_inspection(df: pd.DataFrame):
     )
 
     return layout
-
-
-
-
-
 
 
 def qp_scatter(**args):
