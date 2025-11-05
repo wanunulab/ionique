@@ -66,19 +66,55 @@ def panel_parser_AutoSquare():
 
     _update_preview()
 
-    run_btn = pn.widgets.Button(name="Run parse (newrank='event' at 'vstepgap')", button_type="primary")
+    run_btn = pn.widgets.Button(name="Run parse (newrank='event' at 'clean')", button_type="primary")
     def _run(event):
         try:
             status.object = "Running..."
             parser = _build_parser()
-            session.parse(parser, newrank="event", at_child_rank="vstepgap")
+            session.parse(parser, newrank="event", at_child_rank="clean")
             status.object = "✅ Parse complete: newrank **event** at **vstepgap**"
         except Exception as e:
             status.object = f"❌ Parse failed: `{e}`"
 
     run_btn.on_click(_run)
+    helper_md = pn.pane.Markdown(
+        """
+    ### AutoSquareParser — What it does
+
+    **It estimates the open-pore baseline current and then detects square-like drops (events)** that fall below a fractional threshold**.
+
+    ---
+
+    ### Input Parameters
+
+    - **Threshold Baseline (fractional)**  
+      Fraction of the estimated baseline current used as the detection threshold.  
+      *Typical range:* `0.1–0.9`.
+
+    - **Expected Conductance (nS)**  
+      Your estimated conductance, used  to predict baseline current.
+
+    - **Conductance Tolerance **  
+      Window around expected baseline. An event’s measured baseline should be within this range to be accepted.  
+
+    - **Samples to pad**  
+      Samples to include **before and after** each event when saving context.  
+      For example: 50 at 200kHz padding adds ~ 0.25 ms to start and end of the event.
+
+    ---
+
+    ### Output Features (per event)
+
+    - `baseline` — median baseline current after the event 
+    - `mean` — mean current inside the event  
+    - `frac` — fractional: `1 - mean / baseline`  
+    - `wrap` — context snippet around the event
+        """,
+        sizing_mode="stretch_width",
+    )
 
     return pn.Card(
+        helper_md,
         pn.Row(threshold_baseline, expected_conductance, conductance_tolerance, wrap_padding),
         pn.Column("**Parser preview**", parser_preview),
         run_btn,
@@ -86,7 +122,7 @@ def panel_parser_AutoSquare():
         title="AutoSquareParser",
         collapsible=True,
         sizing_mode="stretch_width",
-    )
+        )
 
 
 def panel_parser_SpeedyStatSplit():
@@ -99,7 +135,7 @@ def panel_parser_SpeedyStatSplit():
     from ionique.datatypes import SessionFileManager
     from ionique.parsers import SpeedyStatSplit
     session=SessionFileManager()
-    
+
     # Numeric widgets
     cutoff_frequency = pn.widgets.FloatInput(name="Cutoff Frequency (must match loading filter)", value=25000, step=1.0)
     window_width = pn.widgets.IntInput(name="Window Width (samples)", value=500, step=5)
@@ -226,7 +262,6 @@ def detect_array_columns(df: pd.DataFrame):
         if s.dropna().map(lambda x: isinstance(x, np.ndarray)).any():
             cols.append(col)
     return cols
-
 
 
 def panel_save_dataframe(
@@ -423,8 +458,60 @@ def _panel_load_files(
     status = pn.pane.Alert("Ready.", alert_type="light", sizing_mode="stretch_width")
     output_area = pn.Column()
 
+    helper_md = pn.pane.Markdown(
+        """
+    ### OPTReader — What it does
+    
+    Reads current from a `.opt` file and voltage from either a paired
+    `_volt.opt` or `.xml` file in the same folder. Handles metadata extraction.
+    
+    ---
+    
+    ### Parameters
+    
+    - **Voltage compress**
+      If **on**, splits the trace into segments at each **voltage change** and returns
+      a list of `(start, end)` tuples with the voltage value.  
+      Used for step-wise analysis.
+    
+    - **Filter the signal**   
+      Optional preprocessing of the **current** using SOS filter.  
+    
+    - **Downsample (post-filter)** (`downsample`: integer N ≥ 1, default N = 1)  
+      Keeps every N-th sample for both current and voltage (after filtering).  
+      Also records `eff_sampling_freq = SR / N` in metadata.
+    
+    - **Samples to Remove (post-downsample)** (`n_remove`: integer ≥ 0, default `0`)  
+      When **Voltage compress** is on, trims the first `n_remove` samples from every
+      voltage step segment (removes voltage change transients (helps to avoid bias in event's mean value)).  
+    
+    ---
+    
+    ### Filter parameters (apply only if “Filter the signal?” is ON)
+    
+    - **Cutoff Frequency (Hz)**
+      The maximum value is SR / 2, however the safe values are typically between 5-25kHz, higher values preserve 
+      more data (if the events are very short)  but remain noise. 
+    
+    ---
+    
+    ### Outputs
+    
+    - **Metadata**:  
+      Includes `HeaderFile`, `Sampling frequency`, `total namber of samples`,  
+      `downsample`, `effective sampling frequency`.
+    
+    - **current**: `np.ndarray` (in **nA**, scaled by `current_multiplier = 1e9`).
+    
+    - **voltage**:  
+      - If **Voltage compress** is **off** → `np.ndarray` waveform (mV).  
+      - If **on** → list of `((start, end), step_value)` tuples from step detection.
+    
+    ---
+        """
+    )
     form_2 = pn.Column(
-        pn.pane.Markdown("### Parameters for Preprocessing Data"),
+        helper_md,
         voltage_compress_checkbox,
         filter_at_all_checkbox,
         cutoff_frequency,
@@ -489,7 +576,12 @@ def _panel_load_files(
             status.alert_type = "danger"
             output_area.objects = []
         else:
-            status.object = f"""Done. Loaded {len(params['files'])} file(s).\n {' \n'.join(params["files"])}"""
+            file_list = "\n".join(params["files"])
+
+            status.object = (
+                f"Done. Loaded {len(params['files'])} file(s).\n {file_list}"
+            )
+            # status.object = f"""Done. Loaded {len(params['files'])} file(s).\n {' \n'.join(params["files"])}"""
             status.alert_type = "success"
             # Render result if provided
             if result is None:
@@ -546,6 +638,7 @@ def _panel_load_opt_callback(**params):
             fname,
             voltage_compress=params["voltage_compress"],
             downsample=params["downsample"],
+            prefilter=filt,
             )
         trace_file = TraceFile(
             current=current,
@@ -1071,23 +1164,275 @@ def panel_filter_from_dataclass(
     return layout, get_values, run_button
 
 
+def panel_parser_Exclusion():
+    """
+    Build a Panel UI to configure and run ExclusionParser on `session`.
+
+    - Regions are entered as CSV lines: start_sec,end_sec (one per line)
+    - Defaults: newrank="clean", at_child_rank="vstepgap"
+    """
+
+    from ionique.datatypes import SessionFileManager
+    from ionique.parsers import ExclusionParser
+
+    _init_panel()
+    pn.extension("tabulator")
+
+    session = SessionFileManager()
+
+    # --- Widgets ---
+    helper_md = pn.pane.Markdown(
+        "Enter one region per line as `start_sec,end_sec` (seconds). "
+        "Example:\n```\n0.0, 0.25\n1.2, 2.0\n```",
+        sizing_mode="stretch_width",
+    )
+
+    regions_ta = pn.widgets.TextAreaInput(
+        name="Exclusion Regions (sec)",
+        placeholder="0.0, 0.25\n1.2, 2.0",
+        height=160,
+        sizing_mode="stretch_width",
+    )
+
+    newrank = pn.widgets.TextInput(name="newrank", value="clean")
+    at_child_rank = pn.widgets.TextInput(name="at_child_rank", value="vstepgap")
+
+    parser_preview = pn.pane.Str("", sizing_mode="stretch_width")
+    status = pn.pane.Markdown("", sizing_mode="stretch_width")
+    run_btn = pn.widgets.Button(name="Run parse", button_type="primary")
+
+    # --- Helpers ---
+    def _parse_regions_text(txt: str):
+        regions = []
+        if not txt.strip():
+            return regions
+        for i, line in enumerate(txt.splitlines(), start=1):
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            try:
+                parts = [p.strip() for p in line.split(",")]
+                if len(parts) != 2:
+                    raise ValueError("must be two comma-separated numbers")
+                s = float(parts[0]); e = float(parts[1])
+                if not (e > s):
+                    raise ValueError("end_sec must be > start_sec")
+                regions.append((s, e))
+            except Exception as exc:
+                raise ValueError(f"Line {i}: {line!r} → {exc}") from exc
+        return regions
+
+    def _build_parser():
+        regions = _parse_regions_text(regions_ta.value)
+        return ExclusionParser(regions=regions)
+
+    def _update_preview(event=None):
+        try:
+            p = _build_parser()
+            parser_preview.object = repr(p)
+        except Exception as e:
+            parser_preview.object = f"Error building parser: {e}"
+
+    regions_ta.param.watch(_update_preview, "value")
+    newrank.param.watch(_update_preview, "value")
+    at_child_rank.param.watch(_update_preview, "value")
+    _update_preview()
+
+    # --- Run ---
+    def _run(_):
+        try:
+            status.object = "Running..."
+            parser = _build_parser()
+            nr = (newrank.value or "clean").strip()
+            acr = (at_child_rank.value or "vstepgap").strip()
+            if not nr:
+                raise ValueError("newrank cannot be empty")
+            if not acr:
+                raise ValueError("at_child_rank cannot be empty")
+
+            session.parse(parser=parser, newrank=nr, at_child_rank=acr)
+            status.object = f"✅ Parse complete: newrank **{nr}** at **{acr}**"
+        except Exception as e:
+            status.object = f"❌ Parse failed: `{e}`"
+
+    run_btn.on_click(_run)
 
 
+    return pn.Card(
+        pn.Row(
+            pn.Column(
+                helper_md,
+                regions_ta,
+                sizing_mode="stretch_both",
+            ),
+            pn.Spacer(width=20),
+            pn.Column(
+                pn.Row(newrank, at_child_rank),
+                pn.Column("**Parser preview**", parser_preview),
+                run_btn,
+                status,
+                sizing_mode="stretch_both",
+            ),
+        ),
+        title="ExclusionParser",
+        collapsible=True,
+        sizing_mode="stretch_width",
+    )
 
+def panel_parser_Exclusion_per_file():
+    import panel as pn, pandas as pd
+    from ionique.datatypes import SessionFileManager
+    from ionique.parsers import ExclusionParser, Parser
 
+    _init_panel()
+    pn.extension()
 
+    class NoOpParser(Parser):
+        required_parent_attributes = ["current"]
+        def __init__(self): super().__init__()
+        def parse(self, current, **kwargs):
+            return [(0, len(current), {})]
 
+    def _parse_regions_text(txt: str):
+        regs = []
+        if not txt or not txt.strip():
+            return regs
+        for i, line in enumerate(txt.splitlines(), start=1):
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = [p.strip() for p in line.split(",")]
+            if len(parts) != 2:
+                raise ValueError(f"Line {i}: expected 'start,end'")
+            s, e = float(parts[0]), float(parts[1])
+            if e <= s:
+                raise ValueError(f"Line {i}: end must be > start")
+            regs.append((s, e))
+        return regs
 
+    session = SessionFileManager()
+    files = list(getattr(session, "children", []) or [])
+    if not files:
+        return pn.pane.Markdown("**No files loaded in SessionFileManager.** Load files first.")
 
+    def _fname(tf):
+        try:
+            md = getattr(tf, "metadata", {}) or {}
+            return md.get("HeaderFile") or md.get("filename") or getattr(tf, "name", None) or "unnamed"
+        except Exception:
+            return "unnamed"
 
+    # Use a STABLE key for mapping (don’t rely on DataFrame row positions)
+    # id(tf) works fine during one session; if you persist between sessions, use your own UUID on tf.
+    # --- File mapping and Select widget setup ---
+    file_keys = [id(tf) for tf in files]
+    key_to_tf = {k: tf for k, tf in zip(file_keys, files)}
+    key_to_label = {k: _fname(tf) for k, tf in zip(file_keys, files)}
+    label_to_key = {label: key for key, label in key_to_label.items()}
+    regions_by_key = {k: "" for k in file_keys}
 
+    # Use dict instead of list of tuples
+    file_select = pn.widgets.Select(
+        name="File",
+        options=label_to_key,  # {label -> key}
+        value=file_keys[0],
+        sizing_mode="stretch_width",
+    )
 
+    def _coerce_key(raw):
+        """Handle stale or tuple Select values gracefully."""
+        if isinstance(raw, tuple) and len(raw) == 2:
+            return raw[1]
+        if isinstance(raw, str) and raw in label_to_key:
+            return label_to_key[raw]
+        return raw
 
+    selected_file_md = pn.pane.Markdown("", sizing_mode="stretch_width")
 
+    helper_md = pn.pane.Markdown(
+        "Enter regions for the **selected file** (seconds). One per line: `start_sec,end_sec`.\n\n"
+        "Leave empty if the file has no artifacts → it will be copied (`clean == vstepgap`).\n"
+        "Example:\n```\n0.0, 0.25\n1.2, 2.0\n```",
+        sizing_mode="stretch_width",
+    )
 
+    regions_ta = pn.widgets.TextAreaInput(
+        name="Exclusion Regions (sec)",
+        placeholder="0.0, 0.25\n1.2, 2.0",
+        height=160,
+        sizing_mode="stretch_width",
+    )
 
+    newrank = pn.widgets.TextInput(name="newrank", value="clean")
+    at_child_rank = pn.widgets.TextInput(name="at_child_rank", value="vstepgap")
 
+    parser_preview = pn.pane.Str("", sizing_mode="stretch_width")
+    status = pn.pane.Markdown("", sizing_mode="stretch_width")
+    run_btn = pn.widgets.Button(name="Run on all files", button_type="primary")
 
+    def _load_selected(raw_key):
+        key = _coerce_key(raw_key)
+        if key not in key_to_tf:
+            selected_file_md.object = "_No file selected_"
+            regions_ta.value = ""
+            parser_preview.object = ""
+            return
+        tf = key_to_tf[key]
+        selected_file_md.object = f"**Selected file:** `{key_to_label[key]}`"
+        regions_ta.value = regions_by_key.get(key, "")
+        try:
+            regs = _parse_regions_text(regions_ta.value)
+            parser_preview.object = repr(ExclusionParser(regions=regs)) if regs else "NoOpParser (pass-through)"
+        except Exception as e:
+            parser_preview.object = f"Error: {e}"
 
+    @pn.depends(file_select, watch=True)
+    def _populate_regions(_):
+        _load_selected(file_select.value)
 
+    def _on_regions_change(event):
+        key = _coerce_key(file_select.value)
+        if key in key_to_tf:
+            regions_by_key[key] = event.new
+            try:
+                regs = _parse_regions_text(event.new)
+                parser_preview.object = repr(ExclusionParser(regions=regs)) if regs else "NoOpParser (pass-through)"
+            except Exception as e:
+                parser_preview.object = f"Error: {e}"
 
+    regions_ta.param.watch(_on_regions_change, "value")
+
+    def _run(_):
+        nr = (newrank.value or "clean").strip()
+        acr = (at_child_rank.value or "vstepgap").strip()
+        if not nr or not acr:
+            status.object = "❌ Please set both `newrank` and `at_child_rank`."
+            return
+
+        logs = []
+        for key, tf in key_to_tf.items():
+            name = key_to_label[key]
+            txt = regions_by_key.get(key, "")
+            try:
+                regs = _parse_regions_text(txt)
+                parser = ExclusionParser(regions=regs) if regs else NoOpParser()
+                tf.parse(parser=parser, newrank=nr, at_child_rank=acr)
+                logs.append(f"✅ {name} — {'exclusion' if regs else 'noop'}")
+            except Exception as e:
+                logs.append(f"❌ {name} — {e}")
+        status.object = "\n".join(logs)
+
+    run_btn.on_click(_run)
+
+    return pn.Card(
+        pn.Row(
+            pn.Column("**Pick a file**", file_select, selected_file_md, sizing_mode="stretch_both"),
+            pn.Spacer(width=18),
+            pn.Column(helper_md, regions_ta, pn.Row(newrank, at_child_rank),
+                      pn.Column("**Parser preview**", parser_preview),
+                      run_btn, status, sizing_mode="stretch_both"),
+        ),
+        title="ExclusionParser (per-file regions, bulk run)",
+        collapsible=True,
+        sizing_mode="stretch_width",
+    )
