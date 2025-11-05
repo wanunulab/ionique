@@ -969,3 +969,89 @@ class AutoSquareParser(Parser):
 
         return results
 
+# slice_points = [(1000,6999),(5000000,60000000)] # list [ (start, end), ... ]
+# ex=ExclusionParser(regions=slice_points)
+#
+# file.parse(parser=ex, at_child_rank="vstepgap",newrank-"vstep_clean")
+#
+
+# makes new identical children when steps are outside the slices
+# makes new trimmed children when steps have overlaps with slices e.g., step: (10s - 20s), slice_points: (5s - 12s). new child of that step should be 12s-20s,
+# makes no children when a step is completely within slice boundaries.
+
+
+class ExclusionParser(Parser):
+    """
+    Output 'clean' children by excluding user-specified regions (in GLOBAL seconds).
+    regions: list[(start_sec, end_sec)] global seconds.
+    """
+
+    required_parent_attributes = ["current", "eff_sampling_freq", "voltage", "start"]
+
+    def __init__(self, regions):
+        super().__init__()
+        self.regions = regions
+
+    def parse(self, current, eff_sampling_freq, start=None, **kwargs):
+        num_samples = len(current)
+        seg_start, seg_end = 0, num_samples
+
+        # establish this child's absolute start time in seconds
+        if start is not None:
+            parent_start_sec = float(start) / float(eff_sampling_freq)
+
+        else:
+            parent_start_sec = 0.0
+
+        excl = []
+        for s_sec, e_sec in self.regions:
+            ls_sec = s_sec - parent_start_sec
+            le_sec = e_sec - parent_start_sec
+            s = int(round(ls_sec * eff_sampling_freq))
+            e = int(round(le_sec * eff_sampling_freq))
+            if e <= 0 or s >= num_samples:
+                continue
+            start = max(0, s)
+            end = min(num_samples, e)
+            if start < end:
+                excl.append((start, end))
+                # print(s,e)
+
+        # merge overlaps
+        if excl:
+            excl.sort()
+            merged = []
+            cs, ce = excl[0]
+            for s, e in excl[1:]:
+                if s <= ce:
+                    ce = max(ce, e)
+                else:
+                    merged.append((cs, ce))
+                    cs, ce = s, e
+            merged.append((cs, ce))
+            excl = merged
+            # print(len(excl))
+
+        # compute clean intervals
+        clean = []
+        last = seg_start
+        for s, e in excl:
+            if e <= seg_start or s >= seg_end:
+                continue
+            if s > last:
+                clean.append((last, min(s, seg_end)))
+            last = max(last, e)
+            if last >= seg_end:
+                break
+        if last < seg_end:
+            clean.append((last, seg_end))
+
+        results = []
+        for cstart, cend in clean:
+            results.append((cstart, cend, {
+                "excluded_windows_local": excl,
+                "parent_start_sec": parent_start_sec,
+            }))
+
+        return results
+
