@@ -988,9 +988,10 @@ class ExclusionParser(Parser):
 
     required_parent_attributes = ["current", "eff_sampling_freq", "voltage", "start"]
 
-    def __init__(self, regions):
+    def __init__(self, regions: list[tuple[float, float]]):
         super().__init__()
         self.regions = regions
+
 
     def parse(self, current, eff_sampling_freq, start=None, **kwargs):
         num_samples = len(current)
