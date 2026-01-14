@@ -18,21 +18,23 @@ version = release
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'myst_parser', 'sphinx_multiversion']
-
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'myst_parser',
+    'sphinx_multiversion',
+]
 
 smv_tag_whitelist = r'^v\d+\.\d+(\.\d+)?$'
-smv_branch_whitelist = r'^(feature/dina)$'
-smv_remote_whitelist = r'^$'
+smv_branch_whitelist = r'^(main|master|feature/dina)$'
+smv_remote_whitelist = r'^origin$'
 
-html_sidebars = {
-   '**': ['sidebar-nav-bs.html', 'versioning.html'],
-}
 
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
 }
+
 autodoc_mock_imports = ["nbwidgets", "setup_log"]
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'sphinx.ext.autodoc', "cparsers*"]
@@ -48,5 +50,17 @@ autodoc_default_options = {
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_sidebars = {
+    '**': [
 
-
+        'globaltoc.html',     # site/page navigation
+        'sourcelink.html',    # "View page source"
+        'searchbox.html',     # search
+        'versions.html',
+    ],
+}
+html_theme_options = {
+    'collapse_navigation': False,  # keep sections expanded
+    'navigation_depth': 4,         # how deep the TOC goes
+    'sticky_navigation': True,     # keep nav visible while scrolling
+}

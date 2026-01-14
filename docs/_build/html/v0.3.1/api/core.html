@@ -1,0 +1,886 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ionique.core &mdash; ionique 0.3.1.dev0+g05af5db3a.d20251003 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=826dffdb"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ionique.parsers" href="parsers.html" />
+    <link rel="prev" title="ionique.io" href="io.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ionique
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Nanopore Signal Analysis Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../signal_preprocess.html">Signal Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../signal_preprocess.html#filtering-with-filter-class">Filtering with <cite>Filter</cite> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../signal_preprocess.html#trimming-with-trimmer-class">Trimming with <cite>Trimmer</cite> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../signal_preprocess.html#summary">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../signal_analysis.html">Signal Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_input.html">Data Input</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="io.html">ionique.io</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.accepted_keywords"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.accepted_keywords</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.current_multiplier"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.current_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.ext"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.ext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.read"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.AbstractFileReader.voltage_multiplier"><code class="docutils literal notranslate"><span class="pre">AbstractFileReader.voltage_multiplier</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.EDHReader"><code class="docutils literal notranslate"><span class="pre">EDHReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.__init__"><code class="docutils literal notranslate"><span class="pre">EDHReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.accepted_keywords"><code class="docutils literal notranslate"><span class="pre">EDHReader.accepted_keywords</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.current_multiplier"><code class="docutils literal notranslate"><span class="pre">EDHReader.current_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.ext"><code class="docutils literal notranslate"><span class="pre">EDHReader.ext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.EDHReader.voltage_multiplier"><code class="docutils literal notranslate"><span class="pre">EDHReader.voltage_multiplier</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.OPTReader"><code class="docutils literal notranslate"><span class="pre">OPTReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.__init__"><code class="docutils literal notranslate"><span class="pre">OPTReader.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.accepted_keywords"><code class="docutils literal notranslate"><span class="pre">OPTReader.accepted_keywords</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.current_multiplier"><code class="docutils literal notranslate"><span class="pre">OPTReader.current_multiplier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.ext"><code class="docutils literal notranslate"><span class="pre">OPTReader.ext</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.find_peaks_in_segment"><code class="docutils literal notranslate"><span class="pre">OPTReader.find_peaks_in_segment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.find_peaks_slide_window"><code class="docutils literal notranslate"><span class="pre">OPTReader.find_peaks_slide_window()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="io.html#ionique.io.OPTReader.process_custom_xml"><code class="docutils literal notranslate"><span class="pre">OPTReader.process_custom_xml()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.load_files_GUI"><code class="docutils literal notranslate"><span class="pre">load_files_GUI()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="io.html#ionique.io.select_files_GUI"><code class="docutils literal notranslate"><span class="pre">select_files_GUI()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ionique.core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.core.AbstractSegmentTree"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.__init__"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.add_child"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.add_child()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.add_children"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.add_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.children"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.clear_children"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.clear_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.climb_to_rank"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.climb_to_rank()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.end"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.get_feature"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.get_feature()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.get_top_parent"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.get_top_parent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.n"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.n</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.parent"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.parse"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.rank"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.relative_end"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.relative_end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.relative_slice"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.relative_slice</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.relative_start"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.relative_start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.slice"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.slice</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.start"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.AbstractSegmentTree.traverse_to_rank"><code class="docutils literal notranslate"><span class="pre">AbstractSegmentTree.traverse_to_rank()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.core.MetaSegment"><code class="docutils literal notranslate"><span class="pre">MetaSegment</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.__init__"><code class="docutils literal notranslate"><span class="pre">MetaSegment.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.current"><code class="docutils literal notranslate"><span class="pre">MetaSegment.current</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.delete"><code class="docutils literal notranslate"><span class="pre">MetaSegment.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.duration"><code class="docutils literal notranslate"><span class="pre">MetaSegment.duration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.from_json"><code class="docutils literal notranslate"><span class="pre">MetaSegment.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.max"><code class="docutils literal notranslate"><span class="pre">MetaSegment.max</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.mean"><code class="docutils literal notranslate"><span class="pre">MetaSegment.mean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.min"><code class="docutils literal notranslate"><span class="pre">MetaSegment.min</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.std"><code class="docutils literal notranslate"><span class="pre">MetaSegment.std</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.time"><code class="docutils literal notranslate"><span class="pre">MetaSegment.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.to_dict"><code class="docutils literal notranslate"><span class="pre">MetaSegment.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.to_json"><code class="docutils literal notranslate"><span class="pre">MetaSegment.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.to_meta"><code class="docutils literal notranslate"><span class="pre">MetaSegment.to_meta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.MetaSegment.unique_features"><code class="docutils literal notranslate"><span class="pre">MetaSegment.unique_features</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.core.Segment"><code class="docutils literal notranslate"><span class="pre">Segment</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.__init__"><code class="docutils literal notranslate"><span class="pre">Segment.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.children"><code class="docutils literal notranslate"><span class="pre">Segment.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.delete"><code class="docutils literal notranslate"><span class="pre">Segment.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.end"><code class="docutils literal notranslate"><span class="pre">Segment.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.from_json"><code class="docutils literal notranslate"><span class="pre">Segment.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.max"><code class="docutils literal notranslate"><span class="pre">Segment.max</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.mean"><code class="docutils literal notranslate"><span class="pre">Segment.mean</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.min"><code class="docutils literal notranslate"><span class="pre">Segment.min</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.n"><code class="docutils literal notranslate"><span class="pre">Segment.n</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.parent"><code class="docutils literal notranslate"><span class="pre">Segment.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.rank"><code class="docutils literal notranslate"><span class="pre">Segment.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.scale"><code class="docutils literal notranslate"><span class="pre">Segment.scale()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.start"><code class="docutils literal notranslate"><span class="pre">Segment.start</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.std"><code class="docutils literal notranslate"><span class="pre">Segment.std</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.to_dict"><code class="docutils literal notranslate"><span class="pre">Segment.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.to_json"><code class="docutils literal notranslate"><span class="pre">Segment.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ionique.core.Segment.to_meta"><code class="docutils literal notranslate"><span class="pre">Segment.to_meta()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ionique.core.ignored"><code class="docutils literal notranslate"><span class="pre">ignored()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="parsers.html">ionique.parsers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.AutoSquareParser"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.AutoSquareParser.__init__"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.AutoSquareParser.parse"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.AutoSquareParser.required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">AutoSquareParser.required_parent_attributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.FilterDerivativeSegmenter"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.FilterDerivativeSegmenter.__init__"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.FilterDerivativeSegmenter.parse"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.FilterDerivativeSegmenter.set_params"><code class="docutils literal notranslate"><span class="pre">FilterDerivativeSegmenter.set_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.IVCurveAnalyzer"><code class="docutils literal notranslate"><span class="pre">IVCurveAnalyzer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.IVCurveAnalyzer.__init__"><code class="docutils literal notranslate"><span class="pre">IVCurveAnalyzer.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.IVCurveAnalyzer.analyze"><code class="docutils literal notranslate"><span class="pre">IVCurveAnalyzer.analyze()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.IVCurveParser"><code class="docutils literal notranslate"><span class="pre">IVCurveParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.IVCurveParser.__init__"><code class="docutils literal notranslate"><span class="pre">IVCurveParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.IVCurveParser.parse"><code class="docutils literal notranslate"><span class="pre">IVCurveParser.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.MemoryParse"><code class="docutils literal notranslate"><span class="pre">MemoryParse</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.MemoryParse.__init__"><code class="docutils literal notranslate"><span class="pre">MemoryParse.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.MemoryParse.parse"><code class="docutils literal notranslate"><span class="pre">MemoryParse.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.NoiseFilterParser"><code class="docutils literal notranslate"><span class="pre">NoiseFilterParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.NoiseFilterParser.__init__"><code class="docutils literal notranslate"><span class="pre">NoiseFilterParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.NoiseFilterParser.parse"><code class="docutils literal notranslate"><span class="pre">NoiseFilterParser.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.Parser"><code class="docutils literal notranslate"><span class="pre">Parser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.__init__"><code class="docutils literal notranslate"><span class="pre">Parser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.from_json"><code class="docutils literal notranslate"><span class="pre">Parser.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.get_init_params"><code class="docutils literal notranslate"><span class="pre">Parser.get_init_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.get_name"><code class="docutils literal notranslate"><span class="pre">Parser.get_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.get_process_inputs"><code class="docutils literal notranslate"><span class="pre">Parser.get_process_inputs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.get_process_outputs"><code class="docutils literal notranslate"><span class="pre">Parser.get_process_outputs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.get_required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">Parser.get_required_parent_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.parse"><code class="docutils literal notranslate"><span class="pre">Parser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">Parser.required_parent_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.set_params"><code class="docutils literal notranslate"><span class="pre">Parser.set_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.to_dict"><code class="docutils literal notranslate"><span class="pre">Parser.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.Parser.to_json"><code class="docutils literal notranslate"><span class="pre">Parser.to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.SpeedyStatSplit"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpeedyStatSplit.__init__"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpeedyStatSplit.best_single_split"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.best_single_split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpeedyStatSplit.parse"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpeedyStatSplit.parse_meta"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.parse_meta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpeedyStatSplit.set_params"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.set_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpeedyStatSplit.uiTemplate"><code class="docutils literal notranslate"><span class="pre">SpeedyStatSplit.uiTemplate</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.SpikeParser"><code class="docutils literal notranslate"><span class="pre">SpikeParser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpikeParser.__init__"><code class="docutils literal notranslate"><span class="pre">SpikeParser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpikeParser.parse"><code class="docutils literal notranslate"><span class="pre">SpikeParser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.SpikeParser.required_parent_attributes"><code class="docutils literal notranslate"><span class="pre">SpikeParser.required_parent_attributes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.lambda_event_parser"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.lambda_event_parser.__init__"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.lambda_event_parser.parse"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.lambda_event_parser.set_params"><code class="docutils literal notranslate"><span class="pre">lambda_event_parser.set_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.pairwise"><code class="docutils literal notranslate"><span class="pre">pairwise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="parsers.html#ionique.parsers.snakebase_parser"><code class="docutils literal notranslate"><span class="pre">snakebase_parser</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.snakebase_parser.__init__"><code class="docutils literal notranslate"><span class="pre">snakebase_parser.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.snakebase_parser.parse"><code class="docutils literal notranslate"><span class="pre">snakebase_parser.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="parsers.html#ionique.parsers.snakebase_parser.set_params"><code class="docutils literal notranslate"><span class="pre">snakebase_parser.set_params()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">ionique.utils</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.Filter"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.__init__"><code class="docutils literal notranslate"><span class="pre">Filter.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.bidirectional"><code class="docutils literal notranslate"><span class="pre">Filter.bidirectional</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.cutoff_frequency"><code class="docutils literal notranslate"><span class="pre">Filter.cutoff_frequency</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.filter_method"><code class="docutils literal notranslate"><span class="pre">Filter.filter_method</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.filter_type"><code class="docutils literal notranslate"><span class="pre">Filter.filter_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Filter.sampling_frequency"><code class="docutils literal notranslate"><span class="pre">Filter.sampling_frequency</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.Singleton"><code class="docutils literal notranslate"><span class="pre">Singleton</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Singleton.__init__"><code class="docutils literal notranslate"><span class="pre">Singleton.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.Trimmer"><code class="docutils literal notranslate"><span class="pre">Trimmer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.__init__"><code class="docutils literal notranslate"><span class="pre">Trimmer.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.newrank"><code class="docutils literal notranslate"><span class="pre">Trimmer.newrank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.rank"><code class="docutils literal notranslate"><span class="pre">Trimmer.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#ionique.utils.Trimmer.samples_to_remove"><code class="docutils literal notranslate"><span class="pre">Trimmer.samples_to_remove</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.extract_features"><code class="docutils literal notranslate"><span class="pre">extract_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.si_eval"><code class="docutils literal notranslate"><span class="pre">si_eval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#ionique.utils.split_voltage_steps"><code class="docutils literal notranslate"><span class="pre">split_voltage_steps()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="datatypes.html">ionique.datatypes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager"><code class="docutils literal notranslate"><span class="pre">SessionFileManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.__init__"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.add_child"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.add_child()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.add_children"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.add_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.rank"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.register_affector"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.register_affector()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.SessionFileManager.unique_features"><code class="docutils literal notranslate"><span class="pre">SessionFileManager.unique_features</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile"><code class="docutils literal notranslate"><span class="pre">TraceFile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.__init__"><code class="docutils literal notranslate"><span class="pre">TraceFile.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.children"><code class="docutils literal notranslate"><span class="pre">TraceFile.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.delete"><code class="docutils literal notranslate"><span class="pre">TraceFile.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.end"><code class="docutils literal notranslate"><span class="pre">TraceFile.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.parent"><code class="docutils literal notranslate"><span class="pre">TraceFile.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.plot"><code class="docutils literal notranslate"><span class="pre">TraceFile.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.rank"><code class="docutils literal notranslate"><span class="pre">TraceFile.rank</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="datatypes.html#ionique.datatypes.TraceFile.start"><code class="docutils literal notranslate"><span class="pre">TraceFile.start</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cparsers.html">ionique.cparsers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit"><code class="docutils literal notranslate"><span class="pre">FastStatSplit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.__init__"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.best_single_split"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.best_single_split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.min_gain"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.min_gain</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.parse"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.parse_meta"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.parse_meta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="cparsers.html#ionique.cparsers.FastStatSplit.score_samples"><code class="docutils literal notranslate"><span class="pre">FastStatSplit.score_samples()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cparsers.html#ionique.cparsers.pairwise"><code class="docutils literal notranslate"><span class="pre">pairwise()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install_beginner.html">Installation for beginners</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#welcome-to-ionique">Welcome to Ionique!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-1-install-python">Step 1: Install Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-2-github">Step 2: GitHub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-3-moving-between-folders-in-the-terminal">Step 3: Moving Between Folders in the Terminal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-4-virtual-environment">Step 4: Virtual Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-5-run-the-notebooks">Step 5: Run the Notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install_beginner.html#step-6-finish-workflow">Step 6: Finish Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ionique_starter.html">Install Ionique</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#download-the-ionique-repository">1. Download the Ionique Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#open-the-ionique-folder-in-vs-code">2. Open the Ionique Folder in VS Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#set-up-a-virtual-environment">3. Set Up a Virtual Environment</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../ionique_starter.html#step-1-open-terminal-in-vs-code">Step 1: Open Terminal in VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionique_starter.html#step-2-confirm-you-re-in-the-correct-directory">Step 2: Confirm You’re in the Correct Directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../ionique_starter.html#step-3-create-and-activate-the-environment">Step 3: Create and Activate the Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#install-the-ionique-package">4. Install the Ionique Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#optional-install-jupyterlab">5. (Optional) Install JupyterLab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../ionique_starter.html#deactivate-the-environment">6. Deactivate the Environment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../python_vscode_start.html">Guide for VSCode and Python Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python_vscode_start.html#installing-vs-code">Installing VS Code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-vs-code">1. Install VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-required-extensions">2. Install Required Extensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-compilers-build-tools">3. Install Compilers (Build Tools)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#install-python">4. Install Python.</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python_vscode_start.html#skip-this-step-if-you-already-have-python"><em>Skip this step if you already have Python!</em></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#download-and-install-vs-code">1. Download and Install VS_Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#open-a-terminal">2. Open a Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#id1">3. Install Python</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python_vscode_start.html#id2"><em>Skip this step if you already have Python!</em></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#id3">1. Install VS Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_vscode_start.html#id4">2. Install Python</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../python_vscode_start.html#id5"><em>Skip this step if you already have Python!</em></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ionique</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api_reference.html">API Reference</a></li>
+      <li class="breadcrumb-item active">ionique.core</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/core.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ionique-core">
+<h1>ionique.core<a class="headerlink" href="#ionique-core" title="Link to this heading"></a></h1>
+<blockquote id="module-ionique.core">
+<div><p>adaptation from “core.py” by Jacob Scheriber
+<a class="reference external" href="https://github.com/jmschrei/PyPore">https://github.com/jmschrei/PyPore</a></p>
+</div></blockquote>
+<p>This holds the core data types which may be abstracted in
+many different applications.
+This module defines a tree-based framework for representing, parsing, and annotating
+segments of ionic current data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.core.</span></span><span class="sig-name descname"><span class="pre">AbstractSegmentTree</span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for managing hierarchical segments.</p>
+<p>This class supports a tree structure where each segment can contain multiple
+child segments, enabling recursive parsing and analysis of nested data.
+It provides utilities to manage relationships between segments, apply parsers,
+and extract subsegments by rank.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize the segment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.add_child">
+<span class="sig-name descname"><span class="pre">add_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">child</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnySegment</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.add_child" title="Link to this definition"></a></dt>
+<dd><p>Add a single child</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.add_children">
+<span class="sig-name descname"><span class="pre">add_children</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">AnySegment</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.add_children" title="Link to this definition"></a></dt>
+<dd><p>Add multiple children if:
+1. Child position is the within parent’s segment.
+2. The length of the child’s segment is &gt; 0
+3. There is no overlap between consecutive children</p>
+<p>Or add children with no check</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.children">
+<span class="sig-name descname"><span class="pre">children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">AnySegment</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.children" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.clear_children">
+<span class="sig-name descname"><span class="pre">clear_children</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.clear_children" title="Link to this definition"></a></dt>
+<dd><p>Clear the list of children</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.climb_to_rank">
+<span class="sig-name descname"><span class="pre">climb_to_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AnySegment</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.climb_to_rank" title="Link to this definition"></a></dt>
+<dd><p>Go up and find the segment with the specified rank
+:return: segment</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.end">
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.get_feature">
+<span class="sig-name descname"><span class="pre">get_feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.get_feature" title="Link to this definition"></a></dt>
+<dd><p>Gets the ‘name’ feature of the current segment or its parent</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.get_top_parent">
+<span class="sig-name descname"><span class="pre">get_top_parent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AnySegment</span></span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.get_top_parent" title="Link to this definition"></a></dt>
+<dd><p>Recursively go up and find top most parent
+:return: parent</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.n">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.n" title="Link to this definition"></a></dt>
+<dd><p>Get the length of the segment
+:return: len(segment)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AnySegment</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.parent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newrank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">at_child_rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.parse" title="Link to this definition"></a></dt>
+<dd><p>Parses the data in the segment or at a particular rank of child segments
+into children segments with a new rank.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parser</strong> (<a class="reference internal" href="../ioniq.html#ionique.parsers.Parser" title="ionique.parsers.Parser"><em>Parser</em></a>) – A parser object with a <cite>parse</cite> method and required input attributes.</p></li>
+<li><p><strong>newrank</strong> (<em>str</em>) – Rank to assign to the newly created child segments.</p></li>
+<li><p><strong>at_child_rank</strong> (<em>str</em><em> or </em><em>None</em>) – Determines whether to traverse the children tree down to a given rank.</p></li>
+<li><p><strong>kwargs</strong> – Additional arguments to pass to the parser.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if parsing was successful, otherwise raises an exception.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.rank">
+<span class="sig-name descname"><span class="pre">rank</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.rank" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.relative_end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.relative_end" title="Link to this definition"></a></dt>
+<dd><p>Get end position relative to parent segment
+:return: end position</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.relative_slice">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_slice</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.relative_slice" title="Link to this definition"></a></dt>
+<dd><p>Slice the array to get the data between end-start segment
+:return: sliced np array</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.relative_start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.relative_start" title="Link to this definition"></a></dt>
+<dd><p>Get the start position relative to parent segment
+:return: start position</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.slice">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">slice</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.slice" title="Link to this definition"></a></dt>
+<dd><p>Slice the array to get the data between start-end segment
+:return: sliced np array</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ionique.core.AbstractSegmentTree.start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.AbstractSegmentTree.traverse_to_rank">
+<span class="sig-name descname"><span class="pre">traverse_to_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#ionique.core.AbstractSegmentTree.traverse_to_rank" title="Link to this definition"></a></dt>
+<dd><p>Traverse the tree rank and get the list of the segments of the rank
+:param: rank
+:return: list of segments</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.core.</span></span><span class="sig-name descname"><span class="pre">MetaSegment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnySegment</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.MetaSegment" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.core.AbstractSegmentTree" title="ionique.core.AbstractSegmentTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractSegmentTree</span></code></a></p>
+<p>The metadata on an abstract segment of ionic current. All information about a segment can be
+loaded, without the expectation of the array of floats.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">AnySegment</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.MetaSegment.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> (<em>int</em>) – Start index of the segment.</p></li>
+<li><p><strong>end</strong> (<em>int</em>) – End index of the segment.</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="../ioniq.html#ionique.core.AbstractSegmentTree" title="ionique.core.AbstractSegmentTree"><em>AbstractSegmentTree</em></a><em> or </em><em>None</em>) – Parent segment in the tree (optional).</p></li>
+<li><p><strong>rank</strong> (<em>str</em><em> or </em><em>None</em>) – Rank identifier for this segment (optional).</p></li>
+<li><p><strong>unique_features</strong> (<em>dict</em>) – Dictionary of metadata features.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.current">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current</span></span><a class="headerlink" href="#ionique.core.MetaSegment.current" title="Link to this definition"></a></dt>
+<dd><p>Get the current data of the segment if the segment correlates to the file
+:return: current</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.MetaSegment.delete" title="Link to this definition"></a></dt>
+<dd><p>Delete itself. There are no arrays with which to delete references for.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#ionique.core.MetaSegment.duration" title="Link to this definition"></a></dt>
+<dd><p>Get the duration of the segment = start - end
+:return: duration</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.MetaSegment.from_json" title="Link to this definition"></a></dt>
+<dd><p>Read in a metasegment from a JSON and return a metasegment object.
+Either pass in a file which has a segment stored, or an actual JSON
+object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max</span></span><a class="headerlink" href="#ionique.core.MetaSegment.max" title="Link to this definition"></a></dt>
+<dd><p>Calculate the maximum value of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum value of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.mean">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean</span></span><a class="headerlink" href="#ionique.core.MetaSegment.mean" title="Link to this definition"></a></dt>
+<dd><p>Calculate the mean of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mean value of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min</span></span><a class="headerlink" href="#ionique.core.MetaSegment.min" title="Link to this definition"></a></dt>
+<dd><p>Calculate the minimum value of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum value of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.std">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std</span></span><a class="headerlink" href="#ionique.core.MetaSegment.std" title="Link to this definition"></a></dt>
+<dd><p>Calculate the standard deviation of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Standard deviation of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#ionique.core.MetaSegment.time" title="Link to this definition"></a></dt>
+<dd><p>Get the time data of the segment if the corresponding rank is in file
+:return: time</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.MetaSegment.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Return a dict representation of the metadata, usually used prior to
+converting the dict to a JSON.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.MetaSegment.to_json" title="Link to this definition"></a></dt>
+<dd><p>Return a JSON representation of this, by reporting the important
+metadata.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.to_meta">
+<span class="sig-name descname"><span class="pre">to_meta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.MetaSegment.to_meta" title="Link to this definition"></a></dt>
+<dd><p>Kept to allow for error handling, but since it’s already a metasegment
+it won’t actually do anything.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.MetaSegment.unique_features">
+<span class="sig-name descname"><span class="pre">unique_features</span></span><a class="headerlink" href="#ionique.core.MetaSegment.unique_features" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ionique.core.Segment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ionique.core.</span></span><span class="sig-name descname"><span class="pre">Segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../ioniq.html#ionique.core.AbstractSegmentTree" title="ionique.core.AbstractSegmentTree"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractSegmentTree</span></code></a></p>
+<p>A segment of ionic current, and methods relevant for collecting metadata. The ionic current is
+expected to be passed as a numpy array of floats. Metadata methods (mean, std..) are decorated
+as properties to reduce overall computational time, making them calculated on the fly rather
+than during analysis.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.Segment.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment.__init__" title="Link to this definition"></a></dt>
+<dd><p>The segment must have a list of ionic current, of which it stores some statistics about.
+It may also take in as many keyword arguments as needed, such as start time or duration
+if already known. Cannot override statistical measurements.
+:param current: Numpy array of current data points.
+:type current: np.ndarray
+:param kwargs: Additional attributes like ‘start’, ‘end’, ‘rank’, etc.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.Segment.children">
+<span class="sig-name descname"><span class="pre">children</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">AnySegment</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#ionique.core.Segment.children" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.Segment.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment.delete" title="Link to this definition"></a></dt>
+<dd><p>Deleting this segment requires deleting its reference to the ionic
+current array, and then deleting itself.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.Segment.end">
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ionique.core.Segment.end" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.Segment.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment.from_json" title="Link to this definition"></a></dt>
+<dd><p>Read in a segment from a JSON and return a metasegment object. Either
+pass in a file which has a segment stored, or an actual JSON object.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.Segment.max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max</span></span><a class="headerlink" href="#ionique.core.Segment.max" title="Link to this definition"></a></dt>
+<dd><p>Calculate the maximum value of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Maximum value of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.Segment.mean">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean</span></span><a class="headerlink" href="#ionique.core.Segment.mean" title="Link to this definition"></a></dt>
+<dd><p>Calculate the mean of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Mean value of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.Segment.min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">min</span></span><a class="headerlink" href="#ionique.core.Segment.min" title="Link to this definition"></a></dt>
+<dd><p>Calculate the minimum value of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minimum value of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.Segment.n">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#ionique.core.Segment.n" title="Link to this definition"></a></dt>
+<dd><p>Get the number of elements in the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of elements in the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.Segment.parent">
+<span class="sig-name descname"><span class="pre">parent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AnySegment</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ionique.core.Segment.parent" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.Segment.rank">
+<span class="sig-name descname"><span class="pre">rank</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#ionique.core.Segment.rank" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.Segment.scale">
+<span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampling_freq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment.scale" title="Link to this definition"></a></dt>
+<dd><p>Rescale all of the values to go from samples to seconds.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ionique.core.Segment.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ionique.core.Segment.start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ionique.core.Segment.std">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std</span></span><a class="headerlink" href="#ionique.core.Segment.std" title="Link to this definition"></a></dt>
+<dd><p>Calculate the standard deviation of the current array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Standard deviation of the current array.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.Segment.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Return a dict representation of the metadata, usually used prior to
+converting the dict to a JSON.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.Segment.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment.to_json" title="Link to this definition"></a></dt>
+<dd><p>Return a JSON representation of this, by reporting the important
+metadata.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionique.core.Segment.to_meta">
+<span class="sig-name descname"><span class="pre">to_meta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.Segment.to_meta" title="Link to this definition"></a></dt>
+<dd><p>Convert from a segment to a ‘metasegment’, which stores only metadata
+about the segment and not the full array of ionic current.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ionique.core.ignored">
+<span class="sig-prename descclassname"><span class="pre">ionique.core.</span></span><span class="sig-name descname"><span class="pre">ignored</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">exceptions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ionique.core.ignored" title="Link to this definition"></a></dt>
+<dd><p>Replace the “try, except: pass” paradigm by replacing those three lines with a single line.
+Taken from the latest 3.4 python update push by Raymond Hettinger, see:
+<a class="reference external" href="http://hg.python.org/cpython/rev/406b47c64480">http://hg.python.org/cpython/rev/406b47c64480</a></p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="io.html" class="btn btn-neutral float-left" title="ionique.io" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parsers.html" class="btn btn-neutral float-right" title="ionique.parsers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ali Fallahi, Dinara Boyko, Wanunu Lab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="sphinxsidebarwrapper">
+  <h3>Versions</h3>
+  <ul class="simple">
+    
+      <li><a href="../../v0.3.0/api/core.html">v0.3.0</a></li>
+    
+      <li><a href="core.html">v0.3.1</a></li>
+    
+      <li><a href="../../feature/dina/api/core.html">feature/dina</a></li>
+    
+      <li><a href="../../main/api/core.html">main</a></li>
+    
+  </ul>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
