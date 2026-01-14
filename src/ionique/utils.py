@@ -267,7 +267,166 @@ class Filter:
         else:
             current[:] = signal.sosfilt(self.sos, current, axis=0)
 
+@dataclass
+class ClockFilter:
+    """
+    This special filter removes a singular frequency from the signal. 
+    If the power spectral density of a signal contains a very narrow and sharp peak at one frequency, caused by EMF interference from a digital signal, this filter can eliminate its effect.
+    This is not a notch filter, it effectively subtracts a phase-matching sine wave of an exact frequency from the signal.
+    If multiple clock frequencies or harmonics exist, use once for each frequency.
+    The clock filter can be used before, after, or without low-pass filtering. 
+    Constructor returns a callable, which would filter the signal inplace.
 
+    :param clock_frequency: clock frequency to be removed in Hz.
+    :type clock_frequency: float
+    
+    :param section_length: length of sections to use in noise estimation. Each section is filtered independently
+    
+    
+    :param sampling_frequency: Sampling frequency of the signal in Hz.
+    :type sampling_frequency: float, optional
+
+    """
+    clock_frequency: float
+    section_length: float = field(default=0.5, metadata={"min":0.000001}) #in seconds
+    sampling_frequency: float = None
+     
+    
+
+    def __call__(self, current, sampling_frequency=None):
+        """Run the filter inplace in a memory efficient way, without duplicating the full array in the process."""
+        if self.sampling_frequency is None and sampling_frequency is None:
+            raise ValueError("Sampling frequency must be provided.")
+
+        if sampling_frequency is not None:
+            self.sampling_frequency = float(sampling_frequency)
+
+        fs = float(self.sampling_frequency)
+        f0 = float(self.clock_frequency)
+
+        if current.ndim != 1:
+            raise ValueError("current must be a 1D array.")
+        if current.size == 0:
+            return
+
+        from fractions import Fraction
+
+        def find_period_samples(fs_: float, f0_: float,
+                                rel_tol: float = 1e-12,
+                                max_den: int = 10_000_000,
+                                max_period: int = 1_000_000):
+            """If f0/fs is (effectively) rational, return reduced denominator q (period in samples). Else None."""
+            r = f0_ / fs_
+            if not np.isfinite(r) or r == 0.0:
+                return None
+            frac = Fraction(r).limit_denominator(max_den)
+            p, q = frac.numerator, frac.denominator
+            if q <= 0 or q > max_period:
+                return None
+            if abs(r - (p / q)) <= rel_tol * max(1.0, abs(r)):
+                return q
+            return None
+
+        def remove_tone_dot_inplace(x: np.ndarray, c_lut: np.ndarray, s_lut: np.ndarray):
+            """
+            Fast removal assuming len(x) is an integer multiple of len(c_lut).
+            Uses reshape views (no tiling) and subtracts in-place.
+            """
+            N = x.size
+            P = c_lut.size
+            if N == 0:
+                return
+            if N % P != 0:
+                return  # caller guarantees; if violated, do nothing
+
+            X = x.reshape(-1, P)  # view
+            xc = float(np.sum(X * c_lut))
+            xs = float(np.sum(X * s_lut))
+            a = (2.0 / N) * xc
+            b = (2.0 / N) * xs
+
+            tone_lut = a * c_lut + b * s_lut  # only P samples allocated
+            X -= tone_lut  # broadcast subtract, in-place
+            return a,b
+
+        def remove_tone_by_fitting_inplace(x: np.ndarray, fs_: float, f0_: float):
+            """
+            2-parameter LS on the tail via 2x2 normal equations, no ridge regularization.
+            """
+            N = x.size
+            if N < 2:
+                return
+
+            w0 = 2.0 * np.pi * f0_ / fs_
+            n = np.arange(N, dtype=np.float64)
+            c = np.cos(w0 * n)
+            s = np.sin(w0 * n)
+
+            X = np.column_stack((c, s))
+            theta, *_ = np.linalg.lstsq(X, np.asarray(x), rcond=None)
+            a, b = theta
+
+            tone = a*c + b*s
+
+            x -= tone
+
+        # Section size in samples
+        section_n_samples = int(round(fs * float(self.section_length)))
+        section_n_samples = max(1, section_n_samples)
+
+        # Find discrete-time period (if rational enough)
+        n_period = find_period_samples(fs, f0)
+
+        # Prepare LUT if usable
+        use_fast = (n_period is not None) and (n_period > 0) and (n_period <= section_n_samples)
+        if use_fast:
+            w0 = 2.0 * np.pi * f0 / fs
+            nL = np.arange(n_period, dtype=np.float64)
+            c_lut = np.cos(w0 * nL)
+            s_lut = np.sin(w0 * nL)
+        else:
+            n_period = None
+            c_lut = s_lut = None
+
+        # Internal robustness knob: if remainder is tiny, move one (or more) full periods into the tail
+        min_fit = n_period*10
+
+        # Process all sections, including final partial section
+        for start in range(0, current.size, section_n_samples):
+            stop = min(start + section_n_samples, current.size)
+            seg_len = stop - start
+            if seg_len <= 0:
+                break
+
+            if not use_fast or n_period is None or n_period <= 1:
+                remove_tone_by_fitting_inplace(current[start:stop], fs, f0)
+                continue
+
+            rem = seg_len % n_period
+            full_len = seg_len - rem
+
+            # If remainder is too short, steal one (or more) full periods from the LUT part
+            while rem != 0 and rem < min_fit and full_len >= n_period:
+                full_len -= n_period
+                rem += n_period
+
+            mid = start + full_len
+            dot_theta=None
+            if full_len > 0:
+                dot_theta=remove_tone_dot_inplace(current[start:mid], c_lut, s_lut)
+                
+                # remove_tone_by_fitting_inplace(current[start:stop],fs,f0)
+
+            if mid < stop:
+                if dot_theta is not None:
+                    n=stop-mid
+                    c = np.cos(w0*np.arange(n))
+                    s = np.sin(w0*np.arange(n))
+                    a,b=dot_theta
+                    current[mid:stop]-= a*c+b*s
+                else:
+                    remove_tone_by_fitting_inplace(current[mid:stop], fs, f0)  
+        return
 
 
 @dataclass
