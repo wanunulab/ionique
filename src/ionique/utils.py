@@ -280,8 +280,8 @@ class ClockFilter:
     :param clock_frequency: clock frequency to be removed in Hz.
     :type clock_frequency: float
     
-    :param section_length: length of sections to use in noise estimation. Each section is filtered independently
-    
+    :param section_length: length of sections (in seconds) to use in noise estimation. Each section is filtered independently. 
+    :type section_length: float
     
     :param sampling_frequency: Sampling frequency of the signal in Hz.
     :type sampling_frequency: float, optional
