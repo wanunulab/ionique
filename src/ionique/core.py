@@ -483,7 +483,7 @@ class MetaSegment(AbstractSegmentTree):
             with open(filename, 'r') as infile:
                 in_json = ''.join([line for line in infile])
 
-        words = re.findall(r"\[[\w'.-]+\]|[\w'.-]+", json)
+        words = re.findall(r"\[[\w'.-]+\]|[\w'.-]+", in_json)
         attrs = {words[i]: words[i+1] for i in range(0, len(words), 2)}
 
         return MetaSegment(**attrs)
