@@ -4,7 +4,7 @@ Test module for io.py
 import xml.etree.ElementTree as ET
 import pytest
 import os
-from ioniq.io import EDHReader, OPTReader
+from ionique.io import EDHReader, OPTReader
 import numpy as np
 
 # Test EDH reader

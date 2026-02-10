@@ -145,7 +145,7 @@ class Parser(abc.ABC):
 
         _json = json.dumps(self.to_dict(), indent=4, separators=(',', ' : '))
         if filename:
-            with open(filename, 'r') as out:
+            with open(filename, 'w') as out:
                 out.write(_json)
         return _json
 
@@ -807,7 +807,7 @@ class IVCurveAnalyzer(Parser):
         if len(self.parent_segment.children) < 2:
             raise ValueError("The segment should have at least two voltage steps")
         result = {}
-        for vstep in self.parent_segment.chindren:
+        for vstep in self.parent_segment.children:
             voltage = vstep.voltage
             current = vstep.current
             if self.method == "simple":
@@ -821,7 +821,7 @@ class IVCurveAnalyzer(Parser):
         return result
 
     def _simple_stats(self, current):
-        return np.mean(current), np.tsd(current)
+        return np.mean(current), np.std(current)
     def _extra_stats(self, current):
         """
         divide segment into n subsegments (default 10 or 0.1s, whichever is longer),

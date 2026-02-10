@@ -5,7 +5,7 @@ Test module for parsers.py
 import pyximport
 import numpy as np
 import pytest
-from ioniq.parsers import SpikeParser
+from ionique.parsers import SpikeParser
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 
 # Simple data for test cases

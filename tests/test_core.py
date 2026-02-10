@@ -5,7 +5,7 @@ Unit test for core.py
 
 import pytest
 import numpy as np
-from ioniq.core import AbstractSegmentTree, MetaSegment, Segment
+from ionique.core import AbstractSegmentTree, MetaSegment, Segment
 
 
 @pytest.fixture
