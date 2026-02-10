@@ -2,7 +2,7 @@
 Test module for utils.py
 """
 
-from ioniq.utils import *
+from ionique.utils import *
 import pytest
 import numpy as np
 
