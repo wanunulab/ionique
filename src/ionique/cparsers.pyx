@@ -5,7 +5,8 @@
 '''
 This contains cython implementations of ionic current parsers which are in
 parsers.py. Currently the only parser is StatSplit, which is implemented
-as FastStatSplit.
+as FastStatSplit. 
+Adapted from the PyPore Package by Jacob Schreiber and Kevin Karplus (https://github.com/jmschrei/PyPore) -- Original License included in "PYPORE_LICENSE.txt".
 '''
 
 import numpy as np
