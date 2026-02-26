@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-    adaptation from "core.py" by Jacob Scheriber
-    https://github.com/jmschrei/PyPore
+    loose adaptation from "core.py" by Jacob Scheriber
+    https://github.com/jmschrei/PyPore -- Original License included in "PYPORE_LICENSE.txt".
 This holds the core data types which may be abstracted in
 many different applications.
 This module defines a tree-based framework for representing, parsing, and annotating
