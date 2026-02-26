@@ -696,38 +696,4 @@ class OPTReader(AbstractFileReader):
         return peaks, properties
 
 
-if __name__ == "__main__":
-    # print(EDHReader.ext)
-    #e = EDHReader()
-    # meta, current, voltage = e.read("../../tests/data/8e7_80n01M1_5pctSorbitol_IV/"
-    #                                 "8e7_80n01M1_5pctSorbitol_IV.edh", voltage_compress=True)
 
-    # import matplotlib.pyplot as plt
-    # plt.plot(current[::100])
-    # plt.waitforbuttonpress()
-    # e.read("C:/Users/alito/EDR/Q402m1_SBead/Q402m1_SBead.edh")
-
-
-    opt_file_1 = "/Users/dinaraboyko/grad_school/cloned_repo/data/Parker/101425/B101425SR_250kHz__000.opt"
-
-    opt_file_2 = "/Users/dinaraboyko/grad_school/cloned_repo/data/xialin/file 2/B110724SR_250kHz__008.opt"
-    opt_file_3 = "/Users/dinaraboyko/grad_school/cloned_repo/data/011225/B011225_933--220403.opt"
-
-    file = "/Users/dinaraboyko/grad_school/cloned_repo/data/openflowcel_dphpcPBD_PEO_dec_pretreatAR20_2MGdm_1MKCl_10_CH001/openflowcel_dphpcPBD_PEO_dec_pretreatAR20_2MGdm_1MKCl.edh"
-
-    #metadata, current, voltage = EDHReader(file, voltage_compress=True, downsample=10)
-    #print(metadata)
-
-    metadata, current, voltage = OPTReader(opt_file_1, voltage_compress=True, downsample=1)
-    print("Data for XML")
-    print(metadata)
-
-    # metadata, current, voltage = reader
-    # print("Metadata:", metadata)
-    # print("Curren:", len(current))
-    print("Voltage:", voltage)
-
-    metadata2, current2, voltage2 = OPTReader(opt_file_3, voltage_compress=True, downsample=1)
-    print("\n\n\nData for _volt.opt")
-    print(metadata2)
-    print("Voltage:", voltage2)
