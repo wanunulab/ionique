@@ -6,7 +6,7 @@ and multiple concrete parser implementations for detecting spikes, noise, square
 structures in ionic current signals.
 
 Some of the parsers and the parser base class were adapted from the
-PyPore Package by Jacob Schreiber and Kevin Karplus (https://github.com/jmschrei/PyPore)
+PyPore Package by Jacob Schreiber and Kevin Karplus (https://github.com/jmschrei/PyPore) -- Original License included in "PYPORE_LICENSE.txt".
 
 """
 
