@@ -1,3 +1,15 @@
+"""
+JSON-based logging setup for ionique session activity.
+
+This module provides a decorator-based logging mechanism that records
+function/method calls — including their class name, method name, timestamp,
+and sanitized argument list — to a timestamped JSON file.  NumPy arrays and
+plain lists are replaced with a ``"<numpy array>"`` placeholder so that the
+log file remains small and fully JSON-serializable.
+
+A module-level ``json_logger`` instance is created on import so that all
+ionique submodules can share a single log file per Python session.
+"""
 import json
 import functools
 import logging
@@ -6,10 +18,35 @@ import datetime
 
 
 class JSONLogger:
+    """
+    Decorator-based logger that records function call metadata to a JSON file.
+
+    Each call to a decorated function appends a JSON entry containing the
+    invocation timestamp, class name, method name, and a sanitized
+    representation of the arguments.  NumPy arrays and lists are replaced with
+    a ``"<numpy array>"`` placeholder to keep entries compact and serializable.
+
+    A new timestamped log file is created each time a ``JSONLogger`` instance
+    is initialised, and the file is cleared (reset to an empty JSON array) on
+    creation so that each session starts with a clean log.
+
+    Attributes
+    ----------
+    filename : str
+        Path to the JSON log file, named ``<YYYYMMDD_HHMMSS>_log.json``.
+    logger : logging.Logger
+        Standard-library logger used to emit exception tracebacks to stderr
+        when a decorated function raises.
+    """
+
     def __init__(self):
         """
-        initialize logging
+        Initialise the JSON logger and create an empty log file.
 
+        A timestamped filename is generated from the current wall-clock time,
+        the log file is cleared to an empty JSON array, and a standard-library
+        ``logging.Logger`` is configured at ``INFO`` level for exception
+        reporting.
         """
         timestamp_init = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         self.filename = f"{timestamp_init}_log.json"
@@ -19,16 +56,23 @@ class JSONLogger:
 
     def _clear_log_file(self):
         """
-        Clear the log file each time the kernel restarts
-        When the JSONLogger init it dumps an empty lit to the file
+        Clear the log file each time the kernel restarts.
+
+        When the ``JSONLogger`` is initialised it dumps an empty list to the
+        file so that subsequent appends always find valid JSON.
         """
         with open(self.filename, "w") as file:
             json.dump([], file)
 
     def _log_to_json(self, entry):
         """
-        Append the new log entry to the JSON file
+        Append a new log entry to the JSON file.
 
+        Parameters
+        ----------
+        entry : dict
+            Mapping with keys ``"timestamp"``, ``"class"``, ``"method"``, and
+            ``"arguments"`` describing a single function invocation.
         """
         with open(self.filename, "r+") as file:
             try:

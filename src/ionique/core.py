@@ -30,13 +30,26 @@ class AbstractSegmentTree(object):
     child segments, enabling recursive parsing and analysis of nested data.
     It provides utilities to manage relationships between segments, apply parsers,
     and extract subsegments by rank.
+
+    Attributes
+    ----------
+    parent : AbstractSegmentTree or None
+        Parent segment in the tree, or None if this is the root.
+    children : list of AbstractSegmentTree
+        List of child segments belonging to this node.
+    start : int or None
+        Start index of the segment in the underlying data array.
+    end : int or None
+        End index of the segment in the underlying data array.
+    rank : str or None
+        Label identifying the depth level or type of this segment.
     """
     # Memory optimization by limiting attributes
     __slots__ = ('parent', 'children', 'start', 'end', 'rank', '__dict__')
 
     def __init__(self) -> None:
         """
-        Initialize the segment
+        Initialize the segment with default empty state.
         """
         # TODO: check if unique_features should be added:
         self.unique_features = {}
@@ -51,18 +64,27 @@ class AbstractSegmentTree(object):
 
     def parse(self, parser, newrank: str, at_child_rank: str | None = None, **kwargs) -> bool:
         """
+        Parse the segment data into child segments with a new rank.
+
         Parses the data in the segment or at a particular rank of child segments
         into children segments with a new rank.
 
-        :param parser: A parser object with a `parse` method and required input attributes.
-        :type parser: Parser
-        :param newrank: Rank to assign to the newly created child segments.
-        :type newrank: str
-        :param at_child_rank: Determines whether to traverse the children tree down to a given rank.
-        :type at_child_rank: str or None
-        :param kwargs: Additional arguments to pass to the parser.
-        :return: True if parsing was successful, otherwise raises an exception.
-        :rtype: bool
+        Parameters
+        ----------
+        parser : Parser
+            A parser object with a `parse` method and required input attributes.
+        newrank : str
+            Rank to assign to the newly created child segments.
+        at_child_rank : str or None, optional
+            Determines whether to traverse the children tree down to a given rank.
+            Defaults to None.
+        **kwargs
+            Additional arguments to pass to the parser.
+
+        Returns
+        -------
+        bool
+            True if parsing was successful, otherwise raises an exception.
         """
         try:
             # TODO: get the features from parsers (test)
@@ -103,7 +125,18 @@ class AbstractSegmentTree(object):
 
     def get_feature(self, name: str):
         """
-        Gets the 'name' feature of the current segment or its parent
+        Get a named feature from the current segment or the nearest ancestor that has it.
+
+        Parameters
+        ----------
+        name : str
+            The name of the feature to retrieve.
+
+        Returns
+        -------
+        object or None
+            The feature value if found in this segment's ``unique_features``, as a direct
+            attribute, or by climbing the parent chain; None if not found anywhere.
         """
         if name in self.unique_features.keys():
             return self.unique_features[name]
@@ -117,8 +150,13 @@ class AbstractSegmentTree(object):
     @cached_property
     def relative_start(self) -> int:
         """
-        Get the start position relative to parent segment
-        :return: start position
+        Get the start position relative to the parent segment.
+
+        Returns
+        -------
+        int
+            Start index offset from the parent's start, or the absolute start
+            if there is no parent.
         """
         if self.parent is not None:
             return self.start - self.parent.start
@@ -127,8 +165,13 @@ class AbstractSegmentTree(object):
     @cached_property
     def relative_end(self) -> int:
         """
-        Get end position relative to parent segment
-        :return: end position
+        Get the end position relative to the parent segment.
+
+        Returns
+        -------
+        int
+            End index offset from the parent's start, or the absolute end
+            if there is no parent.
         """
         if self.parent is not None:
             return self.end - self.parent.start
@@ -139,31 +182,47 @@ class AbstractSegmentTree(object):
     @cached_property
     def slice(self) -> np.ndarray:
         """
-        Slice the array to get the data between start-end segment
-        :return: sliced np array
+        Compute the numpy slice object spanning this segment's start to end.
+
+        Returns
+        -------
+        numpy.ndarray
+            A ``numpy.s_`` slice object for the range ``[start:end]``.
         """
         return np.s_[self.start:self.end]
 
     @cached_property
     def relative_slice(self) -> np.ndarray:
         """
-        Slice the array to get the data between end-start segment
-        :return: sliced np array
+        Compute the numpy slice object spanning this segment's relative start to relative end.
+
+        Returns
+        -------
+        numpy.ndarray
+            A ``numpy.s_`` slice object for the range ``[relative_start:relative_end]``.
         """
         return np.s_[self.relative_start:self.relative_end]
 
     @cached_property
     def n(self) -> int:
         """
-        Get the length of the segment
-        :return: len(segment)
+        Get the length of the segment.
+
+        Returns
+        -------
+        int
+            Number of samples in the segment (``end - start``).
         """
         return self.end-self.start
 
     def get_top_parent(self) -> AnySegment:
         """
-        Recursively go up and find top most parent
-        :return: parent
+        Recursively traverse upward and return the topmost parent node.
+
+        Returns
+        -------
+        AbstractSegmentTree
+            The root ancestor of this segment.
         """
         if self.parent is not None:
             return self.parent.get_top_parent(self)
@@ -171,8 +230,18 @@ class AbstractSegmentTree(object):
 
     def climb_to_rank(self, rank: str) -> AnySegment | None:
         """
-        Go up and find the segment with the specified rank
-        :return: segment
+        Traverse upward through the tree to find the nearest ancestor with the given rank.
+
+        Parameters
+        ----------
+        rank : str
+            The rank label to search for.
+
+        Returns
+        -------
+        AbstractSegmentTree or None
+            The nearest ancestor (or self) that has the specified rank,
+            or None if no such segment exists in the chain.
         """
         if self.rank == rank:
             return self
@@ -229,9 +298,17 @@ class AbstractSegmentTree(object):
 
     def traverse_to_rank(self, rank: str) -> list:
         """
-        Traverse the tree rank and get the list of the segments of the rank
-        :param: rank
-        :return: list of segments
+        Traverse the tree downward and collect all segments at the given rank.
+
+        Parameters
+        ----------
+        rank : str
+            The rank label to search for among descendants.
+
+        Returns
+        -------
+        list of AbstractSegmentTree
+            All segments in the subtree (including self) that have the specified rank.
         """
         if self.rank == rank:
             return [self]
@@ -243,8 +320,13 @@ class AbstractSegmentTree(object):
 
     def summary(self):
         """
-        Provide a summary of existing ranks and number of elements at each rank
-        :return: dict of (rank: count) in root→children order
+        Provide a summary of existing ranks and the count of elements at each rank.
+
+        Returns
+        -------
+        dict
+            Mapping of rank label to count of segments at that rank, ordered
+            from root toward children.
         """
         ranks_in_order = []
         seen = set()
@@ -275,8 +357,26 @@ class AbstractSegmentTree(object):
 
 class MetaSegment(AbstractSegmentTree):
     """
-    The metadata on an abstract segment of ionic current. All information about a segment can be
-    loaded, without the expectation of the array of floats.
+    Lightweight segment node storing only position and metadata, without raw signal data.
+
+    All information about a segment can be loaded without requiring the underlying
+    array of ionic current values.
+
+    Parameters
+    ----------
+    start : int
+        Start index of the segment.
+    end : int
+        End index of the segment.
+    parent : AbstractSegmentTree or None, optional
+        Parent segment in the tree. Defaults to None.
+    rank : str or None, optional
+        Rank identifier for this segment. Defaults to None.
+    unique_features : dict or None, optional
+        Dictionary of metadata features associated with this segment.
+        Defaults to an empty dict.
+    **kwargs
+        Additional keyword arguments (currently unused).
     """
     # Limit attributes to "unique_features"
     __slots__ = "unique_features"
@@ -285,16 +385,7 @@ class MetaSegment(AbstractSegmentTree):
                  parent: AnySegment | None = None, rank: str | None = None,
                  unique_features: dict | None = {}, **kwargs):
         """
-        :param start: Start index of the segment.
-        :type start: int
-        :param end: End index of the segment.
-        :type end: int
-        :param parent: Parent segment in the tree (optional).
-        :type parent: AbstractSegmentTree or None
-        :param rank: Rank identifier for this segment (optional).
-        :type rank: str or None
-        :param unique_features: Dictionary of metadata features.
-        :type unique_features: dict
+        Initialize the MetaSegment with positional and metadata information.
         """
         super().__init__()
         # pointers to lower level segments (sub-segments)
@@ -327,8 +418,13 @@ class MetaSegment(AbstractSegmentTree):
     @property
     def current(self):
         """
-        Get the current data of the segment if the segment correlates to the file
-        :return: current
+        Get the ionic current data for this segment by slicing the parent file's array.
+
+        Returns
+        -------
+        numpy.ndarray or None
+            Current values from the root file segment sliced to this segment's
+            start/end range, or None if the file rank cannot be reached.
         """
         try:
             cur = self.climb_to_rank('file').current[self.start:self.end]
@@ -345,8 +441,10 @@ class MetaSegment(AbstractSegmentTree):
         """
         Calculate the mean of the current array.
 
-        :return: Mean value of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Mean value of the current array.
         """
         return np.mean(self.current)
 
@@ -355,8 +453,10 @@ class MetaSegment(AbstractSegmentTree):
         """
         Calculate the standard deviation of the current array.
 
-        :return: Standard deviation of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Standard deviation of the current array.
         """
         return np.std(self.current)
 
@@ -365,8 +465,10 @@ class MetaSegment(AbstractSegmentTree):
         """
         Calculate the minimum value of the current array.
 
-        :return: Minimum value of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Minimum value of the current array.
         """
         return np.min(self.current)
 
@@ -375,31 +477,45 @@ class MetaSegment(AbstractSegmentTree):
         """
         Calculate the maximum value of the current array.
 
-        :return: Maximum value of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Maximum value of the current array.
         """
         return np.max(self.current)
 
     @property
     def time(self):
         """
-        Get the time data of the segment if the corresponding rank is in file
-        :return: time
+        Get the time array for this segment sliced from the root file segment.
+
+        Returns
+        -------
+        numpy.ndarray
+            Time values from the root file segment sliced to this segment's range.
         """
         return self.climb_to_rank("file").time[self.start:self.end]
 
     @property
     def duration(self) -> float:
         """
-        Get the duration of the segment = start - end
-        :return: duration
+        Get the duration of the segment in time units.
+
+        Returns
+        -------
+        float
+            Time elapsed from the first to the last sample of the segment.
         """
         return self.time[-1]-self.time[0]
 
     def __repr__(self) -> str:
         """
-        The representation is a JSON.
-        :return: string representation of JSON
+        Return a JSON string representation of this segment.
+
+        Returns
+        -------
+        str
+            JSON string representation of the segment's metadata.
         """
         return self.to_json()
 
@@ -491,20 +607,25 @@ class MetaSegment(AbstractSegmentTree):
 
 class Segment(AbstractSegmentTree):
     """
-    A segment of ionic current, and methods relevant for collecting metadata. The ionic current is
-    expected to be passed as a numpy array of floats. Metadata methods (mean, std..) are decorated
-    as properties to reduce overall computational time, making them calculated on the fly rather
-    than during analysis.
+    A data-containing segment of ionic current with computed statistics.
+
+    The ionic current is expected to be passed as a numpy array of floats.
+    Metadata methods (mean, std, min, max) are decorated as properties to
+    reduce overall computational time, making them calculated on the fly
+    rather than during analysis.
+
+    Parameters
+    ----------
+    current : numpy.ndarray
+        Numpy array of ionic current data points.
+    **kwargs
+        Additional attributes such as ``start``, ``end``, ``rank``, etc.
+        Cannot override statistical measurements.
     """
 
     def __init__(self, current, **kwargs):
         """
-        The segment must have a list of ionic current, of which it stores some statistics about.
-        It may also take in as many keyword arguments as needed, such as start time or duration
-        if already known. Cannot override statistical measurements.
-        :param current: Numpy array of current data points.
-        :type current: np.ndarray
-        :param kwargs: Additional attributes like 'start', 'end', 'rank', etc.
+        Initialize the segment with an ionic current array and optional metadata.
         """
 
         super().__init__()
@@ -625,8 +746,10 @@ class Segment(AbstractSegmentTree):
         """
         Calculate the mean of the current array.
 
-        :return: Mean value of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Mean value of the current array.
         """
         return np.mean(self.current)
 
@@ -635,8 +758,10 @@ class Segment(AbstractSegmentTree):
         """
         Calculate the standard deviation of the current array.
 
-        :return: Standard deviation of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Standard deviation of the current array.
         """
         return np.std(self.current)
 
@@ -645,8 +770,10 @@ class Segment(AbstractSegmentTree):
         """
         Calculate the minimum value of the current array.
 
-        :return: Minimum value of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Minimum value of the current array.
         """
         return np.min(self.current)
 
@@ -655,8 +782,10 @@ class Segment(AbstractSegmentTree):
         """
         Calculate the maximum value of the current array.
 
-        :return: Maximum value of the current array.
-        :rtype: float
+        Returns
+        -------
+        float
+            Maximum value of the current array.
         """
         return np.max(self.current)
 
@@ -665,8 +794,10 @@ class Segment(AbstractSegmentTree):
         """
         Get the number of elements in the current array.
 
-        :return: Number of elements in the current array.
-        :rtype: int
+        Returns
+        -------
+        int
+            Number of elements in the current array.
         """
         return len(self.current)
 
@@ -698,9 +829,22 @@ class Segment(AbstractSegmentTree):
 @contextmanager
 def ignored(*exceptions):
     """
-    Replace the "try, except: pass" paradigm by replacing those three lines with a single line.
-    Taken from the latest 3.4 python update push by Raymond Hettinger, see:
+    Context manager that silently suppresses the specified exception types.
+
+    Replaces the ``try/except: pass`` pattern with a single-line context manager.
+    Taken from the Python 3.4 update by Raymond Hettinger; see:
     http://hg.python.org/cpython/rev/406b47c64480
+
+    Parameters
+    ----------
+    *exceptions : type
+        One or more exception classes to suppress within the ``with`` block.
+
+    Yields
+    ------
+    None
+        Control is yielded to the body of the ``with`` block; any listed
+        exceptions raised within are silently caught and discarded.
     """
     try:
         yield

@@ -1,13 +1,22 @@
 # cparsers.pyx
 # Contact: Jacob Schreiber
 #          jmschreiber91@gmail.com
-# modified for ionique by Ali Fallahi
-'''
-This contains cython implementations of ionic current parsers which are in
-parsers.py. Currently the only parser is StatSplit, which is implemented
-as FastStatSplit. 
-Adapted from the PyPore Package by Jacob Schreiber and Kevin Karplus (https://github.com/jmschrei/PyPore) -- Original License included in "PYPORE_LICENSE.txt".
-'''
+# modified for ionique by Ali Fallahi.
+"""
+Cython implementations of ionic current parsers.
+
+This module contains optimized Cython implementations of the segmentation parser (SpeedyStatSplit) defined
+in parsers.py. Variance-based recursive segmentation is provided by
+`FastStatSplit`, which is approximately 50-100x faster than the equivalent
+pure-Python implementation. 
+
+Modules
+-------
+FastStatSplit
+    Cython implementation of the StatSplit variance-based segmenter.
+pairwise
+    Utility generator yielding consecutive pairs from an iterable.
+"""
 
 import numpy as np
 cimport numpy as np
@@ -39,15 +48,65 @@ cdef inline double var_c( int start, int end, double [:] c, double [:] c2 ):
 		((c[end-1]-c[start-1])/(end-start))**2
 
 def pairwise(iterable):
+	"""
+	Return an iterator of overlapping pairs from the input iterable.
+
+	Parameters
+	----------
+	iterable : iterable
+	    Any iterable to consume. Each element is paired with its immediate
+	    successor, so an input of length n yields n-1 pairs.
+
+	Returns
+	-------
+	zip
+	    An iterator of (a, b) tuples where b immediately follows a in the
+	    original iterable.
+	"""
 	a, b = tee(iterable)
 	next(b, None)
 	return zip(a, b)
 
 cdef class FastStatSplit:
-	'''
-	A cython implementation of the segmenter written by Kevin Karplus. Sped up approximately 50-100x
-	compared to the Python implementation depending on parameters.
-	'''
+	"""
+	Cython implementation of the variance-based signal segmenter by Kevin Karplus.
+
+	Approximately 50-100x faster than the equivalent pure-Python implementation
+	depending on parameters. Segments a 1D ionic current trace by recursively
+	finding split points that maximize the reduction in total variance across
+	the two resulting sub-segments.
+
+	Parameters
+	----------
+	min_width : int, optional
+	    Minimum number of samples required in any segment. Defaults to 100.
+	max_width : int, optional
+	    Maximum number of samples allowed in any segment before a forced split
+	    is inserted. Defaults to 1000000.
+	window_width : int, optional
+	    Width of the sliding window used during stepwise split search.
+	    Must be >= 2 * min_width. Defaults to 10000.
+	min_gain_per_sample : float or None, optional
+	    If provided, uses the legacy method for setting the gain threshold
+	    (deprecated). Defaults to None.
+	false_positive_rate : float or None, optional
+	    Expected number of false-positive split detections per second. Used in
+	    Bayesian gain threshold calculation. Defaults to sampling_freq.
+	prior_segments_per_second : float or None, optional
+	    Prior expectation of how many true segments occur per second. Used in
+	    Bayesian gain threshold calculation. Defaults to sampling_freq / 2.
+	sampling_freq : float, optional
+	    Sampling frequency of the signal in Hz. Defaults to 1e5.
+	cutoff_freq : float or None, optional
+	    Low-pass cutoff frequency in Hz used to adjust the Bayesian threshold.
+	    Must be <= 0.5 * sampling_freq if provided. Defaults to None.
+
+	Attributes
+	----------
+	min_gain : float
+	    Minimum log-likelihood gain required to accept a split point, computed
+	    from the Bayesian formulation or the legacy min_gain_per_sample method.
+	"""
 
 	cdef int min_width, max_width, window_width, sampling_freq
 	cdef public double min_gain
@@ -56,6 +115,34 @@ cdef class FastStatSplit:
 	def __init__( self, min_width=100, max_width=1000000, window_width=10000,
 		min_gain_per_sample=None, false_positive_rate=None,
 		prior_segments_per_second=None, sampling_freq=1.e5, cutoff_freq=None ):
+		"""
+		Initialize FastStatSplit and compute the minimum gain threshold.
+
+		Parameters
+		----------
+		min_width : int, optional
+		    Minimum number of samples in any segment. Defaults to 100.
+		max_width : int, optional
+		    Maximum number of samples before a forced split. Defaults to 1000000.
+		window_width : int, optional
+		    Width of the sliding search window. Must be >= 2 * min_width.
+		    Defaults to 10000.
+		min_gain_per_sample : float or None, optional
+		    Legacy gain-per-sample threshold (deprecated). If provided,
+		    `min_gain` is set to `min_gain_per_sample * window_width`.
+		    Defaults to None.
+		false_positive_rate : float or None, optional
+		    Expected false-positive splits per second for the Bayesian
+		    threshold. Defaults to `sampling_freq`.
+		prior_segments_per_second : float or None, optional
+		    Prior rate of true segments per second for the Bayesian threshold.
+		    Defaults to `sampling_freq / 2`.
+		sampling_freq : float, optional
+		    Sampling frequency of the signal in Hz. Defaults to 1e5.
+		cutoff_freq : float or None, optional
+		    Low-pass cutoff frequency in Hz for threshold adjustment.
+		    Must be <= 0.5 * sampling_freq. Defaults to None.
+		"""
 
 		self.min_width = min_width
 		self.max_width = max_width
@@ -102,9 +189,24 @@ cdef class FastStatSplit:
 		self.min_gain *= 2
 
 	def parse( self, current ):
-		'''
-		Wrapper function for the segmentation, which is implemented in cython.
-		'''
+		"""
+		Segment a current trace and return a list of Segment objects.
+
+		Computes cumulative sum arrays for efficient variance calculations,
+		then recursively finds split points and constructs one `Segment` per
+		detected sub-segment, each containing its slice of the current array.
+
+		Parameters
+		----------
+		current : numpy.ndarray
+		    1D array of ionic current values to segment.
+
+		Returns
+		-------
+		list[Segment]
+		    A list of `Segment` objects covering the full input array with no
+		    gaps or overlaps.
+		"""
 
 		cdef list break_points
 		self.c = np.cumsum( current )
@@ -118,9 +220,23 @@ cdef class FastStatSplit:
 		return segments
 
 	def parse_meta( self, current ):
-		'''
-		Wrapper function for the segmentation, which is implemented in cython. returns meta segments (no current array)
-		'''
+		"""
+		Segment a current trace and return lightweight MetaSegment objects.
+
+		Identical to `parse` but constructs `MetaSegment` instances instead of
+		`Segment` instances, so no signal data is stored in each node.
+
+		Parameters
+		----------
+		current : numpy.ndarray
+		    1D array of ionic current values to segment.
+
+		Returns
+		-------
+		list[MetaSegment]
+		    A list of `MetaSegment` objects covering the full input array with
+		    no gaps or overlaps.
+		"""
 		cdef list break_points
 		self.c = np.cumsum( current )
 		self.c2 = np.cumsum( np.multiply( current, current ) )
@@ -133,13 +249,21 @@ cdef class FastStatSplit:
 		return segments
 
 	def best_single_split( self, current ):
-		'''
-		Wrapper for a single call to _best_single_split. It will find the
-		single best split in a series of current, and return the index of
-		that split. Returns a tuple of ( gain, index ) where gain is the
-		gain in variance by splitting there, and index is the index at which
-		the split should occur in the current array. 
-		'''
+		"""
+		Find the single best split point in the entire current array.
+
+		Parameters
+		----------
+		current : numpy.ndarray
+		    1D array of ionic current values to analyze.
+
+		Returns
+		-------
+		tuple[float, int]
+		    A tuple of (gain, index) where gain is the log-likelihood gain in
+		    variance achieved by splitting at the returned index, and index is
+		    the position in the current array at which the split should occur.
+		"""
 
 		self.c = np.cumsum( current )
 		self.c2 = np.cumsum( np.multiply( current, current ) )
@@ -147,11 +271,7 @@ cdef class FastStatSplit:
 		return self._best_single_split()
 
 	cdef tuple _best_single_split( self ):
-		'''
-		A slghtly modification of _best_split_stepwise, ensuring that the
-		single best split is returned instead of only ones which meet a
-		threshold.
-		'''
+		"""Return the single highest-gain split across the entire stored cumulative arrays, ignoring the min_gain threshold."""
 
 		cdef int start = 0, end = len( self.c ) - 1, i, x = -1
 		cdef double var_summed, low_var_summed, high_var_summed, gain
@@ -171,10 +291,7 @@ cdef class FastStatSplit:
 
 	@cython.boundscheck(False)
 	cdef int _best_split_stepwise( self, int start, int end ):
-		'''
-		Find the best split in a segment between start and end. Calculate best
-		split by maximizing the change in variance.
-		'''
+		"""Find the index of the best variance-reducing split between start and end, or -1 if none meets min_gain."""
 
 		if end-start <= 2*self.min_width:
 			return -1 
@@ -193,10 +310,7 @@ cdef class FastStatSplit:
 		return x
 
 	cdef list _recursive_split( self, int start, int end ):
-		'''
-		Find the best splits recursively in the current until you get to the
-		minimum width possible, and have looked at the entire 
-		'''
+		"""Recursively split the segment [start, end) and return a sorted list of all breakpoint indices."""
 
 		cdef int pseudostart, pseudoend, split_at = -1
 
@@ -218,12 +332,29 @@ cdef class FastStatSplit:
 			self._recursive_split( split_at, end )
 
 	def score_samples( self, current, no_split=False ):
-		'''
-		Return a series of lists scoring each sample. However, this isn't just
-		scoring each sample once. Every time a split is detected, it will return
-		a new list with newly scored samples. In essence, it returns one list
-		per scan of the current using the recursive method.
-		'''
+		"""
+		Return per-sample log-likelihood gain scores for each recursive scan.
+
+		For each recursive sweep across the data, a score array is produced
+		recording the variance-gain value evaluated at every candidate split
+		position. One score array is returned per scan; splits detected during
+		a scan trigger further recursive scans of the resulting sub-segments.
+
+		Parameters
+		----------
+		current : numpy.ndarray
+		    1D array of ionic current values to score.
+		no_split : bool, optional
+		    If True, perform only a single (non-recursive) scan and return one
+		    score array without looking for further splits. Defaults to False.
+
+		Returns
+		-------
+		list[numpy.ndarray]
+		    A list of score arrays, one per recursive scan. Each array has the
+		    same length as the stored cumulative array and contains the
+		    log-likelihood gain at each sample index.
+		"""
 
 		self.c = np.cumsum( current )
 		self.c2 = np.cumsum( np.multiply( current, current ) )
@@ -231,11 +362,7 @@ cdef class FastStatSplit:
 
 	@cython.boundscheck(False)
 	cdef tuple _best_split_stepwise_score( self, int start, int end ):
-		'''
-		Find the best split in a segment between start and end. Calculate best
-		split by maximizing the change in variance, and return the log score of
-		each sample which has been viewed. 
-		'''
+		"""Find the best split between start and end and return (split_index, score_array) with per-sample gain values."""
 
 		if end-start <= 2*self.min_width:
 			return -1, []
@@ -256,10 +383,7 @@ cdef class FastStatSplit:
 		return x, score
 
 	cdef list _recursive_split_scoring( self, int start, int end, int no_split ):
-		'''
-		A copy of the _recursive_split method, but returning the score of the
-		samples for each recursive sweep across the data.
-		'''
+		"""Recursively split [start, end) and accumulate per-scan score arrays, mirroring _recursive_split logic."""
 
 		cdef int pseudostart, pseudoend, split_at = -1
 		cdef np.ndarray score
