@@ -14,7 +14,7 @@ io
     File readers for nanopore data formats: EDH, OPT, and ABF. Handles
     loading, metadata extraction, and unit scaling.
 utils
-    Signal processing utilities and the Singleton metaclass used by
+    Signal processing utilities such as filters and feature extraction helpers.
     
 parsers
     Event detection parsers (SpikeParser, AutoSquareParser) that operate on
