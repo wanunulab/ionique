@@ -6,7 +6,7 @@ Submodules
 ----------
 core
     Segment tree hierarchy (AbstractSegmentTree, MetaSegment, Segment) for
-    organizing and recursively parsing ionic current signal data.
+    organizing and recursively parsing ionic current signal data. core is rarely imported by the user. 
 datatypes
     Data containers including TraceFile for wrapping loaded traces and
     SessionFileManager (singleton) for managing a session's loaded files.
