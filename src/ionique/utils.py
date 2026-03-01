@@ -38,25 +38,35 @@ class Singleton(type):
 
     def __init__(self, *args, **kwargs):
         """
-        Class initialization
+        Initialize the metaclass and set the singleton instance to None.
 
-        :param args: Arguments for the class
-        :param kwargs: Keyword arguments for the class
+        Parameters
+        ----------
+        args : tuple
+            Arguments for the class.
+        kwargs : dict
+            Keyword arguments for the class.
         """
         self.__instance = None
         super().__init__(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
         """
-        Returns the Singleton instance.
+        Return the Singleton instance, creating it if it does not yet exist.
 
-        It creates the instance if it doesn't exist the instance does not exist.
         If the instance exists, it is returned as-is.
 
-        :param args: Arguments for the class constructor.
-        :param kwargs: Keyword arguments for the class constructor.
-        :return: The Singleton instance.
-        :rtype: object
+        Parameters
+        ----------
+        args : tuple
+            Arguments for the class constructor.
+        kwargs : dict
+            Keyword arguments for the class constructor.
+
+        Returns
+        -------
+        object
+            The Singleton instance.
         """
         if self.__instance is None:
             self.__instance = super().__call__(*args, **kwargs)
@@ -75,17 +85,26 @@ def split_voltage_steps(voltage: np.ndarray, n_remove=0, as_tuples=False):
     `n_remove` parameter. The output can either be two separate arrays of start and end
     indices, or a list of tuples representing each segment.
 
-    :param voltage: 1D voltage signal array to be segmented.
-    :type voltage: numpy.ndarray
-    :param n_remove: Number of samples to remove from the start of each split. Defaults to 0.
-    :type n_remove: int
-    :param as_tuples: If True, returns a list of (start, end) index tuples. If False, returns two arrays: start_indices and end_indices. Defaults to False.
-    :type as_tuples: bool
-    :raises ValueError:  If `n_remove` is negative or larger than the start of the voltage changes.
-    :return: Either:
-              - A tuple of (start_indices, end_indices), where each is a numpy array of indices.
-              - A list of (start, end) tuples if `as_tuples=True`.
-    :rtype: tuple[numpy.ndarray, numpy.ndarray] or list[tuple[int, int]]
+    Parameters
+    ----------
+    voltage : numpy.ndarray
+        1D voltage signal array to be segmented.
+    n_remove : int, optional
+        Number of samples to remove from the start of each split. Defaults to 0.
+    as_tuples : bool, optional
+        If True, returns a list of (start, end) index tuples. If False, returns
+        two arrays: start_indices and end_indices. Defaults to False.
+
+    Returns
+    -------
+    tuple[numpy.ndarray, numpy.ndarray] or list[tuple[int, int]]
+        Either a tuple of (start_indices, end_indices) where each is a numpy
+        array of indices, or a list of (start, end) tuples if `as_tuples=True`.
+
+    Raises
+    ------
+    ValueError
+        If `n_remove` is negative or larger than the start of the voltage changes.
     """
 
     # Check if the current or voltage arrays are empty
@@ -121,17 +140,29 @@ def si_eval(value, unit=None, return_unit=False):
     This utility is useful when parsing human-readable measurement strings or standardizing
     units across data pipelines that mix strings and numeric formats.
 
-    :param value: The value to be converted. Can be a string like "1.2 kHz" or a numeric value (int or float).
-    :type value: str or float
-    :param unit: The unit string (e.g., "kHz", "mV"). Required only if `value` is a numeric type.
-    :type unit: str, optional
-    :param return_unit: If True, returns a tuple containing the converted numeric value and the base unit (e.g., 'Hz').
-                        If False, only the numeric value is returned.
-    :type return_unit: bool, optional
-    :raises ValueError: If the input format is invalid or the unit is missing for numeric input.
-    :raises TypeError: If the value is neither a string nor a numeric type.
-    :return: The converted value, optionally paired with the base unit.
-    :rtype: float or tuple[float, str]
+    Parameters
+    ----------
+    value : str or float
+        The value to be converted. Can be a string like "1.2 kHz" or a numeric
+        value (int or float).
+    unit : str, optional
+        The unit string (e.g., "kHz", "mV"). Required only if `value` is a
+        numeric type.
+    return_unit : bool, optional
+        If True, returns a tuple containing the converted numeric value and the
+        base unit (e.g., 'Hz'). If False, only the numeric value is returned.
+
+    Returns
+    -------
+    float or tuple[float, str]
+        The converted value, optionally paired with the base unit.
+
+    Raises
+    ------
+    ValueError
+        If the input format is invalid or the unit is missing for numeric input.
+    TypeError
+        If the value is neither a string nor a numeric type.
     """
     # If value is a string, split it to separate the value from unit
     if isinstance(value, str):
@@ -161,8 +192,10 @@ def _get_prefix_val() -> dict:
 
     This function is used internally to provide the SI prefix values.
 
-    :return: A dictionary mapping SI prefixes to their values.
-    :rtype: dict
+    Returns
+    -------
+    dict
+        A dictionary mapping SI prefixes to their multiplier values.
     """
 
     prefix = {
@@ -188,10 +221,15 @@ def _si_multiplier_unit(unitstr: str) -> float:
     Given a single character string (SI prefix) it
     returns the corresponding multiplier value.
 
-    :param unitstr: A single character string = SI prefix.
-    :type unitstr: str
-    :return: The multiplier corresponding to the given SI prefix.
-    :rtype: float
+    Parameters
+    ----------
+    unitstr : str
+        A single character string representing an SI prefix.
+
+    Returns
+    -------
+    float
+        The multiplier corresponding to the given SI prefix.
     """
 
     if unitstr in _get_prefix_val():
@@ -202,26 +240,34 @@ def _si_multiplier_unit(unitstr: str) -> float:
 @dataclass
 class Filter:
     """
-    This class allows a user to apply low-pass, high-pass,
-    band-pass, or band-stop filters using standard filter types (Butterworth or Bessel).
-    Filters are implemented using second-order sections (SOS) for numerical stability and
-    can be applied in either forward-only or bidirectional mode.
+    Apply low-pass, high-pass, band-pass, or band-stop filters using SOS form.
 
-    :param cutoff_frequency: The cutoff frequency or frequency band for the filter in Hz.
-                            For band filters, provide the band center or list of [low, high] values.
-    :type cutoff_frequency: float or list[float]
-    :param filter_type: The type of filter to apply. Options are "lowpass", "highpass", "bandpass", or "bandstop".
-    :type filter_type: Literal["lowpass", "highpass", "bandpass", "bandstop"]
-    :param filter_method: The filter method. Supported options: "butter" (Butterworth), "bessel". Defaults to "butter".
-    :type filter_method: Literal["butter", "bessel"]
-    :param order: The order of the filter. Must be >= 1. Defaults to 2.
-    :type order: int
-    :param bidirectional: If True, applies filtering forward and backward using `sosfiltfilt`.
-                          If False, uses causal `sosfilt`. Defaults to True.
-    :type bidirectional: bool
-    :param sampling_frequency: Sampling frequency of the signal in Hz.
-    :type sampling_frequency: float, optional
+    Filters are implemented using second-order sections (SOS) for numerical
+    stability and can be applied in either forward-only or bidirectional mode.
 
+    Parameters
+    ----------
+    cutoff_frequency : float or list[float]
+        The cutoff frequency or frequency band for the filter in Hz. For band
+        filters, provide a list of [low, high] values.
+    filter_type : Literal["lowpass", "highpass", "bandpass", "bandstop"]
+        The type of filter to apply.
+    filter_method : Literal["butter", "bessel"], optional
+        The filter design method. Supported options: "butter" (Butterworth) and
+        "bessel". Defaults to "butter".
+    order : int, optional
+        The order of the filter. Must be >= 1. Defaults to 2.
+    bidirectional : bool, optional
+        If True, applies filtering forward and backward using `sosfiltfilt`.
+        If False, uses causal `sosfilt`. Defaults to True.
+    sampling_frequency : float, optional
+        Sampling frequency of the signal in Hz.
+
+    Attributes
+    ----------
+    sos : numpy.ndarray
+        Second-order sections representation of the filter, computed after
+        initialization when `sampling_frequency` is provided.
     """
     cutoff_frequency: float
     filter_type: Literal["lowpass", "highpass", "bandpass", "bandstop"]
@@ -253,6 +299,28 @@ class Filter:
             raise ValueError(f"Unsupported filter method: {self.filter_method}")
 
     def __call__(self, current, sampling_frequency=None):
+        """
+        Apply the filter to a signal array in-place.
+
+        Parameters
+        ----------
+        current : numpy.ndarray
+            The signal array to filter. Modified in-place.
+        sampling_frequency : float, optional
+            Sampling frequency in Hz. Overrides the instance attribute if
+            provided. Required if not set at construction time.
+
+        Returns
+        -------
+        None
+            The array is modified in-place; nothing is returned.
+
+        Raises
+        ------
+        ValueError
+            If no sampling frequency is available from either the instance
+            attribute or this argument.
+        """
         if self.sampling_frequency is None and sampling_frequency is None:
             raise ValueError("Sampling frequency must be provided.")
 
@@ -270,22 +338,24 @@ class Filter:
 @dataclass
 class ClockFilter:
     """
-    This special filter removes a singular frequency from the signal. 
-    If the power spectral density of a signal contains a very narrow and sharp peak at one frequency, caused by EMF interference from a digital signal, this filter can eliminate its effect.
-    This is not a notch filter, it effectively subtracts a phase-matching sine wave of an exact frequency from the signal.
-    If multiple clock frequencies or harmonics exist, use once for each frequency.
-    The clock filter can be used before, after, or without low-pass filtering. 
-    Constructor returns a callable, which would filter the signal inplace.
+    Remove a single periodic clock frequency from a signal by sine-wave subtraction.
 
-    :param clock_frequency: clock frequency to be removed in Hz.
-    :type clock_frequency: float
-    
-    :param section_length: length of sections (in seconds) to use in noise estimation. Each section is filtered independently. 
-    :type section_length: float
-    
-    :param sampling_frequency: Sampling frequency of the signal in Hz.
-    :type sampling_frequency: float, optional
+    If the power spectral density of a signal contains a very narrow and sharp
+    peak at one frequency caused by EMF interference from a digital signal, this
+    filter can eliminate its effect. Unlike a notch filter, it subtracts a
+    phase-matching sine wave of the exact frequency from the signal. For multiple
+    clock frequencies or harmonics, apply once per frequency. Can be used before,
+    after, or without low-pass filtering.
 
+    Parameters
+    ----------
+    clock_frequency : float
+        Clock frequency to be removed, in Hz.
+    section_length : float, optional
+        Length of sections in seconds to use for noise estimation. Each section
+        is filtered independently. Defaults to 0.5.
+    sampling_frequency : float, optional
+        Sampling frequency of the signal in Hz.
     """
     clock_frequency: float
     section_length: float = field(default=0.5, metadata={"min":0.000001}) #in seconds
@@ -294,7 +364,30 @@ class ClockFilter:
     
 
     def __call__(self, current, sampling_frequency=None):
-        """Run the filter inplace in a memory efficient way, without duplicating the full array in the process."""
+        """
+        Run the clock filter in-place in a memory-efficient way.
+
+        Processes the signal in sections without duplicating the full array.
+
+        Parameters
+        ----------
+        current : numpy.ndarray
+            1D signal array to filter. Modified in-place.
+        sampling_frequency : float, optional
+            Sampling frequency in Hz. Overrides the instance attribute if
+            provided. Required if not set at construction time.
+
+        Returns
+        -------
+        None
+            The array is modified in-place; nothing is returned.
+
+        Raises
+        ------
+        ValueError
+            If no sampling frequency is available from either the instance
+            attribute or this argument, or if `current` is not 1D.
+        """
         if self.sampling_frequency is None and sampling_frequency is None:
             raise ValueError("Sampling frequency must be provided.")
 
@@ -434,18 +527,21 @@ class Trimmer:
     """
     Segment trimming utility for hierarchical signal data.
 
-    This class operates on a segment tree. It traverses segments of a given rank (e.g., "vstep") and trims
-    a fixed number of samples from the start of each segment. The resulting trimmed segments are added
-    as new child segments with a specified new rank (e.g., "vstepgap").
+    Traverses segments of a given rank and trims a fixed number of samples from
+    the start of each segment. The resulting trimmed segments are added as new
+    child segments with a specified new rank. Useful when initial samples of each
+    segment contain artifacts that should be excluded from analysis.
 
-    This is useful when initial samples of each segment include artifacts that should be excluded from analysis.
-
-    :param samples_to_remove: Number of samples to trim from the beginning of each segment.
-    :type samples_to_remove: int
-    :param rank: The hierarchical rank of segments to target for trimming. Defaults to "vstep".
-    :type rank: str
-    :param newrank: The rank name to assign to newly created trimmed child segments. Defaults to "vstepgap".
-    :type newrank: str
+    Parameters
+    ----------
+    samples_to_remove : int
+        Number of samples to trim from the beginning of each segment.
+    rank : str, optional
+        The hierarchical rank of segments to target for trimming.
+        Defaults to "vstep".
+    newrank : str, optional
+        The rank name to assign to newly created trimmed child segments.
+        Defaults to "vstepgap".
     """
     samples_to_remove: int
     rank: str = "vstep"
@@ -453,7 +549,23 @@ class Trimmer:
 
     def __call__(self, trace_file):
         """
-        Trim segments within 'vstep' and create 'vstepgap' children.
+        Trim segments within the target rank and create child segments.
+
+        Traverses all segments of `self.rank` in `trace_file` and, for each
+        segment longer than `samples_to_remove`, adds a new child
+        `MetaSegment` of rank `self.newrank` starting after the trimmed
+        samples.
+
+        Parameters
+        ----------
+        trace_file : object
+            A segment tree object that implements `traverse_to_rank()` and
+            `add_child()`.
+
+        Returns
+        -------
+        None
+            Child segments are added in-place to the tree; nothing is returned.
         """
         for v in trace_file.traverse_to_rank(self.rank):
             if v.end - v.start > self.samples_to_remove:
@@ -479,19 +591,43 @@ def extract_features(seg, bottom_rank, extractions: list[str], add_ons: dict = {
     This is useful for generating structured datasets from annotated traces for statistical analysis or
     machine learning.
 
-    :param seg: The root segment or trace object containing a hierarchical structure. It must implement `traverse_to_rank()` and support `get_feature()`.
-    :type seg: object
-    :param bottom_rank: The rank name of the lowest-level segments from which to extract features.
-    :type bottom_rank: str
-    :param extractions: List of feature names to extract directly using `get_feature()` on each segment.
-                        Common examples include: 'mean', 'frac', 'duration', 'baseline', 'current', 'wrap', 'start'.
-    :type extractions: list[str]
-    :param add_ons: A dictionary of fixed key-value pairs to include as constant columns in the resulting DataFrame.
-    :type add_ons: dict
-    :param lambdas: A dictionary mapping column names to lambda functions that compute derived values from each segment.
-    :type lambdas: dict
-    :return: A pandas DataFrame where each row corresponds to a bottom-rank segment and columns represent extracted and computed features.
-    :rtype: pandas.DataFrame
+    Parameters
+    ----------
+    seg : object
+        The root segment or trace object containing a hierarchical structure.
+        Must implement `traverse_to_rank()` and support `get_feature()`.
+    bottom_rank : str
+        The rank name of the lowest-level segments from which to extract
+        features.
+    extractions : list[str]
+        List of feature names to extract directly using `get_feature()` on
+        each segment. Common examples include: 'mean', 'frac', 'duration',
+        'baseline', 'current', 'wrap', 'start'.
+    add_ons : dict, optional
+        A dictionary of fixed key-value pairs to include as constant columns
+        in the resulting DataFrame.
+    lambdas : dict, optional
+        A dictionary mapping column names to lambda functions that compute
+        derived values from each segment.
+
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame where each row corresponds to a bottom-rank segment and
+        columns represent extracted and computed features.
+
+    Examples
+    --------
+    >>> df = extract_features(
+    ...     seg,
+    ...     bottom_rank='event',
+    ...     extractions=['mean', 'frac', 'duration', 'baseline', 'current', 'wrap', 'start'],
+    ...     add_ons={"sample_type": "MBP_D10"},
+    ...     lambdas={
+    ...         "Voltage": lambda seg: int(1000 * seg.get_feature("voltage")),
+    ...         "start_time": lambda seg: seg.start / seg.get_feature("eff_sampling_freq"),
+    ...     },
+    ... )
     """
     headers = extractions + list(add_ons.keys()) + list(lambdas.keys())
 

@@ -10,8 +10,48 @@ import matplotlib.pyplot as plt
 
 
 def qp_trace(seg:AnySegment|None = None, ranks=["vstepgap","event"],downsamples={"vstepgap":50,"event":1},fig_size=(6,5),ranks_kwargs={},fig_kwargs={},plot_voltage:Literal["same","split",None]=None):
-    """
-    quickly plot a trace, or segment.
+    """Quickly plot a trace or segment at one or more hierarchy ranks.
+
+    Traverses the segment tree down to each requested rank and overlays the
+    corresponding current traces on a Matplotlib figure. If ``seg`` is ``None``
+    or a :class:`~ionique.datatypes.SessionFileManager`, all top-level files in
+    the current session are plotted as separate figures.
+
+    Parameters
+    ----------
+    seg : AnySegment or None, optional
+        Segment to plot. If ``None`` or a ``SessionFileManager``, the function
+        iterates over all children of the active session. Defaults to ``None``.
+    ranks : list of str, optional
+        Hierarchy ranks to draw, e.g. ``["vstepgap", "event"]``. Each rank is
+        plotted as a separate pass over the trace. Defaults to
+        ``["vstepgap", "event"]``.
+    downsamples : dict, optional
+        Mapping from rank name to integer downsample factor. Every N-th sample
+        is plotted for the corresponding rank. Defaults to
+        ``{"vstepgap": 50, "event": 1}``.
+    fig_size : tuple of float, optional
+        ``(width, height)`` in inches passed to :func:`matplotlib.pyplot.subplots`.
+        Defaults to ``(6, 5)``.
+    ranks_kwargs : dict, optional
+        Mapping from rank name to a dict of keyword arguments forwarded to
+        :func:`matplotlib.axes.Axes.plot` for that rank. Defaults to ``{}``.
+    fig_kwargs : dict, optional
+        Additional keyword arguments forwarded to
+        :func:`matplotlib.pyplot.subplots`. Defaults to ``{}``.
+    plot_voltage : {"same", "split", None}, optional
+        Controls voltage overlay behaviour:
+
+        - ``None`` — no voltage panel (default).
+        - ``"same"`` — voltage plotted on a twin y-axis (right, red).
+        - ``"split"`` — voltage plotted in a separate subplot below the
+          current trace with a 2:1 height ratio.
+
+    Returns
+    -------
+    None
+        Figures are created via :mod:`matplotlib.pyplot` and displayed inline
+        (in Jupyter) or rendered to the active backend.
     """
 
     if seg is None or type(seg) is SessionFileManager:
@@ -87,11 +127,12 @@ pn.extension()
 # -----------------------------
 
 def _is_arraylike(x) -> bool:
+    """Return True if x is a numpy array, list, or tuple."""
     return isinstance(x, (np.ndarray, list, tuple))
 
 
 def _non_array_columns(df: pd.DataFrame) -> List[str]:
-    """Return columns whose values are not arrays in any row (ignoring NaNs)."""
+    """Return column names whose values are not array-like in any non-null row."""
     cols = []
     for c in df.columns:
         s = df[c]
@@ -106,7 +147,7 @@ def _non_array_columns(df: pd.DataFrame) -> List[str]:
 
 
 def _categorical_candidates(df: pd.DataFrame) -> List[str]:
-    """Non-array columns that can be used for color grouping (object/category or small unique count)."""
+    """Return non-array column names suitable for color grouping (object/category dtype or low cardinality numerics)."""
     candidates = []
     for c in _non_array_columns(df):
         s = df[c]
@@ -120,6 +161,7 @@ def _categorical_candidates(df: pd.DataFrame) -> List[str]:
 
 
 def _numeric_non_array_columns(df: pd.DataFrame) -> List[str]:
+    """Return non-array column names that have a numeric dtype."""
     cols = []
     for c in _non_array_columns(df):
         if pd.api.types.is_numeric_dtype(df[c]):
@@ -128,6 +170,7 @@ def _numeric_non_array_columns(df: pd.DataFrame) -> List[str]:
 
 
 def _detect_array_columns(df: pd.DataFrame) -> List[str]:
+    """Return column names that contain at least one array-like value in any non-null row."""
     cols = []
     for c in df.columns:
         s = df[c]
@@ -137,9 +180,27 @@ def _detect_array_columns(df: pd.DataFrame) -> List[str]:
 
 
 def find_offset_samples(wrap: np.ndarray, current: np.ndarray, atol: float = 1e-8) -> Optional[int]:
-    """
-    Find the start index k in `wrap` where `current` best aligns by exact subsequence match (within atol).
-    Returns k if found (0-based), else None. This is a direct sliding-window allclose check.
+    """Find the start index in ``wrap`` where ``current`` aligns by exact subsequence match.
+
+    Uses a sliding-window :func:`numpy.allclose` check to find the 0-based index
+    ``k`` such that ``wrap[k : k + len(current)]`` matches ``current`` within
+    absolute tolerance ``atol``.
+
+    Parameters
+    ----------
+    wrap : numpy.ndarray
+        The longer context array to search within.
+    current : numpy.ndarray
+        The shorter event array to locate inside ``wrap``.
+    atol : float, optional
+        Absolute tolerance passed to :func:`numpy.allclose`. Defaults to ``1e-8``.
+
+    Returns
+    -------
+    int or None
+        0-based start index ``k`` if a matching subsequence is found, or ``None``
+        if no match is found, either array is empty, or ``current`` is longer than
+        ``wrap``.
     """
     if wrap is None or current is None:
         return None
@@ -157,8 +218,21 @@ def find_offset_samples(wrap: np.ndarray, current: np.ndarray, atol: float = 1e-
 
 
 def compute_sampling_frequency(row: pd.Series) -> Optional[float]:
-    """Per spec: sampling_frequency = row['start'] / row['start_time'].
-    Returns None if invalid or missing."""
+    """Compute the sampling frequency from a DataFrame row using ``start / start_time``.
+
+    Parameters
+    ----------
+    row : pandas.Series
+        A single row from an event DataFrame. Expected to contain numeric
+        ``"start"`` (sample index) and ``"start_time"`` (time in seconds)
+        fields.
+
+    Returns
+    -------
+    float or None
+        Sampling frequency in Hz, or ``None`` if either field is missing,
+        ``NaN``, or ``start_time`` is zero.
+    """
     try:
         start = row["start"]
         start_time = row["start_time"]
@@ -185,12 +259,31 @@ from bokeh.models import (
 
 
 def dashboard_event_inspection(df: pd.DataFrame):
-    """
-    Panel + Bokeh dashboard for exploring ionic current events.
+    """Build an interactive Panel + Bokeh dashboard for exploring ionic current events.
 
-    Adds:
-      • Voltage filter (single-select) to show only events at a chosen voltage.
-      • Group-by dropdown still controls coloring (can select 'voltage' there too).
+    Renders a scatter plot of any two numeric columns with optional color
+    grouping and a voltage filter. Clicking a point in the scatter view loads
+    the corresponding event's raw ``current`` and ``wrap`` arrays into a
+    time-series panel alongside detected sub-segment overlays.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Event feature table, typically produced by
+        :func:`~ionique.simple.get_standard_features`. Expected columns include
+        numeric feature columns (e.g. ``"mean"``, ``"duration"``), plus
+        ``"current"`` and ``"wrap"`` array columns, ``"start"`` and
+        ``"start_time"`` for time-axis reconstruction, and optionally
+        ``"Voltage"`` for voltage filtering and ``"subevent_starts"`` /
+        ``"subevent_ends"`` for sub-segment overlay.
+
+    Returns
+    -------
+    panel.Column
+        A Panel layout containing the axis/group/voltage control widgets, the
+        Bokeh scatter pane, and the Bokeh event time-series figure.
+    panel.pane.Markdown
+        An error pane if ``df`` is empty or not a valid DataFrame.
     """
     if not isinstance(df, pd.DataFrame) or df.empty:
         return pn.pane.Markdown("❌ DataFrame is empty or invalid.")
@@ -484,19 +577,65 @@ def dashboard_event_inspection(df: pd.DataFrame):
 
 
 def qp_scatter(**args):
-  """
-  quickly generate a scatterplot from specified parameters. wrapper for seaborn scatterplot
-  """
-  pass
+    """Quickly generate a scatter plot from specified parameters.
+
+    Intended as a convenience wrapper around seaborn's ``scatterplot``.
+
+    Parameters
+    ----------
+    **args
+        Keyword arguments to be forwarded to the underlying plot function.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The Axes object containing the scatter plot.
+
+    Notes
+    -----
+    Not yet implemented.
+    """
+    pass
 
 def qp_histogram(**args):
-  """
-  quickly plot a 1-D histogram from specified parameter. wrapper for seaborn histplot
-  """
-  pass
+    """Quickly plot a 1-D histogram from a specified feature column.
+
+    Intended as a convenience wrapper around seaborn's ``histplot``.
+
+    Parameters
+    ----------
+    **args
+        Keyword arguments to be forwarded to the underlying plot function.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The Axes object containing the histogram.
+
+    Notes
+    -----
+    Not yet implemented.
+    """
+    pass
 
 def _get_feature_df_from_segments(**args):
-  """
-  if a qp (non-trace) function receives a segment, extract required features and return a pandas dataframe.
-  """
-  pass
+    """Extract required features from segments and return a pandas DataFrame.
+
+    When a ``qp_*`` convenience function (other than :func:`qp_trace`) receives
+    a segment object instead of a DataFrame, this helper traverses the segment
+    tree, extracts the requested feature columns, and returns them as a
+    ``pandas.DataFrame`` suitable for plotting.
+
+    Parameters
+    ----------
+    **args
+        Keyword arguments specifying the segment source and the features to
+        extract. The exact interface is determined by the calling function.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per leaf segment at the requested rank, with feature columns
+        corresponding to the requested extractions.
+    """
+    pass

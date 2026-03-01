@@ -1,7 +1,24 @@
 # !/usr/bin/env python
 """
-Module ionique.simple
-GUI and Jupyter convinience functions to streamline work for basic users
+Panel and GUI convenience layer for interactive file loading and parser configuration.
+
+This module provides Panel-based widgets and Tkinter dialogs that allow users to
+load nanopore trace files, configure signal filters, run parsers, and save results
+without writing code. It is intended for basic users working in Jupyter notebooks
+or as a standalone Panel application.
+
+Key entry points:
+
+- :func:`panel_load_opt_files` — Panel card for loading and preprocessing ``.opt`` files.
+- :func:`panel_load_edh_files` — Placeholder for EDH file loading (not yet implemented).
+- :func:`panel_parser_AutoSquare` — Panel card for configuring and running AutoSquareParser.
+- :func:`panel_parser_SpeedyStatSplit` — Panel card for configuring SpeedyStatSplit.
+- :func:`panel_parser_Exclusion` — Panel card for exclusion region parsing.
+- :func:`panel_parser_Exclusion_per_file` — Per-file exclusion region panel.
+- :func:`panel_save_dataframe` — Panel card for saving a features DataFrame to disk.
+- :func:`get_standard_features` — Extract standard event features from the current session.
+- :func:`select_files_GUI` — Tkinter file-selection dialog.
+- :func:`load_files_GUI` — Tkinter dialog for loading parameters.
 """
 import os
 from pathlib import Path
@@ -11,6 +28,7 @@ pn = None
 
 
 def _init_panel():
+    """Initialize the Panel library and register the plotly extension if not already done."""
     global pn
     global pn_init
     if pn is None or not pn_init:
@@ -22,20 +40,71 @@ def _init_panel():
 
 
 def panel_load_opt_files(path="~", pattern="*[0-9].opt", title="OPT Files and Parameters"):
+    """Build a Panel card for selecting and loading ``.opt`` files into the current session.
+
+    Wraps :func:`_panel_load_files` with the OPT-specific callback
+    :func:`_panel_load_opt_callback`. The returned card contains a file browser,
+    filter/downsample controls, and a Run button that reads each selected file via
+    :class:`~ionique.io.OPTReader` and adds a :class:`~ionique.datatypes.TraceFile`
+    to the :class:`~ionique.datatypes.SessionFileManager`.
+
+    Parameters
+    ----------
+    path : str, optional
+        Starting directory for the file browser. Defaults to ``"~"``.
+    pattern : str, optional
+        Glob pattern used to filter visible files. Defaults to ``"*[0-9].opt"``.
+    title : str, optional
+        Title shown on the Panel card header. Defaults to ``"OPT Files and Parameters"``.
+
+    Returns
+    -------
+    panel.Card
+        A Panel card widget ready to be displayed in a notebook or served as an app.
+    """
     return _panel_load_files(on_run=_panel_load_opt_callback, path=path, pattern=pattern, title=title)
 
 
 def panel_load_edh_files(path="~", pattern="*.edh", title="EDH Files and Parameters"):
+    """Build a Panel card for selecting and loading ``.edh`` files into the current session.
+
+    Parameters
+    ----------
+    path : str, optional
+        Starting directory for the file browser. Defaults to ``"~"``.
+    pattern : str, optional
+        Glob pattern used to filter visible files. Defaults to ``"*.edh"``.
+    title : str, optional
+        Title shown on the Panel card header. Defaults to ``"EDH Files and Parameters"``.
+
+    Returns
+    -------
+    None
+        Nothing is returned until this function is implemented.
+
+    Notes
+    -----
+    Not yet implemented.
+    """
     print("not implemented yet")
     pass
 
 
 def panel_parser_AutoSquare():
-    """
-    Build a Panel UI to configure and run AutoSquareParser on `session`.
-    Hard-coded:
-      - rules=[lambda event: event.duration > 4]
-      - newrank="event", at_child_rank="vstepgap"
+    """Build a Panel card to configure and run AutoSquareParser on the current session.
+
+    Exposes numeric parameters (threshold baseline, expected conductance, conductance
+    tolerance, wrap padding) as interactive widgets. The following arguments are
+    hard-coded and not exposed in the UI:
+
+    - ``rules=[lambda event: event.duration > 4]``
+    - ``newrank="event"``, ``at_child_rank="clean"``
+
+    Returns
+    -------
+    panel.Card
+        A collapsible Panel card containing parameter inputs, a parser preview pane,
+        and a Run button.
     """
 
     from ionique.datatypes import SessionFileManager
@@ -134,11 +203,20 @@ def panel_parser_AutoSquare():
 
 
 def panel_parser_SpeedyStatSplit():
-    """
-    Build a Panel UI to configure and run SpeedyStatSplit on `session`.
-    Hard-coded:
-      - sampling_freq = session.children[0].metadata["eff_sampling_freq"]
-      - newrank="subevent", at_child_rank="event"
+    """Build a Panel card to configure and run SpeedyStatSplit on the current session.
+
+    Exposes cutoff frequency, window width, minimum width, and false positive rate as
+    interactive widgets. The following arguments are hard-coded and not exposed in the UI:
+
+    - ``sampling_freq`` is derived automatically from
+      ``session.children[0].metadata["eff_sampling_freq"]``.
+    - ``newrank="subevent"``, ``at_child_rank="event"``
+
+    Returns
+    -------
+    panel.Card
+        A collapsible Panel card containing parameter inputs, a sampling frequency
+        info pane, a parser preview pane, and a Run button.
     """
     from ionique.datatypes import SessionFileManager
     from ionique.parsers import SpeedyStatSplit
@@ -215,11 +293,24 @@ def panel_parser_SpeedyStatSplit():
 
 
 def get_standard_features():
-    """
-    Extract standard features from the current session's open files. Also stores the dataframe in session.latest_dataframe.
+    """Extract standard features from the current session's open files.
 
-    :return: df
-    :rtype: pandas.DataFrame
+    Computes a set of per-event scalar and array features using
+    :func:`~ionique.utils.extract_features`. If subevent children are present
+    in the session tree, additional subevent-level columns are included. The
+    resulting DataFrame is also stored as ``session.latest_dataframe`` for
+    use by other panel functions.
+
+    Returns
+    -------
+    pandas.DataFrame
+        One row per event with columns including ``mean``, ``std``, ``frac``,
+        ``duration``, ``current``, ``wrap``, ``start``, ``filename``,
+        ``baseline``, ``Voltage``, ``baseline_conductance``, ``start_time``,
+        and ``parent_start_time``. When subevents are present, additional
+        columns ``subevent_starts``, ``subevent_ends``, ``subevent_mean``,
+        ``subevent_std``, ``subevent_duration``, and ``subevent_count`` are
+        included.
     """
     from ionique.datatypes import SessionFileManager
     from ionique.utils import extract_features
@@ -278,7 +369,19 @@ import pandas as pd
 
 
 def detect_array_columns(df: pd.DataFrame):
-    """Return list of columns that contain at least one numpy.ndarray value."""
+    """Return column names that contain at least one numpy.ndarray value.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The DataFrame to inspect.
+
+    Returns
+    -------
+    list of str
+        Names of columns where at least one non-null cell holds a
+        :class:`numpy.ndarray`.
+    """
     import numpy as np
     cols = []
     for col in df.columns:
@@ -294,13 +397,36 @@ def panel_save_dataframe(
         default_name: str = f"dataset.pkl"  # e.g. "2025-10-15_09-42"
         ,
 ):
-    """
-    A Panel UI that:
-      • Lets you browse the filesystem with FileSelector
-      • Uses the currently viewed path (or a selected folder) as the save directory
-      • Saves .pkl / .csv / .xlsx accordingly
-      • Drops array columns for CSV
-      • Accepts the common typo .xslx -> .xlsx
+    """Build a Panel card for saving a features DataFrame to disk.
+
+    Provides a filesystem browser, a filename input, an overwrite toggle, and a
+    Save button. Supported formats are ``.pkl``, ``.csv``, and ``.xlsx``. Array
+    columns are silently dropped when saving as CSV. The common extension typo
+    ``.xslx`` is automatically corrected to ``.xlsx``.
+
+    If ``df`` is not supplied the function falls back to
+    ``SessionFileManager().latest_dataframe`` (set by :func:`get_standard_features`).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame, optional
+        DataFrame to save. Falls back to ``session.latest_dataframe`` if ``None``.
+    start_dir : str, optional
+        Initial directory shown in the file browser. Defaults to ``"."``.
+    default_name : str, optional
+        Default filename (including extension). A timestamp is appended
+        automatically. Defaults to ``"dataset.pkl"``.
+
+    Returns
+    -------
+    panel.Card
+        A Panel card containing the file browser, filename controls, and status
+        output.
+
+    Raises
+    ------
+    ValueError
+        If ``df`` is ``None`` and no ``latest_dataframe`` is found on the session.
     """
 
     name, ext = os.path.splitext(default_name)
@@ -427,28 +553,47 @@ def _panel_load_files(
         pattern="",
         title="File & Parameters",
 ):
-    """
-    Build a single Panel unit (FileSelector + parameter form) and wire a run callback.
+    """Build a single Panel card (FileSelector + parameter form) and wire a run callback.
 
     Parameters
     ----------
     on_run : callable
-        Function called when the run button is clicked.
-        Signature:
+        Function called when the Run button is clicked. Expected signature::
+
             on_run(
-                file: str | None,
+                files: list[str],
                 voltage_compress: bool,
-                filter_at_all:bool,
+                filter_at_all: bool,
                 downsample: int,
-                cutoff_frequency: int,
+                cutoff_frequency: float,
                 sampling_frequency: int,
                 filter_type: str,
                 filter_method: str,
                 order: int,
                 bidirectional: bool,
                 samples_remove: int,
-            ) -> Optional[panel.Viewable | str | dict]
-        The return value (if any) is rendered in the output area.
+            ) -> panel.Viewable | str | None
+
+        The return value (if any) is rendered in the output area below the form.
+    path : str, optional
+        Starting directory for the file browser. Defaults to ``"~"``.
+    pattern : str, optional
+        Glob pattern used to filter visible files. Must include a recognised
+        ionique file extension. Defaults to ``""``.
+    title : str, optional
+        Title displayed on the Panel card header. Defaults to ``"File & Parameters"``.
+
+    Returns
+    -------
+    panel.Card
+        A Panel card widget containing the file browser and parameter form.
+
+    Raises
+    ------
+    ValueError
+        If ``pattern`` is empty or does not contain a supported file extension.
+    TypeError
+        If ``on_run`` is not callable.
     """
     _init_panel()
     import ionique.io as iqio
@@ -643,6 +788,7 @@ def _panel_load_files(
 
 
 def _panel_load_opt_callback(**params):
+    """Load selected OPT files into the session using parameters collected from the Panel form."""
     from ionique.utils import Filter, Trimmer
     if not params["files"]:
         raise ValueError("No files selected")
@@ -730,33 +876,25 @@ def select_files_GUI():
 
 
 def load_files_GUI():
-    """
-    Create a form with:
-      - 'Compress voltage (only uncheck if voltage is not stepwise, e.g., triangle wave)' : checkbox
-      - 'Apply Filter?' : checkbox
-      - If 'Apply Filter?' checked: dynamic form from the Filter dataclass (types, options, limits).
-    Returns (frame, get_values) where get_values() -> dict with:
-      {'compress_voltage': bool, 'apply_filter': bool, 'filter': Filter|None}
+    """Open a modal Tkinter dialog for selecting file-loading parameters.
+
+    Displays a form with a voltage-compress checkbox, an apply-filter checkbox,
+    a downsample rate input, and a dynamic Filter section derived from the
+    :class:`~ionique.utils.Filter` dataclass. Blocks until the user clicks Run or
+    Cancel.
+
+    Returns
+    -------
+    dict or None
+        A dictionary with keys ``"voltage_compress"`` (bool), ``"apply_filter"``
+        (bool), and ``"filter"`` (:class:`~ionique.utils.Filter` or ``None``), or
+        ``None`` if the user cancels the dialog.
     """
     import tkinter as tk
     from tkinter import ttk, messagebox
     from ionique.utils import Filter
     from dataclasses import dataclass, field, fields, MISSING
     from typing import Literal, Optional, get_origin, get_args, Union
-    """
-    Open a modal Tk dialog with:
-      - 'Compress voltage (only uncheck if voltage is not stepwise, e.g., triangle wave)' checkbox
-      - 'Apply Filter?' checkbox
-      - If checked, a dynamic 'Filter' section derived from the Filter dataclass
-    Returns a dict:
-      {
-        "compress_voltage": bool,
-        "apply_filter": bool,
-        "filter": Filter | None
-      }
-    or None if canceled.
-    The window closes after Run or Cancel.
-    """
     # Create an isolated Tk root for use outside Tk apps (e.g., Jupyter)
     root = tk.Tk()
     # root.withdraw()
@@ -998,8 +1136,25 @@ def load_files_GUI():
 
 
 def panel_select_file(directory: str = "~", file_pattern: str = "opt", title: str = "Select file(s)"):
-    """
-    Panel for building a file selector window
+    """Build a minimal Panel file-selector widget.
+
+    Parameters
+    ----------
+    directory : str, optional
+        Starting directory for the file browser. Defaults to ``"~"``.
+    file_pattern : str, optional
+        Glob pattern for filtering visible files. Defaults to ``"opt"``.
+    title : str, optional
+        Header text displayed above the selector. Defaults to ``"Select file(s)"``.
+
+    Returns
+    -------
+    panel.Column
+        The Panel layout containing the header, file selector, and OK button.
+    callable
+        ``get_values()`` — returns the list of currently selected file paths.
+    panel.widgets.Button
+        The OK button, so callers can attach their own ``on_click`` callback.
     """
 
     pn.extension("tabulator")
@@ -1019,9 +1174,29 @@ def panel_select_file(directory: str = "~", file_pattern: str = "opt", title: st
 
 
 def panel_optreader_minimal(title: str = "OPTReader Parameters", voltage_compress: bool = True, downsample: int = 5):
-    """
-    Minimal form: Voltage compress + Downsample + OK button
+    """Build a minimal Panel form for OPTReader parameters.
 
+    Provides only voltage-compress and downsample controls plus an OK button.
+    For the full set of filter parameters use :func:`panel_optreader_full`.
+
+    Parameters
+    ----------
+    title : str, optional
+        Header text displayed above the form. Defaults to ``"OPTReader Parameters"``.
+    voltage_compress : bool, optional
+        Initial value of the voltage-compress checkbox. Defaults to ``True``.
+    downsample : int, optional
+        Initial downsample rate shown in the input widget. Defaults to ``5``.
+
+    Returns
+    -------
+    panel.Column
+        The Panel layout containing the form widgets and OK button.
+    callable
+        ``get_values()`` — returns a dict with keys ``"voltage_compress"`` (bool)
+        and ``"downsample"`` (int).
+    panel.widgets.Button
+        The OK button, so callers can attach their own ``on_click`` callback.
     """
     import panel as pn
     pn.extension('tabulator')
@@ -1057,9 +1232,51 @@ def panel_optreader_full(
         bidirectional: bool = True,
         samples_remove: int = 100,
 ):
-    """
-    Full preprocessing form, second plot.
+    """Build a full Panel preprocessing form for OPTReader parameters.
 
+    Exposes all signal-filter and downsampling parameters as interactive widgets.
+    For a simpler two-widget form use :func:`panel_optreader_minimal`.
+
+    Parameters
+    ----------
+    title : str, optional
+        Header text displayed above the form.
+        Defaults to ``"OPTReader Parameters for Preprocessing Data"``.
+    voltage_compress : bool, optional
+        Initial value of the voltage-compress checkbox. Defaults to ``True``.
+    downsample : int, optional
+        Initial downsample rate. Defaults to ``5``.
+    cutoff_frequency : int, optional
+        Initial cutoff frequency in Hz. Defaults to ``25000``.
+    sampling_frequency : int, optional
+        Initial sampling frequency in Hz. Defaults to ``250000``.
+    filter_type_options : tuple of str, optional
+        Available filter types. Defaults to
+        ``("lowpass", "highpass", "bandpass", "bandstop")``.
+    filter_method_options : tuple of str, optional
+        Available filter methods. Defaults to ``("bessel", "butter")``.
+    filter_type_default : str, optional
+        Pre-selected filter type. Defaults to ``"lowpass"``.
+    filter_method_default : str, optional
+        Pre-selected filter method. Defaults to ``"butter"``.
+    order : int, optional
+        Initial filter order. Defaults to ``2``.
+    bidirectional : bool, optional
+        Initial state of the bidirectional filter checkbox. Defaults to ``True``.
+    samples_remove : int, optional
+        Initial number of samples to remove per voltage step. Defaults to ``100``.
+
+    Returns
+    -------
+    panel.Column
+        The Panel layout containing all form widgets and the OK button.
+    callable
+        ``get_values()`` — returns a dict with keys ``"voltage_compress"``,
+        ``"downsample"``, ``"cutoff_frequency"``, ``"sampling_frequency"``,
+        ``"filter_type"``, ``"filter_method"``, ``"order"``, ``"bidirectional"``,
+        and ``"samples_remove"``.
+    panel.widgets.Button
+        The OK button, so callers can attach their own ``on_click`` callback.
     """
     pn.extension('tabulator')
 
@@ -1122,9 +1339,38 @@ def panel_filter_from_dataclass(
         show_downsample: bool = True,
         downsample_default: int = 5,
 ):
-    """
-    Panel form for Filter dataclass metadata.
+    """Build a Panel form that dynamically reflects the :class:`~ionique.utils.Filter` dataclass fields.
 
+    Introspects the ``Filter`` dataclass to create an appropriate widget for each
+    field (Select for Literal types, Checkbox for bool, IntInput for int, TextInput
+    for float/Optional[float] and str). Optionally includes voltage-compress and
+    downsample controls above the filter section.
+
+    Parameters
+    ----------
+    title : str, optional
+        Header text displayed above the form. Defaults to ``"Filter Parameters"``.
+    show_voltage_compress : bool, optional
+        Whether to include a voltage-compress checkbox. Defaults to ``True``.
+    voltage_compress_default : bool, optional
+        Initial value of the voltage-compress checkbox. Defaults to ``True``.
+    show_downsample : bool, optional
+        Whether to include a downsample integer input. Defaults to ``True``.
+    downsample_default : int, optional
+        Initial downsample rate. Defaults to ``5``.
+
+    Returns
+    -------
+    panel.Column
+        The Panel layout containing all dynamically generated form widgets and
+        the OK button.
+    callable
+        ``get_values()`` — returns a dict with key ``"filter"``
+        (:class:`~ionique.utils.Filter` instance), and optionally
+        ``"voltage_compress"`` (bool) and/or ``"downsample"`` (int) if the
+        corresponding controls are shown.
+    panel.widgets.Button
+        The OK button, so callers can attach their own ``on_click`` callback.
     """
     from dataclasses import fields, MISSING
     from typing import Literal, get_origin, get_args, Union
@@ -1210,11 +1456,19 @@ def panel_filter_from_dataclass(
 
 
 def panel_parser_Exclusion():
-    """
-    Build a Panel UI to configure and run ExclusionParser on `session`.
+    """Build a Panel card to configure and run ExclusionParser on the current session.
 
-    - Regions are entered as CSV lines: start_sec,end_sec (one per line)
-    - Defaults: newrank="clean", at_child_rank="vstepgap"
+    Regions to exclude are entered as ``start_sec,end_sec`` CSV lines (one per line)
+    in a text area. Both ``newrank`` and ``at_child_rank`` are editable. All files in
+    the session receive the same set of exclusion regions.
+
+    For per-file region specification use :func:`panel_parser_Exclusion_per_file`.
+
+    Returns
+    -------
+    panel.Card
+        A collapsible Panel card containing the region text area, rank inputs,
+        a parser preview pane, and a Run button.
     """
 
     from ionique.datatypes import SessionFileManager
@@ -1326,6 +1580,21 @@ def panel_parser_Exclusion():
 
 
 def panel_parser_Exclusion_per_file():
+    """Build a Panel card for per-file exclusion region configuration and bulk parsing.
+
+    Presents a file selector showing all files currently loaded in the
+    :class:`~ionique.datatypes.SessionFileManager`. Each file can have its own set
+    of ``start_sec,end_sec`` exclusion regions. Files left without any regions are
+    processed through a no-op pass-through parser so that ``newrank`` children are
+    still created consistently. Clicking Run applies the appropriate
+    :class:`~ionique.parsers.ExclusionParser` (or no-op) to every loaded file.
+
+    Returns
+    -------
+    panel.Card or panel.pane.Markdown
+        A collapsible Panel card if files are loaded, or a Markdown error message
+        if no files are found in the session.
+    """
     import panel as pn, pandas as pd
     from ionique.datatypes import SessionFileManager
     from ionique.parsers import ExclusionParser, Parser
@@ -1334,11 +1603,29 @@ def panel_parser_Exclusion_per_file():
     pn.extension()
 
     class NoOpParser(Parser):
+        """Pass-through parser that returns the entire current array as one segment."""
+
         required_parent_attributes = ["current"]
 
-        def __init__(self): super().__init__()
+        def __init__(self):
+            """Initialize the no-op parser."""
+            super().__init__()
 
         def parse(self, current, **kwargs):
+            """Return the full current array as a single segment with no sub-division.
+
+            Parameters
+            ----------
+            current : numpy.ndarray
+                The ionic current array.
+            **kwargs
+                Ignored; accepted for interface compatibility.
+
+            Returns
+            -------
+            list[tuple[int, int, dict]]
+                A single-element list containing ``(0, len(current), {})``.
+            """
             return [(0, len(current), {})]
 
     def _parse_regions_text(txt: str):

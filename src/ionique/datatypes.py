@@ -25,12 +25,19 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
     """
     Singleton-based session manager for hierarchical data.
 
-    This class inherits from `MetaSegment` and uses the `Singleton` metaclass
+    This class inherits from ``MetaSegment`` and uses the ``Singleton`` metaclass
     to ensure only one instance exists during a given session. It serves as
     the root segment for a data analysis session and is responsible for managing
     metadata and registered "affectors" (i.e., objects that modify or
     interact with the session).
 
+    Attributes
+    ----------
+    rank : str
+        Fixed rank label ``"root"`` identifying this as the top of the hierarchy.
+    affector_table : dict
+        Registry mapping UUID strings to metadata entries for each registered
+        affector (class name, string representation, and timestamp).
     """
     rank = "root"  # set the rank to "root"
 
@@ -54,10 +61,15 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
         Records metadata including class name, string representation, and timestamp,
         and logs the event with a unique identifier.
 
-        :param affector: An object that modifies or interacts with the session.
-        :type affector: object
-        :return: A UUID string uniquely identifying the registered affector.
-        :rtype: str
+        Parameters
+        ----------
+        affector : object
+            An object that modifies or interacts with the session.
+
+        Returns
+        -------
+        str
+            A UUID string uniquely identifying the registered affector.
         """
 
         # generate a uuid
@@ -84,8 +96,10 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
         """
         Add a single child segment to the session's hierarchy.
 
-        :param child: The segment to be added as a child.
-        :type child: AnySegment
+        Parameters
+        ----------
+        child : AnySegment
+            The segment to be added as a child.
         """
         self.children.append(child)
 
@@ -93,8 +107,10 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
         """
         Add multiple child segments to the session.
 
-        :param children: A list of segments to be added as children.
-        :type children: list[AnySegment]
+        Parameters
+        ----------
+        children : list of AnySegment
+            A list of segments to be added as children.
         """
         self.children.extend(children)
 
@@ -102,8 +118,10 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
         """
         Replace all existing children with new ones without validation.
 
-        :param children: A list of new segments to set as children.
-        :type children: list[AnySegment]
+        Parameters
+        ----------
+        children : list of AnySegment
+            A list of new segments to set as children.
         """
         self.children.clear()
         self.children = children
@@ -112,8 +130,10 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
         """
         Remove a specific child segment from the session.
 
-        :param child: The child segment to be removed.
-        :type child: AnySegment
+        Parameters
+        ----------
+        child : AnySegment
+            The child segment to be removed.
         """
         if child in self.children:
             self.children.remove(child)
@@ -123,35 +143,33 @@ class TraceFile(Segment):
     """
     Data structure for representing a single trace file with current and optional voltage information.
 
-    This class inherits from `Segment` and encapsulates current and voltage data. It sets up segment metadata,
-    defines parent-child hierarchy, and optionally initializes child segments based on voltage steps.
+    This class inherits from ``Segment`` and encapsulates current and voltage data. It sets up
+    segment metadata, defines parent-child hierarchy, and optionally initializes child segments
+    based on voltage steps. If voltage steps are provided, corresponding child segments of rank
+    ``"vstep"`` are created automatically.
 
-    Typical usage includes assigning metadata and organizing hierarchical
-    data structures for downstream processing or visualization.
-
+    Parameters
+    ----------
+    current : numpy.ndarray
+        Array of ionic current values.
+    voltage : list of tuple or None, optional
+        List of ``((start, end), voltage_value)`` tuples used to create child segments
+        for each voltage step. Defaults to None.
+    rank : str, optional
+        Segment rank label. Defaults to ``"file"``.
+    parent : Segment or None, optional
+        Parent segment to which this trace belongs. Defaults to None.
+    unique_features : dict, optional
+        Dictionary of metadata such as sampling frequency. Defaults to an empty dict.
+    metadata : dict, optional
+        Additional metadata. Defaults to an empty dict.
     """
 
     # @json_logger.log
     def __init__(self, current: np.ndarray, voltage=None, rank="file", parent=None,
                  unique_features: dict = {}, metadata: dict = {}):
         """
-        If voltage steps are provided, corresponding child segments of rank "vstep" are created.
-
-        :param current: current array.
-        :type current: numpy.ndarray
-        :param voltage: Optional list of tuples containing (start, end) index pairs and voltage values.
-                        Used to create child segments for each voltage step.
-        :type voltage: list[tuple[tuple[int, int], float]] or None
-        :param rank: Segment rank label, defaults to "file".
-        :type rank: str
-        :param parent: Optional parent segment to which this trace belongs.
-        :type parent: Segment or None
-        :param unique_features: Dictionary of metadata such as sampling frequency.
-        :type unique_features: dict
-        :param metadata: Additional metadata.
-        :type metadata: dict
-
-
+        Initialize the TraceFile and optionally create voltage-step child segments.
         """
         super().__init__(current)
         self.rank = "file"
@@ -175,7 +193,22 @@ class TraceFile(Segment):
 
     def plot(self, rank, axes, downsample_per_rank, color_per_rank):
         """
-        Method for plotting
+        Plot the trace data at a specified rank with per-rank styling options.
+
+        Parameters
+        ----------
+        rank : str
+            The segment rank at which to render the plot.
+        axes : object
+            The axes or figure object to draw on.
+        downsample_per_rank : dict
+            Mapping of rank label to downsampling factor for rendering.
+        color_per_rank : dict
+            Mapping of rank label to color specification for rendering.
+
+        Notes
+        -----
+        Not yet implemented.
         """
         pass
 

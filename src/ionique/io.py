@@ -63,20 +63,24 @@ class AbstractFileReader(object):
 
     def read(self, filename: str, **kwargs):
         """
-        Read a datafile or series of files. Files are identified according to their extension.
-        Data formats that come with a header file must be referred to by the header file.
-        If inheriting from the AbstractFileReader class, do not override this function;
-        instead, create a custom _read method.
+        Read a datafile or series of files, identified by their extension.
 
-        :param filename: file name or list of file names, typically
-        given as a string or PathLike object.
-        :type filename: str or os.PathLike or list[str] or list[os.PathLike]
-        :param **kwargs: keyword arguments passed directly to the file reader class
-        that matches the data format.
-        :return: [metadata, current, etc.. ]. If the input "filename" is a list,
-        this function returns a generator
-        object that yields the output of _read() for every file in the input list.
-        :rtype: tuple[dict,np.ndarray [,np.ndarray or tuple[slice,np.float32]]]
+        Data formats that come with a header file must be referred to by the header
+        file. If inheriting from AbstractFileReader, do not override this method;
+        instead, create a custom ``_read`` method.
+
+        Parameters
+        ----------
+        filename : str or os.PathLike or list[str] or list[os.PathLike]
+            File name or list of file names.
+        **kwargs
+            Keyword arguments passed directly to the format-specific ``_read`` method.
+
+        Returns
+        -------
+        tuple[dict, np.ndarray, np.ndarray or list[tuple[slice, np.float32]]]
+            A tuple of ``(metadata, current, voltage)``. If ``filename`` is a list,
+            returns a generator that yields the output of ``_read()`` for each file.
         """
         for key in kwargs.keys():
             if key not in self.accepted_keywords:
@@ -93,6 +97,7 @@ class AbstractFileReader(object):
             return self._read(filename, **kwargs)
 
     def _read(self, filename, **kwargs):
+        """Override in subclasses to implement format-specific file reading."""
         pass  # rewrite this function in inherited classes to process the data
 
     def __repr__(self):
@@ -120,17 +125,18 @@ class EDHReader(AbstractFileReader):
         """
         Initialize the EDHReader and load signal data from associated files.
 
-        :param edh_filename: Path to the `.edh` header file.
-        :type edh_filename: str
-        :param voltage_compress: If True, splits signal into segments based on voltage steps.
-        :type voltage_compress: bool
-        :param n_remove: Number of samples to remove from the beginning of each voltage step.
-        :type n_remove: int
-        :param downsample: Downsampling factor to reduce data size.
-        :type downsample: int
-        :param prefilter: Callable to apply preprocessing to the current signal.
-        :type prefilter: callable or None
-
+        Parameters
+        ----------
+        edh_filename : str
+            Path to the `.edh` header file.
+        voltage_compress : bool, optional
+            If True, splits signal into segments based on voltage steps. Defaults to False.
+        n_remove : int, optional
+            Number of samples to remove from the beginning of each voltage step. Defaults to 0.
+        downsample : int, optional
+            Downsampling factor to reduce data size. Defaults to 1.
+        prefilter : callable or None, optional
+            Callable to apply preprocessing to the current signal. Defaults to None.
         """
         super().__init__()
         self.filename = edh_filename
@@ -144,6 +150,17 @@ class EDHReader(AbstractFileReader):
         return iter((self.metadata, self.current, self.voltage))
 
     def _read(self):
+        """
+        Parse the `.edh` header and load associated signal data files.
+
+        Returns
+        -------
+        tuple[dict, np.ndarray, np.ndarray or list[tuple[tuple[int, int], np.float32]]]
+            A tuple of ``(metadata, current, voltage)``. ``metadata`` is a dict of
+            header fields. ``current`` and ``voltage`` are float32 arrays scaled to
+            SI units. If ``voltage_compress`` is True, ``voltage`` is replaced by a
+            list of ``((start, stop), voltage_value)`` tuples for each voltage step.
+        """
         filename = os.path.abspath(self.filename)
 
         direc = os.path.dirname(filename)
@@ -235,16 +252,18 @@ class OPTReader(AbstractFileReader):
         """
         Initialize the OPTReader instance and load corresponding files.
 
-        :param opt_filename: Path to the `.opt` header file.
-        :type opt_filename: str
-        :param voltage_compress: If True, splits signal into segments based on voltage steps.
-        :type voltage_compress: bool
-        :param n_remove: Number of samples to remove from the beginning of each voltage step.
-        :type n_remove: int
-        :param downsample: Downsampling factor to reduce data size.
-        :type downsample: int
-        :param prefilter: Callable to apply preprocessing to the current signal.
-        :type prefilter: callable or None
+        Parameters
+        ----------
+        opt_filename : str
+            Path to the `.opt` data file.
+        voltage_compress : bool, optional
+            If True, splits signal into segments based on voltage steps. Defaults to False.
+        n_remove : int, optional
+            Number of samples to remove from the beginning of each voltage step. Defaults to 0.
+        downsample : int, optional
+            Downsampling factor to reduce data size. Defaults to 1.
+        prefilter : callable or None, optional
+            Callable to apply preprocessing to the current signal. Defaults to None.
         """
         super().__init__()
         self.opt_filename = opt_filename
@@ -279,10 +298,16 @@ class OPTReader(AbstractFileReader):
 
     def _load_voltage_opt_file(self):
         """
-        Load voltage data from _volt.opt file.
-        The recorded voltage is noisy and typically off by <1 mV.
-        Remove the noise in voltage data rounding it to the nearest 5mV step.
-        This step is necessary for a better voltage-current alignment
+        Load and denoise voltage data from the associated ``_volt.opt`` file.
+
+        The recorded voltage is noisy and typically off by less than 1 mV.
+        Noise is removed by rounding to the nearest 5 mV step, which is
+        necessary for accurate voltage-current alignment.
+
+        Returns
+        -------
+        np.ndarray
+            Voltage array rounded to the nearest 5 mV step.
         """
         volt = np.fromfile(self.volt_filename, dtype='>d')
         voltage = np.round(volt / 5, decimals=3) * 5
@@ -290,9 +315,18 @@ class OPTReader(AbstractFileReader):
 
     def _pre_check_xml(self, root):
         """
-        Analyzes the XML structure to determine the presence of key tags and attributes.
-        Returns:
-            - detected_features: Dict indicating the presence of specific XML elements.
+        Analyze the XML structure to determine the presence of key tags and attributes.
+
+        Parameters
+        ----------
+        root : xml.etree.ElementTree.Element
+            Root element of the parsed XML tree.
+
+        Returns
+        -------
+        dict
+            Dictionary with boolean values indicating the presence of specific XML
+            elements: ``HWtiming_cap_step``, ``cap_step_waveform``, and ``timestamps``.
         """
         detected_features = {
             "HWtiming_cap_step": root.find(".//HWtiming_cap_step") is not None,
@@ -302,6 +336,17 @@ class OPTReader(AbstractFileReader):
         return detected_features
 
     def _read(self):
+        """
+        Load current and voltage data from the `.opt` file and associated metadata source.
+
+        Returns
+        -------
+        tuple[dict, np.ndarray, np.ndarray or list[tuple[tuple[int, int], np.float32]]]
+            A tuple of ``(metadata, current, voltage)``. ``metadata`` is a dict of
+            experiment parameters. ``current`` and ``voltage`` are float32 arrays
+            scaled to SI units. If ``voltage_compress`` is True, ``voltage`` is
+            replaced by a list of ``((start, stop), voltage_value)`` tuples.
+        """
         # if Voltage stored in `_volt.opt`
         if hasattr(self, 'volt_filename'):
             voltage = self._load_voltage_opt_file()
@@ -370,8 +415,19 @@ class OPTReader(AbstractFileReader):
 
     def process_custom_xml(self):
         """
-        Processes the custom XML file to extract voltage data, align the voltage waveform
-        with the current, and detect peaks in the current signal every time the voltage changes.
+        Process a custom timestamp-based XML file to reconstruct the voltage waveform.
+
+        Extracts voltage data and time points from ``<timestamp>`` elements, then
+        aligns the reconstructed voltage waveform with the current signal by detecting
+        capacitive peaks at each voltage transition.
+
+        Returns
+        -------
+        tuple[np.ndarray, list[float], int]
+            A tuple of ``(voltage_waveform, time_points, sampling_frequency)``.
+            ``voltage_waveform`` is a float32 array aligned to the current signal.
+            ``time_points`` is a list of transition times in seconds.
+            ``sampling_frequency`` is the sample rate in Hz.
         """
         sampling_frequency = 250000
         current = self._load_opt_data()
@@ -465,9 +521,31 @@ class OPTReader(AbstractFileReader):
 
     def find_peaks_slide_window(self, current, start_index,window_shift_duration=0.002, sampling_frequency=250000, sign="negative"):
         """
-        Find peaks in the current every time the voltage changes.
-        The search for the peaks happens in the window of the timestamp 0.02 seconds.
+        Find the first capacitive peak near a voltage transition in the current signal.
 
+        Searches a symmetric window of half-width ``window_shift_duration`` seconds
+        around ``start_index`` for a positive or negative peak, and returns the
+        left edge of the first detected peak.
+
+        Parameters
+        ----------
+        current : np.ndarray
+            Full ionic current signal array.
+        start_index : int
+            Approximate sample index of the voltage transition.
+        window_shift_duration : float, optional
+            Half-width of the search window in seconds. Defaults to 0.002.
+        sampling_frequency : int, optional
+            Sampling rate in Hz. Defaults to 250000.
+        sign : str, optional
+            Direction of the peak to search for: ``"negative"`` or ``"positive"``.
+            Defaults to ``"negative"``.
+
+        Returns
+        -------
+        int or None
+            Sample index of the left edge of the first detected peak, or ``None``
+            if no peak was found within the window.
         """
         window_shift = int(window_shift_duration * sampling_frequency)
         start_window = max(0, start_index - window_shift)
@@ -492,7 +570,18 @@ class OPTReader(AbstractFileReader):
 
     def _parse_xml_metadata(self, root):
         """
-        Parses the XML file and extracts metadata, handling missing elements gracefully.
+        Parse the XML file and extract experiment metadata, handling missing elements gracefully.
+
+        Parameters
+        ----------
+        root : xml.etree.ElementTree.Element
+            Root element of the parsed XML tree.
+
+        Returns
+        -------
+        dict
+            Metadata dictionary containing sampling info, acquisition time, and file info.
+            Missing fields are filled with default values and a warning is printed.
         """
         metadata = {"HeaderFile": os.path.abspath(self.xml_filename)}
 
@@ -515,7 +604,23 @@ class OPTReader(AbstractFileReader):
 
     def _extract_sampling_info(self, root):
         """
-        Extracts sampling frequency, total samples, and total time from the XML.
+        Extract sampling frequency, total samples, and total recording time from the XML.
+
+        Parameters
+        ----------
+        root : xml.etree.ElementTree.Element
+            Root element of the parsed XML tree.
+
+        Returns
+        -------
+        dict
+            Dictionary with keys ``"Sampling frequency (SR)"`` (float, Hz),
+            ``"total_samples"`` (int), and ``"total_time_s"`` (float, seconds).
+
+        Raises
+        ------
+        ValueError
+            If ``HWtiming_cap_step`` or ``cap_step_waveform`` elements are absent.
         """
         hw_timing = root.find(".//HWtiming_cap_step")
         hw_timing_1 = hw_timing.find("cap_step_waveform")
@@ -535,6 +640,18 @@ class OPTReader(AbstractFileReader):
     def _extract_acquisition_time(self, root):
         """
         Get acquisition start time from the XML.
+
+        Parameters
+        ----------
+        root : xml.etree.ElementTree.Element
+            Root element of the parsed XML tree.
+
+        Returns
+        -------
+        dict
+            Dictionary with key ``"Acquisition start time"`` (str) if the
+            ``wall_clock`` attribute is found on the first ``<timestamp>`` element,
+            otherwise an empty dict.
         """
         start_time = root.find(".//timestamp")
         if start_time is not None and "wall_clock" in start_time.attrib:
@@ -543,7 +660,13 @@ class OPTReader(AbstractFileReader):
 
     def _extract_file_info(self):
         """
-        Get filename metadata.
+        Get filename and storage format metadata from the XML file path.
+
+        Returns
+        -------
+        dict
+            Dictionary with keys ``"DataFiles"`` (list[str]) and
+            ``"StorageFormat"`` (str, the file extension).
         """
         return {
             "DataFiles": [os.path.basename(self.xml_filename)],
@@ -551,14 +674,36 @@ class OPTReader(AbstractFileReader):
 
     def _calculate_bandwidth(self, metadata):
         """
-        Final bandwidth based on sampling frequency.
+        Calculate the final acquisition bandwidth from the sampling frequency.
+
+        Parameters
+        ----------
+        metadata : dict
+            Metadata dictionary containing ``"Sampling frequency (SR)"`` (float, Hz).
+
+        Returns
+        -------
+        dict
+            Dictionary with key ``"Final Bandwidth"`` (float, Hz). Returns half the
+            sampling frequency for rates below 200 kHz, otherwise 100 kHz.
         """
         sampling_frequency = metadata["Sampling frequency (SR)"]
         return {"Final Bandwidth": sampling_frequency / 2 if sampling_frequency < 200000 else 100000}
 
     def _load_opt_data(self):
         """
-        Reads the current data from the .opt file.
+        Read raw current data from the `.opt` binary file.
+
+        Returns
+        -------
+        np.ndarray
+            1-D array of current values in big-endian double format (``">d"``),
+            prior to unit conversion.
+
+        Raises
+        ------
+        IOError
+            If the file cannot be read.
         """
         try:
             dtype = np.dtype(">d")
@@ -569,8 +714,30 @@ class OPTReader(AbstractFileReader):
 
     def _align_voltage(self, metadata, current_full):
         """
-        Aligns the voltage to the current signal using XML metadata, starting
-        from the first detected peak in the current data.
+        Align the voltage waveform to the current signal using XML metadata.
+
+        Reconstructs the voltage array from XML time-alignment marks and cap-step
+        waveform data, anchoring it to the first capacitive peak detected in the
+        current signal.
+
+        Parameters
+        ----------
+        metadata : dict
+            Metadata dictionary containing ``"total_samples"`` (int) and
+            ``"Sampling frequency (SR)"`` (float, Hz).
+        current_full : np.ndarray
+            Full ionic current signal array (unscaled).
+
+        Returns
+        -------
+        np.ndarray
+            Float32 voltage waveform array, same length as ``current_full``,
+            with values in millivolts.
+
+        Raises
+        ------
+        ValueError
+            If time alignment marks are missing or no alignment peak is detected.
         """
         if not hasattr(self, "_xml_tree"):
             self._xml_tree = ET.parse(self.xml_filename).getroot()
@@ -610,7 +777,25 @@ class OPTReader(AbstractFileReader):
 
     def _get_start_sample(self, root, sample_rate):
         """
-        Retrieves the starting sample index based on timestamp information.
+        Retrieve the starting sample index from the last pre-acquisition timestamp.
+
+        Parameters
+        ----------
+        root : xml.etree.ElementTree.Element
+            Root element of the parsed XML tree.
+        sample_rate : float
+            Sampling frequency in Hz.
+
+        Returns
+        -------
+        int
+            Sample index corresponding to the last ``<timestamp msec=...>`` element
+            found before the ``<HWtiming_cap_step>`` element.
+
+        Raises
+        ------
+        ValueError
+            If no ``<timestamp>`` element with a ``msec`` attribute is found.
         """
         last_msec = None
         for elem in root.iter():
@@ -627,8 +812,25 @@ class OPTReader(AbstractFileReader):
 
     def _process_time_marks(self, root, voltage_waveform, first_peak_index):
         """
-        Processes time alignment marks to get the voltage waveform.
-        The voltage alignment starts at current_index[first_peak_index - zero_voltage_samples].
+        Fill the voltage waveform array using XML time-alignment segment data.
+
+        Fills ``voltage_waveform`` in-place starting from
+        ``first_peak_index - zero_voltage_samples``, where ``zero_voltage_samples``
+        is the number of leading zero-voltage samples in the alignment marks.
+
+        Parameters
+        ----------
+        root : xml.etree.ElementTree.Element
+            Root element of the parsed XML tree.
+        voltage_waveform : np.ndarray
+            Voltage array to fill in-place (float32, length matches current signal).
+        first_peak_index : int
+            Sample index of the first detected capacitive peak in the current signal.
+
+        Returns
+        -------
+        int
+            Sample index immediately after the last time-alignment segment written.
         """
 
         time_marks = root.find(".//HWtiming_cap_step/time_alignment_marks")
@@ -661,7 +863,26 @@ class OPTReader(AbstractFileReader):
 
     def _process_cap_step_waveform(self, root, voltage_waveform, current_index):
         """
-        Processes the cap step waveform to add triangle wave segments.
+        Fill the voltage waveform array with capacitive triangle-wave step segments.
+
+        Reads ``<triangle_wave>`` elements from ``<cap_step_waveform>`` in the XML
+        and writes the corresponding voltage offset values into ``voltage_waveform``
+        in-place, starting at ``current_index``.
+
+        Parameters
+        ----------
+        root : xml.etree.ElementTree.Element
+            Root element of the parsed XML tree.
+        voltage_waveform : np.ndarray
+            Voltage array to fill in-place (float32, length matches current signal).
+        current_index : int
+            Sample index at which to begin writing cap-step voltage values.
+
+        Returns
+        -------
+        int or None
+            Sample index immediately after the last cap-step segment written, or
+            ``None`` if no ``<cap_step_waveform>`` element was found.
         """
         cap_waveform = root.find(".//HWtiming_cap_step/cap_step_waveform")
         if cap_waveform is None:
@@ -685,8 +906,23 @@ class OPTReader(AbstractFileReader):
 
     def find_peaks_in_segment(self, current_data, start_index, end_index):
         """
-        Apply "find_peaks" on a segment of the current data and return
-        the indices of the found peak
+        Apply ``scipy.signal.find_peaks`` on a slice of the current signal.
+
+        Parameters
+        ----------
+        current_data : np.ndarray
+            Full ionic current signal array.
+        start_index : int
+            Start index of the slice to search (inclusive).
+        end_index : int
+            End index of the slice to search (exclusive).
+
+        Returns
+        -------
+        peaks : np.ndarray
+            Indices of detected peaks relative to the start of the slice.
+        properties : dict
+            Properties dict returned by ``scipy.signal.find_peaks``.
         """
         # slice original data
         segment = current_data[start_index:end_index]
