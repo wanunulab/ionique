@@ -15,7 +15,7 @@ io
     loading, metadata extraction, and unit scaling.
 utils
     Signal processing utilities and the Singleton metaclass used by
-    SessionFileManager.
+    
 parsers
     Event detection parsers (SpikeParser, AutoSquareParser) that operate on
     Segment trees and produce child segments for detected events.
