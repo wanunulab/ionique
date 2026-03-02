@@ -261,7 +261,7 @@ def _save_node(grp, seg, compression, compression_opts):
         children_grp = grp.create_group("children")
         for idx, child in enumerate(seg.children):
             child_rank = child.rank or "unknown"
-            child_name = f"{idx:03d}_{child_rank}"
+            child_name = f"{idx:06d}_{child_rank}"
             child_grp = children_grp.create_group(child_name)
             _save_node(child_grp, child, compression, compression_opts)
 
@@ -319,7 +319,7 @@ def _walk_node_paths(seg, prefix="root"):
     yield seg, prefix
     for idx, child in enumerate(seg.children):
         child_rank = child.rank or "unknown"
-        child_path = f"{prefix}/children/{idx:03d}_{child_rank}"
+        child_path = f"{prefix}/children/{idx:06d}_{child_rank}"
         yield from _walk_node_paths(child, child_path)
 
 
@@ -416,7 +416,7 @@ def _sync_node(f, seg, grp_path, filepath, compression, compression_opts):
 
     for idx, child in enumerate(seg.children):
         child_rank = child.rank or "unknown"
-        child_name = f"{idx:03d}_{child_rank}"
+        child_name = f"{idx:06d}_{child_rank}"
         child_grp_path = f"{children_path}/{child_name}"
 
         if getattr(child, '_iq5_grp_path', None) is None:
