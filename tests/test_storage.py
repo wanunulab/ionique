@@ -2,6 +2,9 @@
 Tests for ionique.storage — HDF5 save/load roundtrip, LazyArray, source switching.
 """
 
+import gc
+import tracemalloc
+
 import numpy as np
 import pytest
 import h5py
@@ -519,3 +522,53 @@ class TestDetachIQ5:
         assert trace_with_vsteps.iq5_path is None
         for node, _ in _walk_node_paths(trace_with_vsteps):
             assert node._iq5_grp_path is None
+
+
+# ---------------------------------------------------------------------------
+# Memory purge verification
+# ---------------------------------------------------------------------------
+
+class TestMemoryPurge:
+    """Verify that to_iq5() actually frees numpy array memory."""
+
+    N_SAMPLES = 12_500_000  # ~50 MB of float32
+    ARRAY_BYTES = N_SAMPLES * 4  # float32 = 4 bytes
+
+    def test_to_iq5_frees_array_memory(self, tmp_path):
+        path = str(tmp_path / "purge_mem.iq5")
+
+        tracemalloc.start()
+
+        current = np.random.randn(self.N_SAMPLES).astype(np.float32)
+        voltage = [((0, self.N_SAMPLES), 0.1)]
+        trace = TraceFile(
+            current=current,
+            voltage=voltage,
+            unique_features={"sampling_freq": 250000},
+            metadata={"experiment": "mem_test"},
+        )
+        del current  # drop the extra reference
+
+        _, before_peak = tracemalloc.get_traced_memory()
+
+        trace.to_iq5(path)
+        gc.collect()
+
+        _, after_peak = tracemalloc.get_traced_memory()
+        current_after, _ = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
+        # The live traced memory should have dropped by at least 80% of
+        # the original array size once the numpy buffer is replaced by
+        # a LazyArray (which holds no data in Python memory).
+        freed = before_peak - current_after
+        assert freed > 0.8 * self.ARRAY_BYTES, (
+            f"Expected to free ≥{0.8 * self.ARRAY_BYTES / 1e6:.1f} MB, "
+            f"but only freed {freed / 1e6:.1f} MB"
+        )
+
+        # Sanity: current is now a LazyArray and still returns correct data
+        assert isinstance(trace.current, LazyArray)
+        sliced = trace.current[0:10]
+        assert isinstance(sliced, np.ndarray)
+        assert sliced.shape == (10,)
