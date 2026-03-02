@@ -353,10 +353,17 @@ class AbstractSegmentTree(object):
 
     @property
     def iq5_path(self):
-        """Path to the backing .iq5 file, or None if in-memory."""
+        """Get the path to the backing .iq5 file.
+
+        Returns
+        -------
+        str or None
+            Path to the ``.iq5`` file if this segment is backed by persistent
+            storage, or ``None`` if it exists only in memory.
+        """
         return getattr(self, '_iq5_path', None)
 
-    def to_iq5(self, filepath):
+    def to_iq5(self, filepath: str) -> AnySegment:
         """Save to .iq5 and replace in-memory arrays with lazy disk access.
 
         Parameters
@@ -366,7 +373,9 @@ class AbstractSegmentTree(object):
 
         Returns
         -------
-        self
+        AbstractSegmentTree
+            This segment (``self``) with arrays replaced by
+            :class:`~ionique.storage.LazyArray` instances.
         """
         from ionique.storage import (save, LazyArray, _assign_grp_paths,
                                      _walk_node_paths)
@@ -388,8 +397,14 @@ class AbstractSegmentTree(object):
                 node.time = LazyArray(filepath, sources_path, "time", "raw")
         return self
 
-    def sync_iq5(self):
-        """Write new/changed nodes to the backing .iq5 file incrementally."""
+    def sync_iq5(self) -> None:
+        """Write new/changed nodes to the backing .iq5 file incrementally.
+
+        Raises
+        ------
+        RuntimeError
+            If the segment is not connected to an ``.iq5`` file.
+        """
         from ionique.storage import _sync_to_file
         filepath = getattr(self, '_iq5_path', None)
         if filepath is None:
@@ -397,12 +412,13 @@ class AbstractSegmentTree(object):
                 "Not connected to an .iq5 file. Call to_iq5() first.")
         _sync_to_file(self, filepath)
 
-    def detach_iq5(self):
+    def detach_iq5(self) -> AnySegment:
         """Load all lazy data into RAM and disconnect from the .iq5 file.
 
         Returns
         -------
-        self
+        AbstractSegmentTree
+            This segment (``self``) with all data loaded into numpy arrays.
         """
         from ionique.storage import LazyArray, _walk_node_paths
         for node, _ in _walk_node_paths(self):

@@ -302,7 +302,20 @@ def _make_json_safe(obj):
 # ---------------------------------------------------------------------------
 
 def _walk_node_paths(seg, prefix="root"):
-    """Yield ``(node, hdf5_group_path)`` pairs matching the save layout."""
+    """Yield ``(node, hdf5_group_path)`` pairs matching the save layout.
+
+    Parameters
+    ----------
+    seg : AbstractSegmentTree
+        The root segment node to walk.
+    prefix : str, optional
+        The HDF5 path prefix for the root, by default ``"root"``.
+
+    Yields
+    ------
+    tuple of (AbstractSegmentTree, str)
+        Pairs of ``(node, hdf5_group_path)`` for each node in the tree.
+    """
     yield seg, prefix
     for idx, child in enumerate(seg.children):
         child_rank = child.rank or "unknown"
@@ -311,7 +324,17 @@ def _walk_node_paths(seg, prefix="root"):
 
 
 def _assign_grp_paths(seg, filepath, prefix="root"):
-    """Set ``_iq5_grp_path``, ``_iq5_path``, and ``_iq5_stale_paths`` on every node."""
+    """Set ``_iq5_grp_path``, ``_iq5_path``, and ``_iq5_stale_paths`` on every node.
+
+    Parameters
+    ----------
+    seg : AbstractSegmentTree
+        The root segment node to traverse.
+    filepath : str
+        Path to the ``.iq5`` file.
+    prefix : str, optional
+        The HDF5 path prefix for the root, by default ``"root"``.
+    """
     for node, grp_path in _walk_node_paths(seg, prefix):
         node._iq5_grp_path = grp_path
         node._iq5_path = filepath
@@ -324,7 +347,13 @@ def _assign_grp_paths(seg, filepath, prefix="root"):
 # ---------------------------------------------------------------------------
 
 def _close_lazy_handles(seg):
-    """Close all open LazyArray file handles in the tree."""
+    """Close all open LazyArray file handles in the tree.
+
+    Parameters
+    ----------
+    seg : AbstractSegmentTree
+        The root segment node whose tree will be traversed.
+    """
     for node, _ in _walk_node_paths(seg):
         if isinstance(node, MetaSegment):
             continue  # current/time are properties that delegate to parent
@@ -335,7 +364,19 @@ def _close_lazy_handles(seg):
 
 
 def _sync_to_file(seg, filepath, compression="gzip", compression_opts=4):
-    """Write new/changed nodes to *filepath* incrementally."""
+    """Write new/changed nodes to *filepath* incrementally.
+
+    Parameters
+    ----------
+    seg : AbstractSegmentTree
+        The root segment node to sync.
+    filepath : str
+        Path to the ``.iq5`` file to write to.
+    compression : str, optional
+        HDF5 compression filter name, by default ``"gzip"``.
+    compression_opts : int, optional
+        Compression level, by default ``4``.
+    """
     # Close read-only handles so we can open in append mode
     _close_lazy_handles(seg)
     with h5py.File(filepath, "a") as f:
@@ -343,7 +384,23 @@ def _sync_to_file(seg, filepath, compression="gzip", compression_opts=4):
 
 
 def _sync_node(f, seg, grp_path, filepath, compression, compression_opts):
-    """Recursively sync a single node: delete stale children, write new ones."""
+    """Recursively sync a single node: delete stale children, write new ones.
+
+    Parameters
+    ----------
+    f : h5py.File
+        Open HDF5 file handle in append mode.
+    seg : AbstractSegmentTree
+        The segment node being synced.
+    grp_path : str
+        The HDF5 group path for this segment.
+    filepath : str
+        Path to the ``.iq5`` file.
+    compression : str
+        HDF5 compression filter name.
+    compression_opts : int
+        Compression level.
+    """
     # 1. Delete stale children paths
     for stale_path in getattr(seg, '_iq5_stale_paths', []):
         if stale_path in f:
@@ -376,7 +433,15 @@ def _sync_node(f, seg, grp_path, filepath, compression, compression_opts):
 
 
 def _update_node_attrs(grp, seg):
-    """Update ``unique_features`` for an existing HDF5 group."""
+    """Update ``unique_features`` for an existing HDF5 group.
+
+    Parameters
+    ----------
+    grp : h5py.Group
+        The HDF5 group to update.
+    seg : AbstractSegmentTree
+        The segment whose ``unique_features`` should be written.
+    """
     scalar_features = {}
     for key, val in seg.unique_features.items():
         if not isinstance(val, np.ndarray):

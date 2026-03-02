@@ -17,5 +17,6 @@ Nanopore Signal Analysis Framework
    event_detect.rst
    signal_analysis.rst
    data_input.rst
+   storage.rst
 
 

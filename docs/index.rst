@@ -37,6 +37,13 @@ Features
   - Step response and dwell-time analysis.
   - Customizable parsers and filters for flexible workflows.
 
+- **Persistent Storage (.iq5)**
+  - Save and reload full analyzed sessions via ``.iq5`` (HDF5-based) files.
+  - Purge-to-disk workflow to free RAM while keeping the tree usable.
+  - Incremental sync — write only new/changed nodes, no full rewrite.
+  - Lazy disk-backed array access for large datasets.
+  - Multiple trace versions (raw, filtered) with source switching.
+
 - **Usability**
   - Python library for scripting and automation.
 
