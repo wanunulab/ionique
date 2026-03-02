@@ -11,13 +11,12 @@ segments of ionic current data.
 
 import re
 import json
-from contextlib import contextmanager
 from itertools import chain
 # from typing import Type, TypeVar
 from typing import TypeVar
 from functools import cached_property
 import numpy as np
-
+from ionique.utils import ignored
 
 AnySegment = TypeVar("AnySegment", bound="AbstractSegmentTree")
 
@@ -826,27 +825,4 @@ class Segment(AbstractSegmentTree):
         return Segment(current, **attrs)
 
 
-@contextmanager
-def ignored(*exceptions):
-    """
-    Context manager that silently suppresses the specified exception types.
 
-    Replaces the ``try/except: pass`` pattern with a single-line context manager.
-    Taken from the Python 3.4 update by Raymond Hettinger; see:
-    http://hg.python.org/cpython/rev/406b47c64480
-
-    Parameters
-    ----------
-    *exceptions : type
-        One or more exception classes to suppress within the ``with`` block.
-
-    Yields
-    ------
-    None
-        Control is yielded to the body of the ``with`` block; any listed
-        exceptions raised within are silently caught and discarded.
-    """
-    try:
-        yield
-    except exceptions:
-        pass

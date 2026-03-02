@@ -649,4 +649,28 @@ def extract_features(seg, bottom_rank, extractions: list[str], add_ons: dict = {
 #                       "start_time": lambda seg: seg.start / seg.get_feature("eff_sampling_freq")})
 
 
+from contextlib import contextmanager
+@contextmanager
+def ignored(*exceptions):
+    """
+    Context manager that silently suppresses the specified exception types.
 
+    Replaces the ``try/except: pass`` pattern with a single-line context manager.
+    Taken from the Python 3.4 update by Raymond Hettinger; see:
+    http://hg.python.org/cpython/rev/406b47c64480
+
+    Parameters
+    ----------
+    *exceptions : type
+        One or more exception classes to suppress within the ``with`` block.
+
+    Yields
+    ------
+    None
+        Control is yielded to the body of the ``with`` block; any listed
+        exceptions raised within are silently caught and discarded.
+    """
+    try:
+        yield
+    except exceptions:
+        pass
