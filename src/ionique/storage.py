@@ -4,8 +4,12 @@ HDF5-backed persistent storage for ionique segment trees.
 
 Provides ``save()`` and ``load()`` functions that serialize any segment tree
 (SessionFileManager, TraceFile, Segment, MetaSegment, or arbitrary subtrees)
-to a single ``.ionique.h5`` file and reconstruct it with lazy, disk-backed
+to a single ``.iq5`` file and reconstruct it with lazy, disk-backed
 array access via ``LazyArray``.
+
+The ``.iq5`` format also supports **purge-to-disk** (``to_iq5()``) and
+**incremental sync** (``sync_iq5()``) workflows, where the file acts as a
+live backing store rather than a snapshot.
 """
 
 import json
@@ -23,6 +27,7 @@ from ionique.core import MetaSegment, Segment
 # Avoid circular import at module level — these are only needed inside
 # load() / save() and are imported lazily there or referenced by string.
 _FORMAT_VERSION = "1.0"
+IQ5_EXTENSION = ".iq5"
 
 
 # ---------------------------------------------------------------------------
@@ -166,7 +171,7 @@ def save(seg, filepath, compression="gzip", compression_opts=4):
     seg : AnySegment
         The root of the subtree to save.
     filepath : str
-        Destination ``.h5`` file path.
+        Destination ``.iq5`` file path.
     compression : str
         HDF5 compression filter name.
     compression_opts : int
@@ -293,6 +298,93 @@ def _make_json_safe(obj):
 
 
 # ---------------------------------------------------------------------------
+# Node-path walking and assignment
+# ---------------------------------------------------------------------------
+
+def _walk_node_paths(seg, prefix="root"):
+    """Yield ``(node, hdf5_group_path)`` pairs matching the save layout."""
+    yield seg, prefix
+    for idx, child in enumerate(seg.children):
+        child_rank = child.rank or "unknown"
+        child_path = f"{prefix}/children/{idx:03d}_{child_rank}"
+        yield from _walk_node_paths(child, child_path)
+
+
+def _assign_grp_paths(seg, filepath, prefix="root"):
+    """Set ``_iq5_grp_path``, ``_iq5_path``, and ``_iq5_stale_paths`` on every node."""
+    for node, grp_path in _walk_node_paths(seg, prefix):
+        node._iq5_grp_path = grp_path
+        node._iq5_path = filepath
+        if not hasattr(node, '_iq5_stale_paths'):
+            node._iq5_stale_paths = []
+
+
+# ---------------------------------------------------------------------------
+# Incremental sync
+# ---------------------------------------------------------------------------
+
+def _close_lazy_handles(seg):
+    """Close all open LazyArray file handles in the tree."""
+    for node, _ in _walk_node_paths(seg):
+        if isinstance(node, MetaSegment):
+            continue  # current/time are properties that delegate to parent
+        for attr in ('current', 'time'):
+            val = getattr(node, attr, None)
+            if isinstance(val, LazyArray):
+                val.close()
+
+
+def _sync_to_file(seg, filepath, compression="gzip", compression_opts=4):
+    """Write new/changed nodes to *filepath* incrementally."""
+    # Close read-only handles so we can open in append mode
+    _close_lazy_handles(seg)
+    with h5py.File(filepath, "a") as f:
+        _sync_node(f, seg, "root", filepath, compression, compression_opts)
+
+
+def _sync_node(f, seg, grp_path, filepath, compression, compression_opts):
+    """Recursively sync a single node: delete stale children, write new ones."""
+    # 1. Delete stale children paths
+    for stale_path in getattr(seg, '_iq5_stale_paths', []):
+        if stale_path in f:
+            del f[stale_path]
+    seg._iq5_stale_paths = []
+
+    # 2. Update mutable attrs if this node already exists
+    if grp_path in f:
+        _update_node_attrs(f[grp_path], seg)
+
+    # 3. Walk children — write new ones, recurse into existing ones
+    children_path = f"{grp_path}/children"
+
+    for idx, child in enumerate(seg.children):
+        child_rank = child.rank or "unknown"
+        child_name = f"{idx:03d}_{child_rank}"
+        child_grp_path = f"{children_path}/{child_name}"
+
+        if getattr(child, '_iq5_grp_path', None) is None:
+            # NEW node — create group, save fully
+            if children_path not in f:
+                f.create_group(children_path)
+            child_grp = f.create_group(child_grp_path)
+            _save_node(child_grp, child, compression, compression_opts)
+            # Assign paths to the new node and all its descendants
+            _assign_grp_paths(child, filepath, child_grp_path)
+        else:
+            # EXISTING node — recurse to check its children
+            _sync_node(f, child, child_grp_path, filepath, compression, compression_opts)
+
+
+def _update_node_attrs(grp, seg):
+    """Update ``unique_features`` for an existing HDF5 group."""
+    scalar_features = {}
+    for key, val in seg.unique_features.items():
+        if not isinstance(val, np.ndarray):
+            scalar_features[key] = _make_json_safe(val)
+    grp.attrs["unique_features"] = json.dumps(scalar_features)
+
+
+# ---------------------------------------------------------------------------
 # load()
 # ---------------------------------------------------------------------------
 
@@ -302,7 +394,7 @@ def load(filepath, parent=None):
     Parameters
     ----------
     filepath : str
-        Path to a ``.ionique.h5`` file.
+        Path to an ``.iq5`` file.
     parent : AnySegment or None
         Optional parent to attach the loaded root to.
 
@@ -418,6 +510,13 @@ def _load_node(filepath, grp, parent):
         node = MetaSegment(start=start or 0, end=end or 0,
                            parent=parent, rank=rank,
                            unique_features=unique_features)
+
+    # -- iq5 tracking -------------------------------------------------------
+    # Strip leading "/" from HDF5 absolute path to match _walk_node_paths
+    grp_path = grp.name.lstrip("/")
+    node._iq5_grp_path = grp_path
+    node._iq5_path = filepath
+    node._iq5_stale_paths = []
 
     # -- children -----------------------------------------------------------
     if "children" in grp:

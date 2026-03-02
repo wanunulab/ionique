@@ -8,7 +8,7 @@ import h5py
 
 from ionique.core import MetaSegment, Segment
 from ionique.datatypes import TraceFile, SessionFileManager
-from ionique.storage import LazyArray, save, load
+from ionique.storage import LazyArray, save, load, IQ5_EXTENSION, _walk_node_paths
 
 
 # ---------------------------------------------------------------------------
@@ -35,7 +35,7 @@ def trace_with_vsteps(sample_current):
 
 @pytest.fixture
 def h5_path(tmp_path):
-    return str(tmp_path / "test_output.ionique.h5")
+    return str(tmp_path / "test_output.iq5")
 
 
 # ---------------------------------------------------------------------------
@@ -326,7 +326,7 @@ class TestEdgeCases:
         save(trace_with_vsteps, h5_path)
         loaded = load(h5_path)
 
-        h5_path2 = str(tmp_path / "resaved.ionique.h5")
+        h5_path2 = str(tmp_path / "resaved.iq5")
         save(loaded, h5_path2)
 
         reloaded = load(h5_path2)
@@ -338,3 +338,184 @@ class TestEdgeCases:
         save(ms, h5_path)
         loaded = load(h5_path)
         assert loaded.unique_features == {}
+
+
+# ---------------------------------------------------------------------------
+# IQ5 extension constant
+# ---------------------------------------------------------------------------
+
+class TestIQ5Extension:
+    def test_iq5_extension_value(self):
+        assert IQ5_EXTENSION == ".iq5"
+
+
+# ---------------------------------------------------------------------------
+# to_iq5() — purge to disk
+# ---------------------------------------------------------------------------
+
+class TestToIQ5:
+    def test_to_iq5_returns_self(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "purge.iq5")
+        result = trace_with_vsteps.to_iq5(path)
+        assert result is trace_with_vsteps
+
+    def test_current_becomes_lazy(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "purge.iq5")
+        trace_with_vsteps.to_iq5(path)
+        assert isinstance(trace_with_vsteps.current, LazyArray)
+
+    def test_lazy_slicing_correct(self, trace_with_vsteps, tmp_path, sample_current):
+        path = str(tmp_path / "purge.iq5")
+        trace_with_vsteps.to_iq5(path)
+        np.testing.assert_array_almost_equal(
+            trace_with_vsteps.current[100:200], sample_current[100:200]
+        )
+
+    def test_iq5_path_set(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "purge.iq5")
+        trace_with_vsteps.to_iq5(path)
+        assert trace_with_vsteps.iq5_path == path
+
+    def test_grp_paths_set(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "purge.iq5")
+        trace_with_vsteps.to_iq5(path)
+        assert trace_with_vsteps._iq5_grp_path == "root"
+        for child in trace_with_vsteps.children:
+            assert child._iq5_grp_path is not None
+
+    def test_metasegment_current_after_purge(self, trace_with_vsteps, tmp_path,
+                                              sample_current):
+        path = str(tmp_path / "purge.iq5")
+        trace_with_vsteps.to_iq5(path)
+        vstep = trace_with_vsteps.children[0]
+        cur = vstep.current
+        assert cur is not None
+        np.testing.assert_array_almost_equal(cur, sample_current[0:2500])
+
+
+# ---------------------------------------------------------------------------
+# sync_iq5() — incremental sync
+# ---------------------------------------------------------------------------
+
+class TestSyncIQ5:
+    def test_sync_without_iq5_raises(self, trace_with_vsteps):
+        with pytest.raises(RuntimeError, match="Not connected"):
+            trace_with_vsteps.sync_iq5()
+
+    def test_sync_after_adding_children(self, trace_with_vsteps, tmp_path,
+                                         sample_current):
+        path = str(tmp_path / "sync.iq5")
+        trace_with_vsteps.to_iq5(path)
+
+        # Add new children to the first vstep
+        vstep = trace_with_vsteps.children[0]
+        ev1 = MetaSegment(start=100, end=200, parent=vstep, rank="event",
+                          unique_features={"baseline": 1.5e-9})
+        ev2 = MetaSegment(start=300, end=400, parent=vstep, rank="event",
+                          unique_features={"baseline": 1.6e-9})
+        vstep.add_children([ev1, ev2])
+
+        trace_with_vsteps.sync_iq5()
+
+        # Reload and verify
+        reloaded = load(path)
+        assert len(reloaded.children[0].children) == 2
+        assert reloaded.children[0].children[0].rank == "event"
+        assert reloaded.children[0].children[0].start == 100
+
+    def test_sync_after_clear_and_add(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "sync_clear.iq5")
+
+        # Add initial events
+        vstep = trace_with_vsteps.children[0]
+        ev1 = MetaSegment(start=100, end=200, parent=vstep, rank="event")
+        vstep.add_children([ev1])
+        trace_with_vsteps.to_iq5(path)
+
+        # Clear old children and add new
+        vstep.clear_children()
+        ev2 = MetaSegment(start=500, end=600, parent=vstep, rank="newevent")
+        vstep.add_children([ev2])
+
+        trace_with_vsteps.sync_iq5()
+
+        # Reload and verify old children gone, new present
+        reloaded = load(path)
+        loaded_vstep = reloaded.children[0]
+        assert len(loaded_vstep.children) == 1
+        assert loaded_vstep.children[0].rank == "newevent"
+        assert loaded_vstep.children[0].start == 500
+
+    def test_sync_updates_features(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "sync_feat.iq5")
+        trace_with_vsteps.to_iq5(path)
+
+        # Modify a unique_feature
+        trace_with_vsteps.unique_features["new_key"] = 42.0
+        trace_with_vsteps.sync_iq5()
+
+        reloaded = load(path)
+        assert reloaded.unique_features["new_key"] == 42.0
+
+    def test_sync_assigns_paths_to_new_children(self, trace_with_vsteps,
+                                                  tmp_path):
+        path = str(tmp_path / "sync_paths.iq5")
+        trace_with_vsteps.to_iq5(path)
+
+        vstep = trace_with_vsteps.children[0]
+        ev = MetaSegment(start=100, end=200, parent=vstep, rank="event")
+        vstep.add_children([ev])
+
+        trace_with_vsteps.sync_iq5()
+
+        # After sync, the new child should have a grp_path
+        assert ev._iq5_grp_path is not None
+        assert ev._iq5_path == path
+
+
+# ---------------------------------------------------------------------------
+# load() sets _iq5_grp_path
+# ---------------------------------------------------------------------------
+
+class TestLoadSetsGrpPaths:
+    def test_load_sets_grp_paths(self, trace_with_vsteps, h5_path):
+        save(trace_with_vsteps, h5_path)
+        loaded = load(h5_path)
+
+        assert loaded._iq5_grp_path == "root"
+        assert loaded._iq5_path == h5_path
+        for node, grp_path in _walk_node_paths(loaded):
+            assert node._iq5_grp_path == grp_path
+            assert node._iq5_path == h5_path
+
+
+# ---------------------------------------------------------------------------
+# detach_iq5()
+# ---------------------------------------------------------------------------
+
+class TestDetachIQ5:
+    def test_detach_returns_self(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "detach.iq5")
+        trace_with_vsteps.to_iq5(path)
+        result = trace_with_vsteps.detach_iq5()
+        assert result is trace_with_vsteps
+
+    def test_detach_converts_to_numpy(self, trace_with_vsteps, tmp_path,
+                                       sample_current):
+        path = str(tmp_path / "detach.iq5")
+        trace_with_vsteps.to_iq5(path)
+        trace_with_vsteps.detach_iq5()
+
+        assert isinstance(trace_with_vsteps.current, np.ndarray)
+        np.testing.assert_array_almost_equal(
+            trace_with_vsteps.current, sample_current
+        )
+
+    def test_detach_clears_iq5_path(self, trace_with_vsteps, tmp_path):
+        path = str(tmp_path / "detach.iq5")
+        trace_with_vsteps.to_iq5(path)
+        trace_with_vsteps.detach_iq5()
+
+        assert trace_with_vsteps.iq5_path is None
+        for node, _ in _walk_node_paths(trace_with_vsteps):
+            assert node._iq5_grp_path is None

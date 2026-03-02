@@ -291,8 +291,15 @@ class AbstractSegmentTree(object):
 
     def clear_children(self):
         """
-        Clear the list of children
+        Clear the list of children, tracking removed HDF5 paths for sync.
         """
+        if getattr(self, '_iq5_grp_path', None) is not None:
+            if not hasattr(self, '_iq5_stale_paths'):
+                self._iq5_stale_paths = []
+            for child in self.children:
+                path = getattr(child, '_iq5_grp_path', None)
+                if path is not None:
+                    self._iq5_stale_paths.append(path)
         self.children.clear()
         return
 
@@ -341,7 +348,75 @@ class AbstractSegmentTree(object):
 
         collect(self)
         return {rank: len(self.traverse_to_rank(rank)) for rank in ranks_in_order}
-    
+
+    # -- .iq5 backing-store API ---------------------------------------------
+
+    @property
+    def iq5_path(self):
+        """Path to the backing .iq5 file, or None if in-memory."""
+        return getattr(self, '_iq5_path', None)
+
+    def to_iq5(self, filepath):
+        """Save to .iq5 and replace in-memory arrays with lazy disk access.
+
+        Parameters
+        ----------
+        filepath : str
+            Destination ``.iq5`` file path.
+
+        Returns
+        -------
+        self
+        """
+        from ionique.storage import (save, LazyArray, _assign_grp_paths,
+                                     _walk_node_paths)
+        save(self, filepath)
+        _assign_grp_paths(self, filepath)
+        # Replace numpy arrays with LazyArrays
+        for node, grp_path in _walk_node_paths(self):
+            sources_path = f"{grp_path}/sources"
+            if (hasattr(node, 'current')
+                    and not isinstance(node, MetaSegment)
+                    and node.current is not None
+                    and not isinstance(node.current, LazyArray)):
+                node.current = LazyArray(filepath, sources_path,
+                                         "current", "raw")
+            if (hasattr(node, 'time')
+                    and not isinstance(node, MetaSegment)
+                    and getattr(node, 'time', None) is not None
+                    and not isinstance(node.time, LazyArray)):
+                node.time = LazyArray(filepath, sources_path, "time", "raw")
+        return self
+
+    def sync_iq5(self):
+        """Write new/changed nodes to the backing .iq5 file incrementally."""
+        from ionique.storage import _sync_to_file
+        filepath = getattr(self, '_iq5_path', None)
+        if filepath is None:
+            raise RuntimeError(
+                "Not connected to an .iq5 file. Call to_iq5() first.")
+        _sync_to_file(self, filepath)
+
+    def detach_iq5(self):
+        """Load all lazy data into RAM and disconnect from the .iq5 file.
+
+        Returns
+        -------
+        self
+        """
+        from ionique.storage import LazyArray, _walk_node_paths
+        for node, _ in _walk_node_paths(self):
+            for attr in ('current', 'time'):
+                val = getattr(node, attr, None)
+                if isinstance(val, LazyArray):
+                    arr = np.asarray(val)
+                    val.close()
+                    setattr(node, attr, arr)
+            node._iq5_grp_path = None
+            node._iq5_path = None
+            node._iq5_stale_paths = []
+        return self
+
 # class ParsableMixin:
 #     def parse(self,parser,newrank:str,**kwargs)->bool:
 #         required_parent_attributes=parser.get_required_parent_attributes()
