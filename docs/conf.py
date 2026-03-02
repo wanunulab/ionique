@@ -30,7 +30,7 @@ source_suffix = {
     '.md': 'markdown',
 }
 
-autodoc_mock_imports = ["nbwidgets", "setup_log"]
+autodoc_mock_imports = ["nbwidgets", "setup_log", "panel", "bokeh"]
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'sphinx.ext.autodoc', "cparsers*"]
 autosummary_generate = True
