@@ -22,12 +22,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'myst_parser',
-    'sphinx_multiversion',
 ]
-
-smv_tag_whitelist = r'^v\d+\.\d+(\.\d+)?$'
-smv_branch_whitelist = r'^(main|master|feature/dina)$'
-smv_remote_whitelist = r'^origin$'
 
 
 source_suffix = {
@@ -52,11 +47,9 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_sidebars = {
     '**': [
-
-        'globaltoc.html',     # site/page navigation
-        'sourcelink.html',    # "View page source"
-        'searchbox.html',     # search
-        'versions.html',
+        'globaltoc.html',
+        'sourcelink.html',
+        'searchbox.html',
     ],
 }
 html_theme_options = {
