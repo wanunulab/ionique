@@ -10,9 +10,9 @@
 project = 'ionique'
 copyright = '2025, Ali Fallahi, Dinara Boyko, Wanunu Lab'
 author = 'Ali Fallahi, Dinara Boyko'
-import ionique
+from importlib.metadata import version as _get_version
 
-release = ionique.__version__
+release = _get_version('ionique')
 version = release
 
 # -- General configuration ---------------------------------------------------
