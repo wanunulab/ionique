@@ -1771,3 +1771,73 @@ def panel_parser_Exclusion_per_file():
         collapsible=True,
         sizing_mode="stretch_width",
     )
+
+
+def convert_to_iq5(filenames: list[str], reader: type, output_dir: str | None = None, **reader_kwargs) -> list:
+    """Convert raw recording files to ``.iq5`` format for memory-efficient analysis.
+
+    Reads each file with the given reader, wraps it in a
+    :class:`~ionique.datatypes.TraceFile`, and writes it to an ``.iq5`` file
+    via :meth:`~ionique.core.AbstractSegmentTree.to_iq5`. The resulting files
+    can be loaded later with :func:`~ionique.storage.load` for lazy,
+    disk-backed access.
+
+    Parameters
+    ----------
+    filenames : list of str
+        Paths to the raw recording files to convert.
+    reader : type
+        An :class:`~ionique.io.AbstractFileReader` **subclass** (not an
+        instance). A new reader is instantiated for each file. Examples:
+        ``OPTReader``, ``EDHReader``.
+    output_dir : str or None, optional
+        Directory to write the ``.iq5`` files into. Defaults to ``None``,
+        which places each ``.iq5`` file next to its source file.
+    **reader_kwargs
+        Keyword arguments forwarded to the reader constructor for every file
+        (e.g. ``voltage_compress=True``, ``downsample=5``).
+
+    Returns
+    -------
+    list of TraceFile
+        The created :class:`~ionique.datatypes.TraceFile` objects, each
+        backed by its ``.iq5`` file with lazy disk access.
+
+    Examples
+    --------
+    >>> from ionique.simple import convert_to_iq5
+    >>> from ionique.io import OPTReader
+    >>> traces = convert_to_iq5(
+    ...     ["exp1.opt", "exp2.opt"],
+    ...     OPTReader,
+    ...     voltage_compress=True,
+    ... )
+    """
+    from ionique.datatypes import TraceFile
+
+    traces = []
+    for fname in filenames:
+        metadata, current, voltage = reader(fname, **reader_kwargs)
+
+        trace = TraceFile(
+            current=current,
+            voltage=voltage,
+            metadata=metadata,
+            unique_features={
+                "sampling_freq": metadata.get(
+                    "eff_sampling_freq",
+                    metadata.get("Sampling frequency (SR)"),
+                ),
+            },
+        )
+
+        stem = Path(fname).stem
+        if output_dir is not None:
+            out_path = str(Path(output_dir) / f"{stem}.iq5")
+        else:
+            out_path = str(Path(fname).with_suffix(".iq5"))
+
+        trace.to_iq5(out_path)
+        traces.append(trace)
+
+    return traces

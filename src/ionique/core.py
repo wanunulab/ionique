@@ -289,7 +289,7 @@ class AbstractSegmentTree(object):
         """
         self.children = children
 
-    def clear_children(self):
+    def clear_children(self) -> None:
         """
         Clear the list of children, tracking removed HDF5 paths for sync.
         """

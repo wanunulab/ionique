@@ -12,8 +12,16 @@ The ``.iq5`` format also supports **purge-to-disk** (``to_iq5()``) and
 live backing store rather than a snapshot.
 """
 
+from __future__ import annotations
+
 import json
+from collections.abc import Generator
+from typing import TYPE_CHECKING
+
 import numpy as np
+
+if TYPE_CHECKING:
+    from ionique.core import AbstractSegmentTree
 
 try:
     import h5py
@@ -301,7 +309,7 @@ def _make_json_safe(obj):
 # Node-path walking and assignment
 # ---------------------------------------------------------------------------
 
-def _walk_node_paths(seg, prefix="root"):
+def _walk_node_paths(seg: AbstractSegmentTree, prefix: str = "root") -> Generator[tuple[AbstractSegmentTree, str], None, None]:
     """Yield ``(node, hdf5_group_path)`` pairs matching the save layout.
 
     Parameters
@@ -323,7 +331,7 @@ def _walk_node_paths(seg, prefix="root"):
         yield from _walk_node_paths(child, child_path)
 
 
-def _assign_grp_paths(seg, filepath, prefix="root"):
+def _assign_grp_paths(seg: AbstractSegmentTree, filepath: str, prefix: str = "root") -> None:
     """Set ``_iq5_grp_path``, ``_iq5_path``, and ``_iq5_stale_paths`` on every node.
 
     Parameters
@@ -346,7 +354,7 @@ def _assign_grp_paths(seg, filepath, prefix="root"):
 # Incremental sync
 # ---------------------------------------------------------------------------
 
-def _close_lazy_handles(seg):
+def _close_lazy_handles(seg: AbstractSegmentTree) -> None:
     """Close all open LazyArray file handles in the tree.
 
     Parameters
@@ -363,7 +371,7 @@ def _close_lazy_handles(seg):
                 val.close()
 
 
-def _sync_to_file(seg, filepath, compression="gzip", compression_opts=4):
+def _sync_to_file(seg: AbstractSegmentTree, filepath: str, compression: str = "gzip", compression_opts: int = 4) -> None:
     """Write new/changed nodes to *filepath* incrementally.
 
     Parameters
@@ -383,7 +391,7 @@ def _sync_to_file(seg, filepath, compression="gzip", compression_opts=4):
         _sync_node(f, seg, "root", filepath, compression, compression_opts)
 
 
-def _sync_node(f, seg, grp_path, filepath, compression, compression_opts):
+def _sync_node(f: h5py.File, seg: AbstractSegmentTree, grp_path: str, filepath: str, compression: str, compression_opts: int) -> None:
     """Recursively sync a single node: delete stale children, write new ones.
 
     Parameters
@@ -432,7 +440,7 @@ def _sync_node(f, seg, grp_path, filepath, compression, compression_opts):
             _sync_node(f, child, child_grp_path, filepath, compression, compression_opts)
 
 
-def _update_node_attrs(grp, seg):
+def _update_node_attrs(grp: h5py.Group, seg: AbstractSegmentTree) -> None:
     """Update ``unique_features`` for an existing HDF5 group.
 
     Parameters
