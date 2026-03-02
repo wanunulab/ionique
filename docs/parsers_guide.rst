@@ -3,9 +3,18 @@
 Parsers Guide
 =============
 
-Parsers detect events or structural boundaries within segments. Each parser
-analyzes the current data of a segment and returns a list of (start, end)
-boundaries that become child segments in the tree.
+Parsers detect events or segment structural boundaries within the current
+trace. Each parser analyzes a segment's data and returns a list of (start,
+end) boundaries that become child segments in the tree.
+
+There are two categories:
+
+- **Event detectors** — find translocation events within voltage steps:
+  ``AutoSquareParser``, ``SpikeParser``, ``lambda_event_parser``.
+- **Segmenters** — split existing segments into sub-regions based on
+  statistical properties: ``SpeedyStatSplit``, ``FilterDerivativeSegmenter``.
+  These are typically applied *within* already-detected events to resolve
+  multi-level current states.
 
 How parsing works
 -----------------
@@ -15,15 +24,15 @@ children, and optionally a target rank:
 
 .. code-block:: python
 
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser
 
-   parser = SpeedyStatSplit(sampling_freq=100000, min_width=50)
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
 
-   # Parse events within each voltage step
-   trace.parse(parser, newrank="event", at_child_rank="vstep")
+   # Detect events within each voltage step
+   trace.parse(detector, newrank="event", at_child_rank="vstep")
 
    # Or parse the trace directly (no at_child_rank)
-   trace.parse(parser, newrank="event")
+   trace.parse(detector, newrank="event")
 
 When ``at_child_rank`` is set, ``parse()`` iterates over all children at that
 rank and runs the parser on each one. The detected boundaries become children
@@ -40,24 +49,33 @@ Choosing a parser
    * - Parser
      - Best for
      - Key parameters
-   * - :doc:`SpeedyStatSplit <parsers/speedy_statsplit>`
-     - Multi-level blockades, general segmentation
-     - ``min_width``, ``window_width``, ``false_positive_rate``
-   * - :doc:`SpikeParser <parsers/spike_parser>`
-     - Brief spike-like events
-     - ``height``, ``prominence``, ``distance``, ``width``
    * - :doc:`AutoSquareParser <parsers/autosquare_parser>`
      - Square-pulse protein blockades
      - ``threshold_baseline``, ``expected_conductance``
+   * - :doc:`SpikeParser <parsers/spike_parser>`
+     - Brief spike-like events
+     - ``height``, ``prominence``, ``distance``, ``width``
+   * - :doc:`SpeedyStatSplit <parsers/speedy_statsplit>`
+     - Sub-state segmentation within events
+     - ``min_width``, ``window_width``, ``false_positive_rate``
    * - :doc:`Other parsers <parsers/other_parsers>`
      - Specialized tasks
      - See individual pages
 
 **Quick decision guide:**
 
-- Signal has **multi-level current states** → SpeedyStatSplit
-- Signal has **brief downward spikes** → SpikeParser
+*Step 1 — detect events:*
+
 - Signal has **rectangular blockades** with known conductance → AutoSquareParser
+- Signal has **brief downward spikes** → SpikeParser
+- Need a **simple threshold rule** → lambda_event_parser
+
+*Step 2 (optional) — segment within events:*
+
+- Events have **multi-level current sub-states** → SpeedyStatSplit
+
+*Utilities:*
+
 - Need to **exclude time regions** → ExclusionParser
 - Need to **separate noisy from clean regions** → NoiseFilterParser
 - Building **IV curves** → IVCurveParser + IVCurveAnalyzer
@@ -66,19 +84,24 @@ Choosing a parser
 Chaining parsers
 ----------------
 
-You can apply parsers at successively deeper ranks:
+You can apply parsers at successively deeper ranks. A typical three-stage
+pipeline: filter noisy regions, detect events, then segment sub-states:
 
 .. code-block:: python
 
-   from ionique.parsers import NoiseFilterParser, SpeedyStatSplit
+   from ionique.parsers import NoiseFilterParser, AutoSquareParser, SpeedyStatSplit
 
-   # First: separate clean from noisy regions
+   # 1. Separate clean from noisy regions
    noise_parser = NoiseFilterParser(noise_threshold=60, detect_noise=False)
    trace.parse(noise_parser, newrank="clean", at_child_rank="vstep")
 
-   # Then: detect events only in clean regions
-   event_parser = SpeedyStatSplit(sampling_freq=100000, min_width=50)
-   trace.parse(event_parser, newrank="event", at_child_rank="clean")
+   # 2. Detect blockade events in clean regions
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
+   trace.parse(detector, newrank="event", at_child_rank="clean")
+
+   # 3. Segment sub-states within each event
+   splitter = SpeedyStatSplit(sampling_freq=100000, min_width=50)
+   trace.parse(splitter, newrank="state", at_child_rank="event")
 
 
 Parser output format

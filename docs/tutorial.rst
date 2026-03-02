@@ -92,8 +92,9 @@ transients. This creates children at rank ``"vstepgap"`` under each
 Step 4: Detect events
 ---------------------
 
-Use ``SpeedyStatSplit`` to find current-level transitions within each trimmed
-voltage step.
+Use ``AutoSquareParser`` to find blockade events within each trimmed voltage
+step. This detects regions where current drops below a fraction of the
+open-channel baseline.
 
 .. image:: _static/images/tutorial/step4_events.png
    :alt: Events detected in a single voltage step
@@ -101,14 +102,13 @@ voltage step.
 
 .. code-block:: python
 
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser
 
-   parser = SpeedyStatSplit(
-       sampling_freq=trace.sampling_freq,
-       min_width=50,
-       window_width=10000,
+   detector = AutoSquareParser(
+       threshold_baseline=0.7,
+       expected_conductance=1.9,
    )
-   trace.parse(parser, newrank="event", at_child_rank="vstepgap")
+   trace.parse(detector, newrank="event", at_child_rank="vstepgap")
 
    events = trace.traverse_to_rank("event")
    print(f"Total events detected: {len(events)}")
@@ -120,6 +120,20 @@ Inspect a few events:
    for ev in events[:5]:
        print(f"  [{ev.start}:{ev.end}] n={ev.n}, "
              f"mean={ev.mean:.3f} nA, std={ev.std:.4f}")
+
+If your events have multi-level current structure (e.g. a protein blocking
+in stages), you can further segment sub-states within each event:
+
+.. code-block:: python
+
+   from ionique.parsers import SpeedyStatSplit
+
+   splitter = SpeedyStatSplit(
+       sampling_freq=trace.sampling_freq,
+       min_width=50,
+       window_width=10000,
+   )
+   trace.parse(splitter, newrank="state", at_child_rank="event")
 
 
 Step 5: Extract features
@@ -201,7 +215,7 @@ The complete pipeline:
 
    from ionique.io import EDHReader
    from ionique.datatypes import TraceFile
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser, SpeedyStatSplit
    from ionique.utils import Filter, Trimmer, extract_features
 
    # Load
@@ -213,8 +227,12 @@ The complete pipeline:
    Trimmer(samples_to_remove=500)(trace)
 
    # Detect events
-   parser = SpeedyStatSplit(sampling_freq=trace.sampling_freq, min_width=50)
-   trace.parse(parser, newrank="event", at_child_rank="vstepgap")
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
+   trace.parse(detector, newrank="event", at_child_rank="vstepgap")
+
+   # (Optional) Segment sub-states within events
+   splitter = SpeedyStatSplit(sampling_freq=trace.sampling_freq, min_width=50)
+   trace.parse(splitter, newrank="state", at_child_rank="event")
 
    # Extract features
    df = extract_features(trace, "event", ["mean", "std", "duration"])

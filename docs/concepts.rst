@@ -149,12 +149,12 @@ The ``parse()`` method subdivides a segment using a parser object:
 
 .. code-block:: python
 
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser
 
-   parser = SpeedyStatSplit(sampling_freq=100000, min_width=50)
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
 
-   # Parse at the vstep level, creating events
-   trace.parse(parser, newrank="event", at_child_rank="vstep")
+   # Detect events within each voltage step
+   trace.parse(detector, newrank="event", at_child_rank="vstep")
 
 What happens:
 
@@ -169,11 +169,11 @@ the parser runs on the segment itself.
 
 .. code-block:: python
 
-   # First pass: coarse segmentation
-   trace.parse(coarse_parser, newrank="block", at_child_rank="vstep")
+   # First: detect blockade events
+   trace.parse(event_detector, newrank="event", at_child_rank="vstep")
 
-   # Second pass: fine segmentation within each block
-   trace.parse(fine_parser, newrank="event", at_child_rank="block")
+   # Then: segment sub-states within each event
+   trace.parse(sub_state_splitter, newrank="state", at_child_rank="event")
 
 
 Building trees manually

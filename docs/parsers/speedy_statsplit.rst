@@ -5,22 +5,36 @@ SpeedyStatSplit
 
 ``SpeedyStatSplit`` is a variance-based recursive segmentation algorithm
 optimized in Cython. It finds boundaries where the signal's statistical
-properties change — making it ideal for multi-level blockade detection.
+properties change — making it ideal for resolving **multi-level current
+sub-states within already-detected events**.
+
+.. note::
+   SpeedyStatSplit is **not** an event detector. Use an event detector
+   (``AutoSquareParser``, ``SpikeParser``, or ``lambda_event_parser``) first
+   to find translocation events, then apply SpeedyStatSplit to segment
+   current levels within those events.
 
 The algorithm recursively splits a signal at the point that maximizes the
 reduction in total variance, stopping when segments are too narrow or the
 gain is below a threshold.
 
+**Typical two-stage workflow:**
+
 .. code-block:: python
 
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser, SpeedyStatSplit
 
-   parser = SpeedyStatSplit(
+   # Stage 1: detect blockade events
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
+   trace.parse(detector, newrank="event", at_child_rank="vstep")
+
+   # Stage 2: segment sub-states within each event
+   splitter = SpeedyStatSplit(
        sampling_freq=100000,
        min_width=100,
        window_width=10000,
    )
-   trace.parse(parser, newrank="event", at_child_rank="vstep")
+   trace.parse(splitter, newrank="state", at_child_rank="event")
 
 
 Parameters
@@ -79,10 +93,10 @@ merge adjacent states.
 
 .. code-block:: python
 
-   # Fine-grained: detect short events
+   # Fine-grained: resolve brief sub-states within events
    parser = SpeedyStatSplit(sampling_freq=100000, min_width=50)
 
-   # Coarse: only detect long-duration states
+   # Coarse: only detect major current-level changes
    parser = SpeedyStatSplit(sampling_freq=100000, min_width=3000)
 
 window_width
@@ -108,15 +122,15 @@ the gain threshold (set via ``false_positive_rate`` or
 
 .. code-block:: python
 
-   # High sensitivity — detect small, brief transitions
-   parser = SpeedyStatSplit(
+   # High sensitivity — resolve small, brief sub-states
+   splitter = SpeedyStatSplit(
        sampling_freq=100000,
        min_width=50,
        false_positive_rate=10.0,
    )
 
-   # Low sensitivity — only detect large, clear transitions
-   parser = SpeedyStatSplit(
+   # Low sensitivity — only split on large, clear level changes
+   splitter = SpeedyStatSplit(
        sampling_freq=100000,
        min_width=1500,
        false_positive_rate=0.01,
@@ -132,21 +146,25 @@ Full example
 
 .. code-block:: python
 
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser, SpeedyStatSplit
 
-   parser = SpeedyStatSplit(
+   # First detect events
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
+   trace.parse(detector, newrank="event", at_child_rank="vstep")
+
+   # Then segment sub-states within each event
+   splitter = SpeedyStatSplit(
        sampling_freq=100000,
        min_width=200,
        window_width=10000,
    )
+   trace.parse(splitter, newrank="state", at_child_rank="event")
 
-   trace.parse(parser, newrank="event", at_child_rank="vstep")
+   states = trace.traverse_to_rank("state")
+   print(f"Resolved {len(states)} sub-states across all events")
 
-   events = trace.traverse_to_rank("event")
-   print(f"Detected {len(events)} segments")
-
-   for ev in events[:5]:
-       print(f"  [{ev.start}:{ev.end}] mean={ev.mean:.3f}, std={ev.std:.4f}")
+   for st in states[:5]:
+       print(f"  [{st.start}:{st.end}] mean={st.mean:.3f}, std={st.std:.4f}")
 
 
 Additional methods
@@ -163,6 +181,8 @@ Additional methods
    best_index = parser.best_single_split(current_array)
 
 .. tip::
-   For very long traces (>1M samples), consider splitting by voltage step
-   first (``at_child_rank="vstep"``), then running SpeedyStatSplit on each
-   step. This is both faster and uses less memory.
+   SpeedyStatSplit works best on segments that already contain a single
+   blockade event with multi-level structure. Running it directly on a
+   full voltage step will segment the entire signal (baseline + events
+   together), which is usually not what you want. Detect events first,
+   then split within them.

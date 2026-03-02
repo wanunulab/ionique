@@ -17,7 +17,7 @@ Minimal workflow
 
    from ionique.io import EDHReader
    from ionique.datatypes import TraceFile
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser, SpeedyStatSplit
    from ionique.utils import Filter, Trimmer, extract_features
 
    # 1. Load an EDH file with voltage-step splitting
@@ -36,11 +36,15 @@ Minimal workflow
    trimmer = Trimmer(samples_to_remove=200)
    trimmer(trace)
 
-   # 4. Detect events with variance-based splitting
-   parser = SpeedyStatSplit(sampling_freq=trace.sampling_freq, min_width=50)
-   trace.parse(parser, newrank="event", at_child_rank="vstepgap")
+   # 4. Detect blockade events
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
+   trace.parse(detector, newrank="event", at_child_rank="vstepgap")
 
-   # 5. Extract features to a pandas DataFrame
+   # 5. (Optional) Segment sub-states within each event
+   splitter = SpeedyStatSplit(sampling_freq=trace.sampling_freq, min_width=50)
+   trace.parse(splitter, newrank="state", at_child_rank="event")
+
+   # 6. Extract features to a pandas DataFrame
    df = extract_features(trace, "event", ["mean", "std", "duration"])
    print(df.head())
 
@@ -63,8 +67,11 @@ segments into children at a new *rank*:
 - **Voltage steps** (rank ``"vstep"``) — created automatically when you load
   with ``voltage_compress=True``. Each step corresponds to a constant applied
   voltage.
-- **Events** (rank ``"event"``) — detected by a parser within each voltage
+- **Events** (rank ``"event"``) — detected by an event detector
+  (AutoSquareParser, SpikeParser, or lambda_event_parser) within each voltage
   step (or trimmed step, ``"vstepgap"``).
+- **States** (rank ``"state"``, optional) — sub-states within an event,
+  resolved by SpeedyStatSplit when events have multi-level current structure.
 
 You can traverse down with ``traverse_to_rank()`` and up with
 ``climb_to_rank()``. Features like ``sampling_freq`` are looked up by climbing

@@ -12,7 +12,7 @@ around a flexible tree-based segment hierarchy.
 
    from ionique.io import EDHReader
    from ionique.datatypes import TraceFile
-   from ionique.parsers import SpeedyStatSplit
+   from ionique.parsers import AutoSquareParser, SpeedyStatSplit
    from ionique.utils import Filter, extract_features
 
    # Load a nanopore recording
@@ -23,9 +23,13 @@ around a flexible tree-based segment hierarchy.
    filt = Filter(cutoff_frequency=5000, filter_type="lowpass", sampling_frequency=100000)
    filt(trace.current)
 
-   # Detect events in each voltage step
-   parser = SpeedyStatSplit(sampling_freq=100000, min_width=50)
-   trace.parse(parser, newrank="event", at_child_rank="vstep")
+   # Detect blockade events in each voltage step
+   detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
+   trace.parse(detector, newrank="event", at_child_rank="vstep")
+
+   # Segment sub-states within each event
+   splitter = SpeedyStatSplit(sampling_freq=100000, min_width=50)
+   trace.parse(splitter, newrank="state", at_child_rank="event")
 
    # Extract features to a DataFrame
    df = extract_features(trace, "event", ["mean", "std", "duration"])
@@ -36,9 +40,11 @@ Key capabilities:
   unit scaling and voltage-step detection.
 - **Signal preprocessing** — Lowpass/highpass/bandpass filtering, clock-tone
   removal, and edge trimming.
-- **Event detection** — 10+ parsers including variance-based splitting
-  (SpeedyStatSplit), spike detection (SpikeParser), and square-pulse analysis
-  (AutoSquareParser).
+- **Event detection** — Parsers for finding translocation events: spike
+  detection (SpikeParser), square-pulse analysis (AutoSquareParser), and
+  threshold-based rules (lambda_event_parser).
+- **Sub-state segmentation** — SpeedyStatSplit resolves multi-level current
+  states within detected events using variance-based recursive splitting.
 - **Segment tree** — Hierarchical data model (file → voltage step → event)
   with recursive parsing, feature lookup, and memory-efficient MetaSegments.
 - **Feature extraction** — Export segment statistics to pandas DataFrames with
