@@ -138,6 +138,17 @@ class SessionFileManager(MetaSegment, metaclass=Singleton):
         if child in self.children:
             self.children.remove(child)
 
+    def close(self):
+        """Close any open HDF5 file handles held by child TraceFiles."""
+        from ionique.storage import LazyArray
+        for child in self.children:
+            if hasattr(child, "current") and isinstance(child.current, LazyArray):
+                child.current.close()
+            if hasattr(child, "time") and isinstance(child.time, LazyArray):
+                child.time.close()
+            if hasattr(child, "close") and child is not self:
+                child.close()
+
 
 class TraceFile(Segment):
     """
@@ -211,6 +222,61 @@ class TraceFile(Segment):
         Not yet implemented.
         """
         pass
+
+    def add_source(self, name, current_array):
+        """Add a new named source (e.g. a filtered version) to the HDF5 backing store.
+
+        Only works when ``self.current`` is a :class:`~ionique.storage.LazyArray`
+        (i.e. after a save/load cycle).
+
+        Parameters
+        ----------
+        name : str
+            Source name (e.g. ``"filtered_10kHz"``).
+        current_array : numpy.ndarray
+            The filtered current array. Must have the same length as the
+            existing current.
+        """
+        from ionique.storage import LazyArray
+        if not isinstance(self.current, LazyArray):
+            raise TypeError(
+                "add_source() requires an HDF5-backed TraceFile "
+                "(save then load first)."
+            )
+        import h5py as _h5py
+        la = self.current
+        la.close()
+        with _h5py.File(la._filepath, "a") as f:
+            src_grp = f[la._sources_group_path]
+            if name in src_grp:
+                del src_grp[name]
+            new_grp = src_grp.create_group(name)
+            arr = np.asarray(current_array)
+            chunk = min(len(arr), 1_000_000) if len(arr) > 0 else None
+            new_grp.create_dataset(
+                "current", data=arr,
+                chunks=(chunk,) if chunk else None,
+                compression="gzip", compression_opts=4,
+            )
+
+    def switch_source(self, name):
+        """Switch which stored version ``.current`` reads from.
+
+        All descendant ``MetaSegment`` nodes automatically use the new source
+        because they resolve ``.current`` by climbing to this ``TraceFile``.
+
+        Parameters
+        ----------
+        name : str
+            Source name to activate (e.g. ``"raw"`` or ``"filtered_10kHz"``).
+        """
+        from ionique.storage import LazyArray
+        if not isinstance(self.current, LazyArray):
+            raise TypeError(
+                "switch_source() requires an HDF5-backed TraceFile "
+                "(save then load first)."
+            )
+        self.current.switch_source(name)
 
     def delete(self):
         """

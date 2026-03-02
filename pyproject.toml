@@ -19,7 +19,7 @@ dependencies = [
   "platformdirs~=4.2.2",
   "pyabf>=2.3.8",
   "pandas>=2.0",
-
+  "h5py>=3.0",
 ]
 
 
