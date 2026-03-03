@@ -41,10 +41,17 @@ df = extract_features(trace, "event", ["mean", "std", "duration"])
 
 ## Installation
 
-Python 3.10–3.13. Requires a C compiler for the Cython extension.
+Python 3.10–3.13. Requires a C compiler for the Cython extension. 
+To get the latest release:
 
 ```bash
 pip install ionique
+```
+
+For latest unreleased version directly from GitHub:
+
+```bash
+pip install git+https://github.com/username/repo.git
 ```
 
 For development:
