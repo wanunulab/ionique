@@ -218,8 +218,8 @@ class EDHReader(AbstractFileReader):
         if self.downsample > 1:
             current_data = current[::self.downsample]
             voltage_data = voltage[::self.downsample]
-            metadata["downsample"] = self.downsample
-            metadata["eff_sampling_freq"] = metadata["Sampling frequency (SR)"] / self.downsample
+        metadata["downsample"] = self.downsample
+        metadata["eff_sampling_freq"] = metadata["Sampling frequency (SR)"] / self.downsample
 
         if self.voltage_compress:
             voltage_splits = split_voltage_steps(voltage, as_tuples=True, n_remove=self.n_remove)
