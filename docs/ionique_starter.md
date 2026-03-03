@@ -88,7 +88,7 @@ pip install .
 
 Wait a few minutes while dependencies install.
 
-![](../images/final_ionique_installes.png)
+![](../images/final_ioniq_installes.png)
 
 > If you see a similar message, congratulations — you've successfully installed the Ionique package!
 

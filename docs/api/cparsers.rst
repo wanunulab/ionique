@@ -1,5 +1,5 @@
 ionique.cparsers
-===============
+================
 
 .. automodule:: ionique.cparsers
    :members:
