@@ -67,6 +67,6 @@ Full user guide, tutorials, and API reference at **[ionique.readthedocs.io](http
 
 ## License
 
-GPL-3.0 — see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
-&copy; 2025 The Wanunu Lab.
+&copy; 2026 The Wanunu Lab.
