@@ -16,7 +16,16 @@ from itertools import chain
 from typing import TypeVar
 from functools import cached_property
 import numpy as np
-from ionique.utils import ignored
+from contextlib import contextmanager
+
+
+@contextmanager
+def _ignored(*exceptions):
+    """Silently suppress specified exception types."""
+    try:
+        yield
+    except exceptions:
+        pass
 
 AnySegment = TypeVar("AnySegment", bound="AbstractSegmentTree")
 
@@ -630,7 +639,7 @@ class Segment(AbstractSegmentTree):
         super().__init__()
         self.current = current
         for key, value in kwargs.items():
-            with ignored(AttributeError):
+            with _ignored(AttributeError):
                 setattr(self, key, value)
 
     def __repr__(self):
@@ -700,7 +709,7 @@ class Segment(AbstractSegmentTree):
         """
 
         for key in ['mean', 'std', 'min', 'max', 'end', 'start', 'duration']:
-            with ignored(KeyError, AttributeError):
+            with _ignored(KeyError, AttributeError):
                 self.__dict__[key] = getattr(self, key)
         del self.current
 
@@ -712,7 +721,7 @@ class Segment(AbstractSegmentTree):
         current array, and then deleting itself.
         """
 
-        with ignored(AttributeError):
+        with _ignored(AttributeError):
             del self.current
 
         del self
@@ -725,11 +734,11 @@ class Segment(AbstractSegmentTree):
         # Changed the code here for the test units:
         # When set to None error occurs
 
-        # with ignored(AttributeError):
+        # with _ignored(AttributeError):
         #     self.start /= sampling_freq
         #     self.end /= sampling_freq
         #     self.duration /= sampling_freq
-        with ignored(AttributeError):
+        with _ignored(AttributeError):
             # if self.start is not None:
             if self.start != None:
                 self.start /= sampling_freq
