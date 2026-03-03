@@ -3,7 +3,7 @@
 [![Pylint](https://github.com/wanunulab/ionique/actions/workflows/pylint.yml/badge.svg)](https://github.com/wanunulab/ionique/actions/workflows/pylint.yml)
 [![Pytest](https://github.com/wanunulab/ionique/actions/workflows/pytest.yml/badge.svg)](https://github.com/wanunulab/ionique/actions/workflows/pytest.yml)
 [![Documentation](https://readthedocs.org/projects/ionique/badge/?version=latest)](https://ionique.readthedocs.io/)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A modular nanopore signal analysis framework for ionic current data. Load recordings, filter noise, detect translocation events, segment sub-states, and extract features — all through a composable Python API or an interactive GUI.
 
