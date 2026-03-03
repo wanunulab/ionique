@@ -108,19 +108,33 @@ def qp_trace(seg:AnySegment|None = None, ranks=["vstepgap","event"],downsamples=
 import numpy as np
 import pandas as pd
 
-import panel as pn
-from bokeh.plotting import figure
-from bokeh.models import (
-    ColumnDataSource,
-    HoverTool,
-    TapTool,
-    Legend,
-    LegendItem,
-    Range1d,
-)
-from bokeh.palettes import Category10, Category20
 
-pn.extension()
+def _require_panel_bokeh():
+    """Lazily import panel and bokeh, raising a helpful error if missing."""
+    try:
+        import panel as pn
+    except ImportError:
+        raise ImportError(
+            "panel is required for interactive dashboards but is not installed. "
+            "Install it with: pip install ionique[panel]"
+        ) from None
+    try:
+        from bokeh.plotting import figure
+        from bokeh.models import (
+            ColumnDataSource,
+            HoverTool,
+            TapTool,
+            Range1d,
+            CDSView,
+            BooleanFilter,
+        )
+        from bokeh.palettes import Category10, Category20
+    except ImportError:
+        raise ImportError(
+            "bokeh is required for interactive dashboards but is not installed. "
+            "Install it with: pip install ionique[panel]"
+        ) from None
+    return pn, figure, ColumnDataSource, HoverTool, TapTool, Range1d, CDSView, BooleanFilter, Category10, Category20
 
 # -----------------------------
 # Utilities
@@ -250,14 +264,6 @@ def compute_sampling_frequency(row: pd.Series) -> Optional[float]:
 # -----------------------------
 
 
-from bokeh.palettes import Category10, Category20
-from bokeh.plotting import figure
-from bokeh.models import (
-    HoverTool, TapTool, Range1d, ColumnDataSource,
-    CDSView, BooleanFilter
-)
-
-
 def dashboard_event_inspection(df: pd.DataFrame):
     """Build an interactive Panel + Bokeh dashboard for exploring ionic current events.
 
@@ -285,6 +291,10 @@ def dashboard_event_inspection(df: pd.DataFrame):
     panel.pane.Markdown
         An error pane if ``df`` is empty or not a valid DataFrame.
     """
+    (pn, figure, ColumnDataSource, HoverTool, TapTool, Range1d,
+     CDSView, BooleanFilter, Category10, Category20) = _require_panel_bokeh()
+    pn.extension()
+
     if not isinstance(df, pd.DataFrame) or df.empty:
         return pn.pane.Markdown("❌ DataFrame is empty or invalid.")
 
