@@ -51,7 +51,7 @@ pip install ionique
 For latest unreleased version directly from GitHub:
 
 ```bash
-pip install git+https://github.com/username/repo.git
+pip install git+https://github.com/wanunulab/ionique.git
 ```
 
 For development:
