@@ -101,6 +101,12 @@ Now, install the Ionique requirements:
 
    pip install .
 
+For interactive dashboards and plotting widgets, also run:
+
+.. code-block:: sh
+
+   pip install ".[panel]"
+
 *If your OS and Python version require the ``python3`` command, use ``pip3`` instead.*
 
 Next, install JupyterLab:

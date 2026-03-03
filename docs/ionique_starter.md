@@ -90,6 +90,12 @@ Run the command:
 pip install .
 ```
 
+For interactive dashboards and plotting widgets, also run:
+
+```bash
+pip install ".[panel]"
+```
+
 Wait a few minutes while dependencies install.
 
 ![](../images/final_ioniq_installes.png)
