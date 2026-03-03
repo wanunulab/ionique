@@ -180,7 +180,7 @@ class TraceFile(Segment):
         self.end = len(self.current)
         self.metadata = metadata
         self.uuid = None
-        self.sampling_freq = self.unique_features.get("sampling_freq")
+        self.sampling_freq = getattr(self.unique_features,"sampling_freq",getattr(self.metadata,"eff_sampling_freq",getattr(self.metadata,"Sampling Frequency (SR)",None)))
         self.time = np.arange(self.start, self.end) / self.sampling_freq
 
         # If voltage data exists, create MetaSegment instance for each voltage step
