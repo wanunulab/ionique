@@ -1,11 +1,9 @@
-:orphan:
-
 =======
 Install
 =======
 
 Install ionique
-============
+===============
 
 The most recent release of the  ``ionique`` package can be installed using pip_
 

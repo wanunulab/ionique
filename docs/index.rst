@@ -57,8 +57,7 @@ Key capabilities:
    :maxdepth: 2
    :caption: Getting Started
 
-   ionique_starter
-   python_vscode_start
+   installation
 
 .. toctree::
    :maxdepth: 2

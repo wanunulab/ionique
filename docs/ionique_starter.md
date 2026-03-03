@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # Install Ionique
 
 This guide walks you through the steps to download, set up, and install the Ionique package using a virtual environment.

@@ -1,3 +1,7 @@
+---
+orphan: true
+---
+
 # Guide for VSCode and Python Installation
 
 This guide is designed for users who do not have Python or Visual Studio Code installed on their machine.
