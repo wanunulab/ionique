@@ -9,14 +9,15 @@ dynamic = ["version"]
 description = "A modular nanopore data analysis package."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {file = "LICENSE"}
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 authors = [{name = "Ali Fallahi", email = "fallahi.a@northeastern.edu"}]
 dependencies = [
   "numpy>=2.0",
   "Cython>=3.0.11",
-  "pytz~=2024.1",
+  "pytz>=2024.1",
   "scipy>=1.14.1",
-  "platformdirs~=4.2.2",
+  "platformdirs>=4.2",
   "pyabf>=2.3.8",
   "pandas>=2.0",
 
@@ -29,4 +30,4 @@ panel = ["panel","bokeh-jupyter","ipympl","plotly","openpyxl"]
 [tool.setuptools_scm]
 write_to = "src/ionique/_version.py"
 # fall back version is for downloading git repo
-fallback_version = "0.3.0"
+fallback_version = "0.4.0"

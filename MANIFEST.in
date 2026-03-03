@@ -1,0 +1,11 @@
+graft src
+include LICENSE README.md CHANGELOG.md pyproject.toml
+
+prune docs
+prune notebooks
+prune tests
+prune images
+prune .github
+prune .claude
+
+global-exclude *.pyc __pycache__ .DS_Store
