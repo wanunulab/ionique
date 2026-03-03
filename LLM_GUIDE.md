@@ -2,7 +2,7 @@
 
 ## Overview
 
-ionique is a Python framework for nanopore ionic current signal analysis. It loads raw data files (`.edh`, `.opt`), organizes signals into a tree of hierarchical segments (voltage steps, events, sub-events), provides parsers for automated event detection, and exports features to DataFrames for statistical analysis. Python 3.10–3.13.
+ionique is a Python framework for nanopore ionic current signal analysis. It loads raw data files (`.edh`, `.opt`), organizes signals into a tree of hierarchical segments (voltage steps, events, sub-states), provides parsers for automated event detection, and exports features to DataFrames for statistical analysis. Python 3.10–3.13.
 
 ## Core Concepts
 
@@ -18,9 +18,11 @@ root (SessionFileManager)          — singleton session container
     └── vstep                      — auto-created per voltage step
         └── vstepgap               — after Trimmer removes initial samples
             └── clean              — after ExclusionParser removes noisy regions
-                └── event          — after AutoSquareParser detects blockades
-                    └── subevent   — after SpeedyStatSplit segments within events
+                └── event          — after event detector (AutoSquareParser, SpikeParser, etc.)
+                    └── state      — after SpeedyStatSplit segments sub-states within events
 ```
+
+Rank names are arbitrary strings — you can use any name. The above are conventions.
 
 ### Key Properties (MetaSegment / Segment)
 
@@ -121,7 +123,13 @@ exclusion = ExclusionParser(regions=[(2.5, 4.0), (10.0, 11.5)])
 trace.parse(exclusion, newrank="clean", at_child_rank="vstepgap")
 ```
 
-### 5. Detect events with AutoSquareParser
+### 5. Detect events
+
+Event detectors find translocation events within voltage steps. Choose based on signal shape:
+
+- **AutoSquareParser** — rectangular blockades with known conductance
+- **SpikeParser** — brief downward spikes
+- **lambda_event_parser** — simple threshold rule
 
 ```python
 from ionique.parsers import AutoSquareParser
@@ -137,7 +145,11 @@ parser = AutoSquareParser(
 sfm.parse(parser, newrank="event", at_child_rank="clean")
 ```
 
-### 6. Sub-event detection with SpeedyStatSplit
+### 6. Segment sub-states within events (optional)
+
+SpeedyStatSplit is **not** an event detector. It segments multi-level current
+structure *within* already-detected events — e.g., a protein blocking in
+stages. Apply it only after an event detector has run.
 
 ```python
 from ionique.parsers import SpeedyStatSplit
@@ -149,7 +161,7 @@ sss = SpeedyStatSplit(
     false_positive_rate=5000,
     cutoff_freq=25000,
 )
-sfm.parse(parser=sss, newrank="subevent", at_child_rank="event")
+sfm.parse(parser=sss, newrank="state", at_child_rank="event")
 ```
 
 ### 7. Extract features into a DataFrame
@@ -179,7 +191,7 @@ from ionique.simple import get_standard_features
 df = get_standard_features()
 # Returns DataFrame with: mean, std, frac, duration, current, wrap, start,
 # filename, baseline, Voltage, baseline_conductance, start_time,
-# parent_start_time, and subevent columns if subevents exist.
+# parent_start_time, and sub-state columns if sub-states exist.
 ```
 
 ### 9. Plot with qp_trace
@@ -246,7 +258,7 @@ panel_parser_Exclusion()
 # Step 3: Detect events
 panel_parser_AutoSquare()
 
-# Step 4: Detect sub-events
+# Step 4: (Optional) Segment sub-states within events
 panel_parser_SpeedyStatSplit()
 
 # Step 5: Extract features
@@ -283,17 +295,36 @@ When `voltage_compress=True`, voltage is `list[((start, end), voltage_value)]` i
 
 | Class | Constructor | Notes |
 |-------|-------------|-------|
-| `MetaSegment(start, end, parent=None, rank=None, unique_features={})` | Lightweight node; `current`/`mean`/`std` are computed on-the-fly from root file | Used by parsers to represent detected segments |
+| `MetaSegment(start, end, parent=None, rank=None, unique_features={}, **kwargs)` | Lightweight node; `current`/`mean`/`std` are computed on-the-fly from root file | Used by parsers to represent detected segments |
 | `Segment(current, **kwargs)` | Data-containing node with a numpy array | `kwargs` can set `start`, `end`, `rank`, etc. |
 
 ### `ionique.parsers`
 
-| Class | Constructor | Required Parent Attrs | Output Rank |
-|-------|-------------|----------------------|-------------|
-| `AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9, conductance_tolerance=1.2, wrap_padding=50, rules=[])` | `current`, `eff_sampling_freq`, `voltage` | `event` |
-| `SpeedyStatSplit(sampling_freq, min_width=100, max_width=1000000, window_width=10000, min_gain_per_sample=None, false_positive_rate=None, prior_segments_per_second=None, cutoff_freq=None)` | `current` | `subevent` |
-| `SpikeParser(height=None, threshold=None, distance=None, prominence=None, width=None, fractional=True, ...)` | `current`, `sampling_freq`, `mean`, `start`, `std` | varies |
-| `ExclusionParser(regions=[(start_sec, end_sec), ...])` | `current`, `eff_sampling_freq`, `voltage`, `start` | `clean` |
+**Event detectors** — find translocation events within voltage steps:
+
+| Class | Constructor | `required_parent_attributes` |
+|-------|-------------|------------------------------|
+| `AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9, conductance_tolerance=1.2, wrap_padding=50, rules=[])` | `["current", "eff_sampling_freq", "voltage"]` |
+| `SpikeParser(height=None, threshold=None, distance=None, prominence=None, prominence_snr=None, width=None, wlen=None, rel_height=0.5, plateu_size=None, fractional=True)` | `["current", "sampling_freq", "mean", "start", "std"]` |
+| `ExclusionParser(regions=[(start_sec, end_sec), ...])` | `["current", "eff_sampling_freq", "voltage", "start"]` |
+
+**Sub-state segmenters** — split already-detected events into current levels:
+
+| Class | Constructor | `required_parent_attributes` |
+|-------|-------------|------------------------------|
+| `SpeedyStatSplit(sampling_freq, min_width=100, max_width=1000000, window_width=10000, min_gain_per_sample=None, false_positive_rate=None, prior_segments_per_second=None, cutoff_freq=None)` | `["current"]` (inherited default) |
+
+**Other parsers:**
+
+| Class | Purpose |
+|-------|---------|
+| `NoiseFilterParser` | Classifies clean vs noisy regions |
+| `FilterDerivativeSegmenter` | Derivative threshold segmentation |
+| `snakebase_parser` | Peak-to-peak amplitude segmentation |
+| `lambda_event_parser` | Simple threshold with rule-based filtering |
+| `IVCurveParser` | Voltage protocol pattern matching |
+| `IVCurveAnalyzer` | Mean current per voltage level |
+| `MemoryParse` | Reconstructs segments from saved boundaries |
 
 ### `ionique.utils`
 
@@ -360,7 +391,7 @@ Returns a DataFrame with these columns:
 | `baseline_conductance` | `abs(baseline / voltage)` |
 | `start_time` | `event.time[0]` |
 | `parent_start_time` | `event.parent.time[0]` |
-| `subevent_starts/ends/mean/std/duration/count` | Only if subevents exist |
+| `subevent_starts/ends/mean/std/duration/count` | Only if sub-states exist |
 
 ---
 
@@ -377,7 +408,7 @@ Returns a DataFrame with these columns:
 5. **Use `seg.summary()`** to inspect the current tree structure:
    ```python
    sfm.summary()
-   # {'root': 1, 'file': 2, 'vstep': 10, 'vstepgap': 10, 'event': 47, 'subevent': 312}
+   # {'root': 1, 'file': 2, 'vstep': 10, 'vstepgap': 10, 'event': 47, 'state': 312}
    ```
 
 6. **`unique_features` dict** is where parsers store per-segment metadata (e.g., `baseline`, `frac`, `wrap`, `voltage`). Access via `seg.unique_features["key"]` or `seg.get_feature("key")`.
@@ -386,9 +417,11 @@ Returns a DataFrame with these columns:
 
 8. **`eff_sampling_freq`** is the effective sampling frequency after downsampling (`SR / downsample`). This is what parsers use, not the raw `Sampling frequency (SR)`.
 
-9. **Parsing flow:** Always parse from outer to inner ranks: Trimmer -> ExclusionParser -> AutoSquareParser -> SpeedyStatSplit. Each parser creates children at the rank below.
+9. **Parsing flow:** Always parse from outer to inner ranks. A typical pipeline: Trimmer → ExclusionParser → event detector (AutoSquareParser) → sub-state segmenter (SpeedyStatSplit). Each step creates children at the rank below.
 
 10. **`at_child_rank` in `parse()`** tells the tree which rank to target. E.g., `sfm.parse(parser, newrank="event", at_child_rank="clean")` traverses down to all `clean` segments and parses each one independently.
+
+11. **SpeedyStatSplit is not an event detector.** It segments multi-level current structure *within* already-detected events. Always run an event detector first (AutoSquareParser, SpikeParser, or lambda_event_parser), then apply SpeedyStatSplit at the `"event"` rank.
 
 ---
 
@@ -523,17 +556,17 @@ df = extract_features(sfm, bottom_rank="my_event", extractions=["mean", "duratio
 
 ## Additional Tips
 
-11. **Inspect the tree interactively.** Use `traverse_to_rank` to get segments at any level and check their properties:
+12. **Inspect the tree interactively.** Use `traverse_to_rank` to get segments at any level and check their properties:
     ```python
     events = sfm.traverse_to_rank("event")
     print(len(events), events[0].mean, events[0].duration)
     ```
 
-12. **Parsers are stateless between calls.** The same parser instance can be reused across multiple `parse()` calls or sessions. Configuration is set at construction time.
+13. **Parsers are stateless between calls.** The same parser instance can be reused across multiple `parse()` calls or sessions. Configuration is set at construction time.
 
-13. **`unique_features` propagates through `get_feature()`.** If you store `{"my_key": value}` on a `vstep` segment, any descendant (event, subevent) can retrieve it with `seg.get_feature("my_key")` without it being explicitly on the child.
+14. **`unique_features` propagates through `get_feature()`.** If you store `{"my_key": value}` on a `vstep` segment, any descendant (event, state) can retrieve it with `seg.get_feature("my_key")` without it being explicitly on the child.
 
-14. **Custom lambdas in `extract_features` have full tree access.** The lambda receives the bottom-rank segment, from which you can navigate anywhere:
+15. **Custom lambdas in `extract_features` have full tree access.** The lambda receives the bottom-rank segment, from which you can navigate anywhere:
     ```python
     lambdas={
         "file_name": lambda s: s.climb_to_rank("file").metadata["HeaderFile"],
@@ -542,14 +575,14 @@ df = extract_features(sfm, bottom_rank="my_event", extractions=["mean", "duratio
     }
     ```
 
-15. **Readers auto-register with SessionFileManager.** Every `AbstractFileReader` subclass calls `sfm.register_affector(self)` in `__init__`. This logs the reader in `sfm.affector_table` with a UUID and timestamp for provenance tracking.
+16. **Readers auto-register with SessionFileManager.** Every `AbstractFileReader` subclass calls `sfm.register_affector(self)` in `__init__`. This logs the reader in `sfm.affector_table` with a UUID and timestamp for provenance tracking.
 
-16. **Segment validation is strict.** `add_children()` asserts that children are within parent bounds and don't overlap. If you get assertion errors, check that your parser returns non-overlapping `(start, end)` tuples within the parent segment's range.
+17. **Segment validation is strict.** `add_children()` asserts that children are within parent bounds and don't overlap. If you get assertion errors, check that your parser returns non-overlapping `(start, end)` tuples within the parent segment's range.
 
-17. **`MetaSegment` vs `Segment`.** Parsers create `MetaSegment` children (lightweight, no data copy). `Segment` holds its own `current` array and is used only for `TraceFile` and legacy parsers. Prefer `MetaSegment` in custom parsers — it slices the root array on demand.
+18. **`MetaSegment` vs `Segment`.** Parsers create `MetaSegment` children (lightweight, no data copy). `Segment` holds its own `current` array and is used only for `TraceFile` and legacy parsers. Prefer `MetaSegment` in custom parsers — it slices the root array on demand.
 
-18. **Multiple files in one session.** Load multiple files into the same session by setting `parent=sfm` on each `TraceFile`. All tree operations (`parse`, `traverse_to_rank`, `extract_features`) then operate across all files at once.
+19. **Multiple files in one session.** Load multiple files into the same session by setting `parent=sfm` on each `TraceFile`. All tree operations (`parse`, `traverse_to_rank`, `extract_features`) then operate across all files at once.
 
-19. **Resetting the session.** `SessionFileManager` is a singleton that persists for the Python process. To start fresh in a notebook, restart the kernel. There is no public `reset()` method.
+20. **Resetting the session.** `SessionFileManager` is a singleton that persists for the Python process. To start fresh in a notebook, restart the kernel. There is no public `reset()` method.
 
-20. **DataFrame array columns.** Columns like `current`, `wrap`, `subevent_starts` contain numpy arrays. These survive `.to_pickle()` but are dropped or cause errors with `.to_csv()`. Use `panel_save_dataframe()` or manually drop array columns before CSV export.
+21. **DataFrame array columns.** Columns like `current`, `wrap`, `subevent_starts` contain numpy arrays. These survive `.to_pickle()` but are dropped or cause errors with `.to_csv()`. Use `panel_save_dataframe()` or manually drop array columns before CSV export.
