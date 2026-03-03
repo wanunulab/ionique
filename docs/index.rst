@@ -57,8 +57,6 @@ Key capabilities:
    :maxdepth: 2
    :caption: Getting Started
 
-   installation
-   install_beginner
    ionique_starter
    python_vscode_start
 
