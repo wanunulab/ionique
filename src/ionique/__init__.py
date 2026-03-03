@@ -49,5 +49,11 @@ except ImportError:
 
 
 __all__=["core","datatypes","io","utils","parsers","plotting","simple"]
+
+
+def get_llm_guide() -> str:
+    """Return the LLM reference guide as a string."""
+    from importlib.resources import files
+    return files("ionique").joinpath("LLM_GUIDE.md").read_text(encoding="utf-8")
 def __dir__():
     return sorted(list(set(list(globals().keys())+__all__)))

@@ -27,6 +27,9 @@ dependencies = [
 [project.optional-dependencies]
 panel = ["panel","bokeh-jupyter","ipympl","plotly","openpyxl"]
 
+[tool.setuptools.package-data]
+ionique = ["LLM_GUIDE.md", "llms.txt"]
+
 [tool.setuptools_scm]
 write_to = "src/ionique/_version.py"
 # fall back version is for downloading git repo
