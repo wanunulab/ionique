@@ -55,7 +55,13 @@ cd ionique
 pip install -e .
 ```
 
-For GUI/dashboard features:
+For GUI/dashboard features (Panel, Bokeh):
+
+```bash
+pip install ionique[panel]
+```
+
+Or in a development install:
 
 ```bash
 pip install -e ".[panel]"
