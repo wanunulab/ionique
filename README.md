@@ -1,13 +1,72 @@
-# ionique [![Pylint](https://github.com/wanunulab/ioniq/actions/workflows/pylint.yml/badge.svg)](https://github.com/wanunulab/ioniq/actions/workflows/pylint.yml) [![Pytest](https://github.com/wanunulab/ioniq/actions/workflows/pytest.yml/badge.svg)](https://github.com/wanunulab/ioniq/actions/workflows/pytest.yml) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-This package is under construction! &copy; 2025 The Wanunu Lab.
+# ionique
 
-ionique is yet another nanopore signal analysis framework. Why? because we need custom analysis every frickin' day. From what we've observed, 10 different members in a lab need about 30 different analysis workflows, and we have hundreds of nanopore researchers around the world. This framework will provide modules and functionalities that they can piece together to build that custom workflow. But most experimentalists don't know how to code or don't want to; so we need the whole thing to work in a gui... and without a gui. Stay tuned as we figure it all out!
+[![Pylint](https://github.com/wanunulab/ionique/actions/workflows/pylint.yml/badge.svg)](https://github.com/wanunulab/ionique/actions/workflows/pylint.yml)
+[![Pytest](https://github.com/wanunulab/ionique/actions/workflows/pytest.yml/badge.svg)](https://github.com/wanunulab/ionique/actions/workflows/pytest.yml)
+[![Documentation](https://readthedocs.org/projects/ionique/badge/?version=latest)](https://ionique.readthedocs.io/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
----
-### installation during development stage (pre-release):
-ionique has been tested for compatibility with python 3.10 to 3.13. Download python 3.12 [here](https://www.python.org/downloads/).
-Temporarily while the package is under development, clone the repo with git or download it, `cd` into the folder, and install via 
+A modular nanopore signal analysis framework for ionic current data. Load recordings, filter noise, detect translocation events, segment sub-states, and extract features — all through a composable Python API or an interactive GUI.
+
+Built for experimentalists who need custom analysis workflows without writing everything from scratch.
+
+## Quick start
+
+```python
+from ionique.io import EDHReader
+from ionique.datatypes import TraceFile
+from ionique.parsers import AutoSquareParser
+from ionique.utils import Filter, Trimmer, extract_features
+
+# Load and preprocess
+trace = TraceFile(*EDHReader("experiment.edh", voltage_compress=True))
+Filter(cutoff_frequency=5000, filter_type="lowpass",
+       sampling_frequency=trace.sampling_freq)(trace.current)
+Trimmer(samples_to_remove=500)(trace)
+
+# Detect events and extract features
+detector = AutoSquareParser(threshold_baseline=0.7, expected_conductance=1.9)
+trace.parse(detector, newrank="event", at_child_rank="vstepgap")
+df = extract_features(trace, "event", ["mean", "std", "duration"])
 ```
+
+## Features
+
+- **File I/O** — read EDH, OPT, and ABF nanopore recordings
+- **Signal preprocessing** — lowpass/highpass/bandpass filtering, clock interference removal, voltage-step edge trimming
+- **Event detection** — AutoSquareParser for rectangular blockades, SpikeParser for brief spikes, lambda_event_parser for simple thresholds
+- **Sub-state segmentation** — SpeedyStatSplit (Cython-accelerated) resolves multi-level current structure within events
+- **Feature extraction** — export event statistics to pandas DataFrames
+- **Visualization** — quick-plot traces with `qp_trace()`, interactive dashboards with Panel/Bokeh
+- **GUI workflows** — Panel widgets for loading files, configuring parsers, and inspecting events in Jupyter
+
+## Installation
+
+Python 3.10–3.13. Requires a C compiler for the Cython extension.
+
+```bash
+pip install ionique
+```
+
+For development:
+
+```bash
+git clone https://github.com/wanunulab/ionique.git
+cd ionique
 pip install -e .
 ```
-See [user guide](userguide.md) for more information or visit ionique's [official documentation site](https://wanunulab.github.io/ionique/).
+
+For GUI/dashboard features:
+
+```bash
+pip install -e ".[panel]"
+```
+
+## Documentation
+
+Full user guide, tutorials, and API reference at **[ionique.readthedocs.io](https://ionique.readthedocs.io/)**.
+
+## License
+
+GPL-3.0 — see [LICENSE](LICENSE) for details.
+
+&copy; 2025 The Wanunu Lab.
