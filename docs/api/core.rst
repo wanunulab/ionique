@@ -197,10 +197,9 @@ Use the ``parse()`` method to subdivide segments using parser objects:
 
    # Create a parser
    parser = SpikeParser(
-       threshold_start=0.15,
-       threshold_end=0.15,
-       min_width=10,
-       max_width=10000
+       prominence=0.15,
+       distance=100,
+       width=(10, 10000)
    )
 
    # Parse events within each voltage step
@@ -217,27 +216,24 @@ Use the ``parse()`` method to subdivide segments using parser objects:
 Utilities
 ---------
 
-ignored
-^^^^^^^
+_ignored (internal)
+^^^^^^^^^^^^^^^^^^^
 
-A context manager to suppress specific exceptions (replaces try/except/pass):
+``_ignored`` is a private context manager used internally to suppress specific
+exceptions. It is not part of the public API.
+
+For your own code, use the equivalent pattern from the standard library:
 
 .. code-block:: python
 
-   from ionique.core import ignored
+   from contextlib import suppress
 
-   # Instead of:
-   try:
-       value = some_dict["missing_key"]
-   except KeyError:
-       pass
-
-   # Use:
-   with ignored(KeyError):
+   # Suppress a specific exception
+   with suppress(KeyError):
        value = some_dict["missing_key"]
 
-   # Can ignore multiple exception types
-   with ignored(KeyError, AttributeError):
+   # Suppress multiple exception types
+   with suppress(KeyError, AttributeError):
        value = obj.missing_attr
 
 .. note::

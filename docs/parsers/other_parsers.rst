@@ -199,7 +199,7 @@ relationships from multi-voltage-step recordings.
 
    from ionique.parsers import IVCurveParser
 
-   parser = IVCurveParser(voltage=voltage_array)
+   parser = IVCurveParser(voltage_array)
    patterns = parser.parse()
    # Returns matched voltage patterns for IV analysis
 
