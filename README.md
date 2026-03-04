@@ -18,7 +18,8 @@ from ionique.parsers import AutoSquareParser
 from ionique.utils import Filter, Trimmer, extract_features
 
 # Load and preprocess
-trace = TraceFile(*EDHReader("experiment.edh", voltage_compress=True))
+metadata, current, voltage = EDHReader("experiment.edh", voltage_compress=True)
+trace = TraceFile(current, voltage=voltage, metadata=metadata)
 Filter(cutoff_frequency=5000, filter_type="lowpass",
        sampling_frequency=trace.sampling_freq)(trace.current)
 Trimmer(samples_to_remove=500)(trace)

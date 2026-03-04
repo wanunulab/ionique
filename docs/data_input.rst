@@ -114,9 +114,6 @@ Creating a TraceFile
 
    from ionique.datatypes import TraceFile
 
-   trace = TraceFile(*reader)
-
-   # Shorthand: unpack reader directly
    trace = TraceFile(current, voltage=voltage, metadata=metadata)
 
 When ``voltage`` contains step boundaries (from ``voltage_compress=True``),

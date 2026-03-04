@@ -16,8 +16,8 @@ around a flexible tree-based segment hierarchy.
    from ionique.utils import Filter, extract_features
 
    # Load a nanopore recording
-   reader = EDHReader("experiment.edh", voltage_compress=True)
-   trace = TraceFile(*reader)
+   metadata, current, voltage = EDHReader("experiment.edh", voltage_compress=True)
+   trace = TraceFile(current, voltage=voltage, metadata=metadata)
 
    # Filter noise
    filt = Filter(cutoff_frequency=5000, filter_type="lowpass", sampling_frequency=100000)

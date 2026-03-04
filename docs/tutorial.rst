@@ -23,8 +23,8 @@ metadata, current, and voltage arrays. Wrap them in a ``TraceFile``.
    from ionique.io import EDHReader
    from ionique.datatypes import TraceFile
 
-   reader = EDHReader("experiment.edh", voltage_compress=True, downsample=1)
-   trace = TraceFile(*reader)
+   metadata, current, voltage = EDHReader("experiment.edh", voltage_compress=True, downsample=1)
+   trace = TraceFile(current, voltage=voltage, metadata=metadata)
 
    print(f"Samples: {trace.n}")
    print(f"Sampling freq: {trace.sampling_freq} Hz")
@@ -219,7 +219,8 @@ The complete pipeline:
    from ionique.utils import Filter, Trimmer, extract_features
 
    # Load
-   trace = TraceFile(*EDHReader("experiment.edh", voltage_compress=True))
+   metadata, current, voltage = EDHReader("experiment.edh", voltage_compress=True)
+   trace = TraceFile(current, voltage=voltage, metadata=metadata)
 
    # Preprocess
    Filter(cutoff_frequency=5000, filter_type="lowpass",
