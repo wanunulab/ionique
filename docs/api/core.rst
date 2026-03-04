@@ -213,29 +213,6 @@ Use the ``parse()`` method to subdivide segments using parser objects:
    events = file_segment.traverse_to_rank("event")
    print(f"Detected {len(events)} events")
 
-Utilities
----------
-
-_ignored (internal)
-^^^^^^^^^^^^^^^^^^^
-
-``_ignored`` is a private context manager used internally to suppress specific
-exceptions. It is not part of the public API.
-
-For your own code, use the equivalent pattern from the standard library:
-
-.. code-block:: python
-
-   from contextlib import suppress
-
-   # Suppress a specific exception
-   with suppress(KeyError):
-       value = some_dict["missing_key"]
-
-   # Suppress multiple exception types
-   with suppress(KeyError, AttributeError):
-       value = obj.missing_attr
-
 .. note::
    Segments store references to data arrays, not copies. Modifying the underlying
    array affects all segments referencing it.
