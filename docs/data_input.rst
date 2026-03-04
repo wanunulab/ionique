@@ -64,17 +64,22 @@ Reader parameters
      - Description
    * - ``voltage_compress``
      - ``False``
-     - Split voltage into step boundaries (returns list of tuples instead of
-       flat array).
+     - Split voltage into step boundaries (returns list of tuples 
+       instead of flat array). Set to ``True`` when the voltage 
+       protocol is strictly composed of DC steps, or ``False`` if 
+       the protocol contains AC elements (Triangle, Sine, Saw, etc.)
    * - ``downsample``
      - ``1``
      - Integer downsampling factor. ``downsample=5`` keeps every 5th sample.
+       Note that downsampling is not reversible; only the downsampled data is retained.
+       Effective sampling frequency (``Raw sampling frequency / downsample``) is automatically calculated and returned in ``metadata["eff_sampling_freq"]``
    * - ``n_remove``
      - ``0``
      - Samples to discard from the start of each voltage step.
    * - ``prefilter``
      - ``None``
-     - A callable applied to the raw current before returning.
+     - A callable applied to the raw current before downsampling is performed. 
+       Can be an instance of ``utils.Filter``, ``utils.ClockFilter`` etc. 
 
 .. code-block:: python
 
@@ -143,7 +148,7 @@ into constant-voltage segments.
    :alt: Current trace with voltage protocol below
    :width: 100%
 
-Under the hood, ``utils.split_voltage_steps()`` finds voltage transitions:
+Under the hood, when voltage_compress=True, ``utils.split_voltage_steps()`` finds DC voltage transitions:
 
 .. code-block:: python
 
@@ -158,6 +163,7 @@ Under the hood, ``utils.split_voltage_steps()`` finds voltage transitions:
    
    boundaries = split_voltage_steps(voltage_array, n_remove=0, as_tuples=True)
    # [(0, 100000), (100000, 200000), (200000, 900000), (900000, 1000000)]
+
 
 
 SessionFileManager
