@@ -148,9 +148,16 @@ Under the hood, ``utils.split_voltage_steps()`` finds voltage transitions:
 .. code-block:: python
 
    from ionique.utils import split_voltage_steps
+   import numpy as np
 
-   boundaries = split_voltage_steps(voltage_array, n_remove=200, as_tuples=True)
-   # [(0, 99800), (100200, 199800), ...]
+   # Example voltage array from a raw file
+   voltage_array=np.zeros(1000000)
+   voltage_array[0:100000]=0.1
+   voltage_array[100000:200000]=0.2
+   voltage_array[200000:900000]=0.25
+   
+   boundaries = split_voltage_steps(voltage_array, n_remove=0, as_tuples=True)
+   # [(0, 100000), (100000, 200000), (200000, 900000), (900000, 1000000)]
 
 
 SessionFileManager
