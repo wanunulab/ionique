@@ -65,9 +65,12 @@ Reader parameters
    * - ``voltage_compress``
      - ``False``
      - Split voltage into step boundaries (returns list of tuples 
-       instead of flat array). Set to ``True`` when the voltage 
+       instead of flat array). Set to ``True`` to save memory when the voltage 
        protocol is strictly composed of DC steps, or ``False`` if 
-       the protocol contains AC elements (Triangle, Sine, Saw, etc.)
+       the protocol contains AC elements (Triangle, Sine, Saw, etc.). 
+       When True, the returned ``voltage`` is formatted as 
+       ``list[((start_0:int, end_0:int), voltage_0:float), ((start_1:int,end_1:int), voltage_1:float), ... ]`` , 
+       denoting start, end, and value of every    identified step in voltage. 
    * - ``downsample``
      - ``1``
      - Integer downsampling factor. ``downsample=5`` keeps every 5th sample.
