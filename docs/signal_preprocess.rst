@@ -12,7 +12,7 @@ discarding edge transients at voltage-step boundaries.
 Filtering with ``Filter``
 -------------------------
 
-``Filter`` wraps scipy's Butterworth and Bessel filters with a simple
+``Filter`` wraps scipy's Butterworth and Bessel IIR filters with a simple
 callable interface. It modifies the current array **in place**.
 
 .. code-block:: python
@@ -26,7 +26,8 @@ callable interface. It modifies the current array **in place**.
        order=2,
        bidirectional=True,          # zero-phase (sosfiltfilt)
        sampling_frequency=100000,
-   )
+   ) 
+   # filt is now a callable that will modify a current array in place
    filt(trace.current)
 
 **Filter types:**
@@ -42,16 +43,21 @@ callable interface. It modifies the current array **in place**.
 - ``"butter"`` (default) — Butterworth, flat passband response.
 - ``"bessel"`` — preserves waveform shape, better group delay.
 
+**Filter order:**
+
+Specifies the order of the filter, i.e. how aggressively frequencies are filtered beyond the cutoff range. 
+A high order (e.g. ``order=16``) ``"bessel"`` filter approximates a gaussian blur.
+
+**Unidirectional vs. Bidirectional filtering**
 When ``bidirectional=True`` (default), the filter is applied forward and
 backward (``scipy.signal.sosfiltfilt``), eliminating phase distortion.
-Set ``bidirectional=False`` to use causal filtering (``sosfilt``).
-
+Set ``bidirectional=False`` to use causal filtering (``sosfilt``). Note that bidirectional doubles the filter order.
 
 Choosing a cutoff frequency
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The cutoff controls how much noise you remove versus how much signal detail
-you preserve. Lower cutoffs produce smoother traces but may blur fast events.
+you preserve. Lower cutoffs produce smoother traces but may blur fast events and details.
 
 .. image:: _static/images/preprocessing/filter_comparison.png
    :alt: Same signal filtered at 1 kHz, 5 kHz, and 10 kHz
