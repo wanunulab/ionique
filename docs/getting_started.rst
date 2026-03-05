@@ -21,8 +21,8 @@ Minimal workflow
    from ionique.utils import Filter, Trimmer, extract_features
 
    # 1. Load an EDH file with voltage-step splitting
-   reader = EDHReader("experiment.edh", voltage_compress=True)
-   trace = TraceFile(*reader)
+   metadata, current, voltage = EDHReader("experiment.edh", voltage_compress=True)
+   trace = TraceFile(current, voltage=voltage, metadata=metadata)
 
    # 2. Filter high-frequency noise
    filt = Filter(

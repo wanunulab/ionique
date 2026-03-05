@@ -127,8 +127,8 @@ Combining features from multiple files
 
    all_dfs = []
    for filename in edh_files:
-       reader = EDHReader(filename, voltage_compress=True)
-       trace = TraceFile(*reader)
+       metadata, current, voltage = EDHReader(filename, voltage_compress=True)
+       trace = TraceFile(current, voltage=voltage, metadata=metadata)
        # ... filter, trim, parse ...
        df = extract_features(
            trace, "event", ["mean", "std", "duration"],

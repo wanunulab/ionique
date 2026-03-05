@@ -64,17 +64,25 @@ Reader parameters
      - Description
    * - ``voltage_compress``
      - ``False``
-     - Split voltage into step boundaries (returns list of tuples instead of
-       flat array).
+     - Split voltage into step boundaries (returns list of tuples 
+       instead of flat array). Set to ``True`` to save memory when the voltage 
+       protocol is strictly composed of DC steps, or ``False`` if 
+       the protocol contains AC elements (Triangle, Sine, Saw, etc.). 
+       When True, the returned ``voltage`` is formatted as 
+       ``list[((start_0:int, end_0:int), voltage_0:float), ((start_1:int,end_1:int), voltage_1:float), ... ]`` , 
+       denoting start, end, and value of every    identified step in voltage. 
    * - ``downsample``
      - ``1``
      - Integer downsampling factor. ``downsample=5`` keeps every 5th sample.
+       Note that downsampling is not reversible; only the downsampled data is retained.
+       Effective sampling frequency (``Raw sampling frequency / downsample``) is automatically calculated and returned in ``metadata["eff_sampling_freq"]``
    * - ``n_remove``
      - ``0``
      - Samples to discard from the start of each voltage step.
    * - ``prefilter``
      - ``None``
-     - A callable applied to the raw current before returning.
+     - A callable applied to the raw current before downsampling is performed. 
+       Can be an instance of ``utils.Filter``, ``utils.ClockFilter`` etc. 
 
 .. code-block:: python
 
@@ -114,9 +122,6 @@ Creating a TraceFile
 
    from ionique.datatypes import TraceFile
 
-   trace = TraceFile(*reader)
-
-   # Shorthand: unpack reader directly
    trace = TraceFile(current, voltage=voltage, metadata=metadata)
 
 When ``voltage`` contains step boundaries (from ``voltage_compress=True``),
@@ -146,14 +151,22 @@ into constant-voltage segments.
    :alt: Current trace with voltage protocol below
    :width: 100%
 
-Under the hood, ``utils.split_voltage_steps()`` finds voltage transitions:
+Under the hood, when voltage_compress=True, ``utils.split_voltage_steps()`` finds DC voltage transitions:
 
 .. code-block:: python
 
    from ionique.utils import split_voltage_steps
+   import numpy as np
 
-   boundaries = split_voltage_steps(voltage_array, n_remove=200, as_tuples=True)
-   # [(0, 99800), (100200, 199800), ...]
+   # Example voltage array from a raw file
+   voltage_array = np.zeros(1000000)
+   voltage_array[0:100000] = 0.1
+   voltage_array[100000:200000] = 0.2
+   voltage_array[200000:900000] = 0.25
+   
+   boundaries = split_voltage_steps(voltage_array, n_remove=0, as_tuples=True)
+   # [(0, 100000), (100000, 200000), (200000, 900000), (900000, 1000000)]
+
 
 
 SessionFileManager

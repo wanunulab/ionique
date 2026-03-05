@@ -124,12 +124,15 @@ Parsers support JSON serialization for reproducibility:
 
 .. code-block:: python
 
-   # Save configuration
-   json_str = parser.to_json("my_parser.json")
+   # Save configuration to file
+   parser.to_json(filename="my_parser.json")
 
-   # Reload
-   from ionique.parsers import Parser
-   restored = Parser.from_json(json_str)
+   # Get JSON string without saving to file
+   json_str = parser.to_json()
+
+.. note::
+   ``from_json`` is defined but not yet fully implemented. Parser
+   restoration from JSON will be available in a future release.
 
 .. toctree::
    :maxdepth: 1
