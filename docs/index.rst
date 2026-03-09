@@ -3,6 +3,10 @@
 ionique: Nanopore Signal Analysis
 ==================================
 
+.. |version| replace:: |release|
+
+**Version**: |release|
+
 ionique is a Python framework for processing ionic current data from nanopore
 experiments. It provides a unified workflow for loading raw traces, filtering
 noise, detecting translocation events, and extracting features — all built

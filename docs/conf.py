@@ -62,4 +62,5 @@ html_theme_options = {
     'collapse_navigation': False,
     'navigation_depth': 4,
     'sticky_navigation': True,
+    'display_version': True,
 }
