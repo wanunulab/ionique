@@ -30,6 +30,11 @@ panel = ["panel","bokeh-jupyter","ipympl","plotly","openpyxl"]
 [tool.setuptools.package-data]
 ionique = ["LLM_GUIDE.md", "llms.txt"]
 
+[tool.cibuildwheel]
+build = "cp310-* cp311-* cp312-* cp313-*"
+skip = "*-musllinux_*"
+before-build = "pip install numpy Cython"
+
 [tool.setuptools_scm]
 write_to = "src/ionique/_version.py"
 # fall back version is for downloading git repo
