@@ -49,6 +49,11 @@ To get the latest release:
 pip install ionique
 ```
 
+Or via `uv`:
+```bash
+uv add ionique
+```
+
 For latest unreleased version directly from GitHub:
 
 ```bash
